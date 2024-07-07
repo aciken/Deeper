@@ -2,6 +2,8 @@ import { View, Text, ScrollView, Image} from 'react-native'
 import React,{useState} from 'react'
 import {router,Link} from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import axios from 'axios'
+
 
 import Arrow from '../../assets/images/arrow.png'
 import ClickableIcon from '../components/ClickableIcon'
@@ -18,6 +20,28 @@ const signin = () => {
   })
 
   const [isSubmiting, setIsSubmiting] = useState(false)
+
+  const submit = () => {
+    console.log('Submitting')
+    const {email, password} = form
+    setIsSubmiting(true)
+    
+    axios.post('https://d8b5-188-2-139-122.ngrok-free.app/login', {
+      email,
+      password
+    }).then(res => {
+      if(res.data !== 'failed'){
+        router.push('/home')
+      } else {
+
+      }
+      setIsSubmiting(false)
+
+    }).catch(() => {
+      console.log('An error occured')
+      setIsSubmiting(false)
+    })
+  }
 
 
   return (
@@ -53,7 +77,7 @@ const signin = () => {
           title="Sign In"
           containerStyles="mt-10 w-full"
           isLoading={isSubmiting}
-          handlePress={() => console.log('Sign In')}
+          handlePress={() => submit()}
           />
           <View className="w-full flex-row justify-center mt-4">
             <Text className="text-lg font-pregular text-gray-400 mr-2">Don't have an account?</Text>
