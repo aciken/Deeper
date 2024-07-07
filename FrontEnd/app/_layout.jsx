@@ -4,6 +4,7 @@ import {useFonts} from 'expo-font'
 import React, { useEffect } from 'react'
 
 
+
 const RootLayout = () => {
 
   const [fontsLoaded, error] = useFonts({
@@ -36,6 +37,9 @@ const RootLayout = () => {
 
   <Stack>
     <Stack.Screen name='index' options={{headerShown: false}}/>
+    <Stack.Screen name='(auth)' options={{headerShown: false}}/>
+
+
   </Stack>
 
   )
