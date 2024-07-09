@@ -2,24 +2,26 @@
   "expo": {
     "name": "FrontEnd",
     "slug": "FrontEnd",
-    "scheme": "deeper",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
+    "scheme": "com.anonymous.FrontEnd",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#1f2937"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.FrontEnd"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1f2937"
-      }
+      },
+      "package": "com.anonymous.FrontEnd"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -27,6 +29,14 @@
     "plugins": [
       "expo-router",
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "ae3f66a6-49fa-4287-aea3-359f931bebcc"
+      }
+    }
   }
 }

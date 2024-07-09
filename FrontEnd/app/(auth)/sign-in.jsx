@@ -1,5 +1,5 @@
-import { View, Text, ScrollView, Image} from 'react-native'
-import React,{useState} from 'react'
+import { View, Text, ScrollView, Image, Alert} from 'react-native'
+import React,{useState,useEffect} from 'react'
 import {router,Link} from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import axios from 'axios'
@@ -10,37 +10,60 @@ import ClickableIcon from '../components/ClickableIcon'
 import FormField from '../components/FormField'
 import Button from '../components/Button'
 
+import { useGlobalContext } from '../context/GlobalProvider'
+
 
 
 const signin = () => {
+
+  const {setIsLogged, setUser, setIsLoading} = useGlobalContext()
 
   const [form, setForm] = useState({
     email: '',
     password: ''
   })
 
+  const [loginSuccess, setLoginSuccess] = useState(false);
   const [isSubmiting, setIsSubmiting] = useState(false)
 
+  useEffect(() => {
+    if (loginSuccess) {
+      setIsLoading(false);
+      router.push('/home'); 
+    }
+  }, [loginSuccess]);
+
   const submit = () => {
-    console.log('Submitting')
     const {email, password} = form
+    if(!email || !password){
+      Alert.alert('Please fill in all fields')
+      
+    } else {
+
+    console.log('Submitting')
+
     setIsSubmiting(true)
     
-    axios.post('https://d8b5-188-2-139-122.ngrok-free.app/login', {
+    axios.post('https://a827-188-2-139-122.ngrok-free.app/login', {
       email,
       password
     }).then(res => {
       if(res.data !== 'failed'){
-        router.push('/home')
+        setUser(res.data);
+        setIsLogged(true)
+        setLoginSuccess(true)
+        
       } else {
-
+        Alert.alert('Invalid email or password');
       }
       setIsSubmiting(false)
 
     }).catch(() => {
-      console.log('An error occured')
+
+      Alert.alert('An error occured')
       setIsSubmiting(false)
     })
+  }
   }
 
 
