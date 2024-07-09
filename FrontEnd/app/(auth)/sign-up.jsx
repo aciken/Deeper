@@ -35,12 +35,14 @@ const signup = () => {
     console.log('Submitting')
     const {name, email, password} = form
     setIsSubmiting(true)
-    axios.put('https://a827-188-2-139-122.ngrok-free.app/signup', {
+    axios.put('https://fdfb-188-2-139-122.ngrok-free.app/signup', {
       name,
       email,
       password
     }).then(res => {
+      console.log('reas')
       if(res.data !== 'exist'){
+        console.log('aaaaaaaaaaaaaaa')
         setUser(res.data);
         setIsLogged(true)
         setLoginSuccess(true)

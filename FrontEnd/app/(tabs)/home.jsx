@@ -2,10 +2,27 @@ import { View, Text, ScrollView } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import React,{useEffect} from 'react'
 import { BackHandler } from 'react-native'
+import axios from 'axios'
 
 import { useIsFocused } from '@react-navigation/native';
 
+import { useGlobalContext } from '../context/GlobalProvider'
+
 const home = () => {
+
+  const {user, setUser} = useGlobalContext()
+
+  useEffect(() => {
+    const email = user.email;
+    console.log(email)
+    axios.post('https://fdfb-188-2-139-122.ngrok-free.app/getUser', {
+       email 
+    }).then(res => {
+      setUser(res.data);
+    }).catch((e) => {
+      console.log(e);
+    });
+  }, []);
 
   const isFocused = useIsFocused();
 

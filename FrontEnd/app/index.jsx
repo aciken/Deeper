@@ -102,7 +102,8 @@ useEffect(() => {
           <ImageButton
             title="Continue with Google"
             handlePress={() => promptAsync()}
-            containerStyles="w-full mt-7"
+            containerStyles="w-full mt-7 bg-white"
+            textStyles={"text-blue-900"}
             ImageSource={require('../assets/images/google.png')}
           />
         </View>

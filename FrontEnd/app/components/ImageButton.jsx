@@ -4,7 +4,7 @@ import React from 'react'
 const ImageButton = ({title, containerStyles, handlePress, isLoading, textStyles, ImageSource}) => {
   return (
     <TouchableOpacity
-    className={`bg-white rounded-xl min-h-[62px] justify-center items-center ${containerStyles}`}
+    className={` rounded-xl min-h-[62px] justify-center items-center ${containerStyles}`}
     onPress={handlePress}
     activeOpacity={0.7}
     disabled={isLoading}
@@ -12,10 +12,10 @@ const ImageButton = ({title, containerStyles, handlePress, isLoading, textStyles
       <View className="flex-row ">
         <Image
           source={ImageSource}
-          className="w-6 h-6 mr-2" 
+          className="w-6 h-6 mr-2 text-center" 
           resizeMode='contain'
         />
-        <Text className={`text-blue-900 font-psemibold text-lg text-center ${textStyles}`}>
+        <Text className={` font-psemibold text-lg text-center ${textStyles}`}>
           {title}
         </Text>
       </View>
