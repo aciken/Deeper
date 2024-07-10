@@ -8,11 +8,15 @@ import {icons} from '../../constants'
 import HourTable from '../components/HourTable';
 import ImageButton from '../components/ImageButton';
 import {router, Redirect} from 'expo-router'
+import { useNavigation } from '@react-navigation/native';
 
-
-const achievements = () => {
+const schedule = ({history}) => {
 
   const {user, setUser} = useGlobalContext()
+
+  const navigation = useNavigation();
+
+
 
   useEffect(() => {
     console.log(user)
@@ -33,6 +37,13 @@ const achievements = () => {
 // console.log(nextDay1, nextDay2, nextDay3); 
 
   const [clicked, setClicked] = useState(todayDateNumber)
+
+  const handleNavigate = () => {
+    navigation.navigate('(log)', {
+      screen: 'addTask',
+      params: { clicked },
+    });
+  };
 
   if (!user) {
     // Handle the case where userData is null - maybe render a placeholder or redirect
@@ -65,7 +76,7 @@ const achievements = () => {
     <ImageButton 
     title="Add Work Task"
     ImageSource={icons.newPlusIcon}
-    handlePress={() => {}}
+    handlePress={() => {handleNavigate()}}
     containerStyles={`mt-2 w-full bg-blue-500`}
     textStyles={`text-white`}
     />
@@ -74,4 +85,4 @@ const achievements = () => {
   )
 }
 
-export default achievements
+export default schedule
