@@ -8,7 +8,7 @@ import ClickableIcon from '../components/ClickableIcon'
 
 import { useGlobalContext } from '../context/GlobalProvider'
 
-const profile = () => {
+const Profile = () => {
 
   const {setIsLogged, setUser, setIsLoading} = useGlobalContext()
 
@@ -36,4 +36,4 @@ const profile = () => {
   )
 }
 
-export default profile
+export default Profile

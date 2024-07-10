@@ -7,15 +7,15 @@ import { useGlobalContext } from '../context/GlobalProvider'
 import {icons} from '../../constants'
 import HourTable from '../components/HourTable';
 import ImageButton from '../components/ImageButton';
-import {router, Redirect} from 'expo-router'
+import {useRouter, Redirect} from 'expo-router'
 import { useNavigation } from '@react-navigation/native';
 
-const schedule = ({history}) => {
+const Schedule = () => {
 
-  const {user, setUser} = useGlobalContext()
+  const {user, setUser, setSelected,selected } = useGlobalContext()
 
   const navigation = useNavigation();
-
+  const router = useRouter();
 
 
   useEffect(() => {
@@ -25,6 +25,8 @@ const schedule = ({history}) => {
   const todayDateNumber = new Date().getDate();
   console.log(todayDateNumber)  
 
+
+  
 //   const getThreeNextDays = () => {
 //     const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 //     const today = new Date().getDay(); // Today's day number
@@ -37,13 +39,20 @@ const schedule = ({history}) => {
 // console.log(nextDay1, nextDay2, nextDay3); 
 
   const [clicked, setClicked] = useState(todayDateNumber)
+  const [isClicked, setIsClicked] = useState(false)
 
-  const handleNavigate = () => {
-    navigation.navigate('(log)', {
-      screen: 'addTask',
-      params: { clicked },
-    });
-  };
+  const handlePress = () => {
+    console.log('Button clicked');
+
+
+        setSelected(clicked);
+        router.push('setTask');
+    
+};
+
+
+
+
 
   if (!user) {
     // Handle the case where userData is null - maybe render a placeholder or redirect
@@ -76,13 +85,13 @@ const schedule = ({history}) => {
     <ImageButton 
     title="Add Work Task"
     ImageSource={icons.newPlusIcon}
-    handlePress={() => {handleNavigate()}}
+    handlePress={() => router.push({ pathname: 'log/setTask', params: {clicked} })}
     containerStyles={`mt-2 w-full bg-blue-500`}
     textStyles={`text-white`}
-    />
+/>
     </View>
   </SafeAreaView>
   )
 }
 
-export default schedule
+export default Schedule

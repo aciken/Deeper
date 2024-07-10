@@ -39,7 +39,8 @@ const index = () => {
 
 
   if(!isLoading && isLogged){
-    router.push('/home')
+    console.log('GOING TO HOMEEEE')
+    router.push('/Home')
   }
 
   const [userInfo, setUserInfo] = useState(null)

@@ -35,7 +35,7 @@ const signup = () => {
     console.log('Submitting')
     const {name, email, password} = form
     setIsSubmiting(true)
-    axios.put('https://1d05-188-2-139-122.ngrok-free.app/signup', {
+    axios.put('https://95e2-188-2-139-122.ngrok-free.app/signup', {
       name,
       email,
       password
@@ -46,7 +46,7 @@ const signup = () => {
         setUser(res.data);
         setIsLogged(true)
         setLoginSuccess(true)
-        router.push('/home')
+        router.push('/Home')
       } else {
         Alert.alert('User already exist')  
       }

@@ -2,7 +2,7 @@ import { View, Text, ScrollView } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import React from 'react'
 
-const tasks = () => {
+const Tasks = () => {
   return (
 <SafeAreaView className="h-full bg-gray-800">
   <ScrollView>
@@ -14,4 +14,4 @@ const tasks = () => {
   )
 }
 
-export default tasks
+export default Tasks

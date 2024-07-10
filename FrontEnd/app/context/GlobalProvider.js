@@ -8,6 +8,7 @@ const GlobalProvider = ({ children }) => {
     const [isLogged, setIsLogged] = useState(false)
     const [user, setUser] = useState(null)
     const [isLoading, setIsLoading] = useState(true)
+    const [selected, setSelected] = useState(0)
 
     useEffect(() => {
 
@@ -21,7 +22,9 @@ const GlobalProvider = ({ children }) => {
             user,
             setUser,
             isLoading,
-            setIsLoading
+            setIsLoading,
+            selected,
+            setSelected,
          }}>
             {children}
         </GlobalContext.Provider>

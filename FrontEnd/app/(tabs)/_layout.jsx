@@ -37,7 +37,7 @@ const TabsLayout = () => {
             }
           }}
         >
-            <Tabs.Screen name="home"
+            <Tabs.Screen name="Home"
             options={{
               title: 'Home',
               headerShown: false,
@@ -46,7 +46,7 @@ const TabsLayout = () => {
               )
             }}
             />
-            <Tabs.Screen name="schedule"
+            <Tabs.Screen name="Schedule"
             options={{
               title: 'Schedule',
               headerShown: false,
@@ -55,7 +55,7 @@ const TabsLayout = () => {
               )
             }}
             />
-            <Tabs.Screen name="tasks"
+            <Tabs.Screen name="Tasks"
             options={{
               title: 'Tasks',
               headerShown: false,
@@ -64,7 +64,7 @@ const TabsLayout = () => {
               )
             }}
             />
-            <Tabs.Screen name="profile"
+            <Tabs.Screen name="Profile"
             options={{
               title: 'Profile',
               headerShown: false,

@@ -8,14 +8,14 @@ import { useIsFocused } from '@react-navigation/native';
 
 import { useGlobalContext } from '../context/GlobalProvider'
 
-const home = () => {
+const Home = () => {
 
   const {user, setUser} = useGlobalContext()
 
   useEffect(() => {
     const email = user.email;
     console.log(email)
-    axios.post('https://1d05-188-2-139-122.ngrok-free.app/getUser', {
+    axios.post('https://95e2-188-2-139-122.ngrok-free.app/getUser', {
        email 
     }).then(res => {
       setUser(res.data);
@@ -50,4 +50,4 @@ const home = () => {
   )
 }
 
-export default home
+export default Home
