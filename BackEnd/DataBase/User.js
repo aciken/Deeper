@@ -22,7 +22,7 @@ const UserSchema = new mongoose.Schema({
   },
   Schedule: [{
     day: Number,
-    tasks: [String] // Assuming the array contains strings. Adjust the type as necessary.
+    tasks: [Array] // Assuming the array contains strings. Adjust the type as necessary.
   }]
 });
 

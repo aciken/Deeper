@@ -7,7 +7,6 @@ const GetUser = async (req, res) => {
         const user = await User.findOne({ email });
         if (user) {
             res.json(user);
-            console.log(user)
         } else {
             res.json('User not found');
         }

@@ -44,7 +44,7 @@ const signin = () => {
 
     setIsSubmiting(true)
     
-    axios.post('https://95e2-188-2-139-122.ngrok-free.app/login', {
+    axios.post('https://54bb-188-2-139-122.ngrok-free.app/login', {
       email,
       password
     }).then(res => {

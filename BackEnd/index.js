@@ -8,6 +8,7 @@ app.use(cors());
 const Login = require('./Auth/Login');
 const Signup = require('./Auth/Signup');
 const GetUser = require('./GetData/GetUser');
+const addWork = require('./Work/addWork');
 
 
 app.get('/', (req, res) => {
@@ -17,6 +18,7 @@ app.get('/', (req, res) => {
 app.post('/login', Login);
 app.put('/signup', Signup);
 app.post('/getUser', GetUser)
+app.put('/addWork', addWork);
 
 
 
