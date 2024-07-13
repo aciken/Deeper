@@ -4,7 +4,7 @@ const addWork = async (req, res) => {
     const { data, email, clicked } = req.body;
     console.log(req.body)
 
-
+    const num = clicked-1
 
     try {
         console.log(email)
@@ -13,10 +13,8 @@ const addWork = async (req, res) => {
 
         if(user){
 
-            console.log(clicked-1)
-            console.log(data)
-            user.Schedule[clicked-1].tasks.push(data);
-            user.markModified('Schedule');
+            user.array[num].push(data);
+            user.markModified('array');
             await user.save();
             res.json(user);
 

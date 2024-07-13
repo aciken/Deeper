@@ -12,14 +12,16 @@ import { useNavigation } from '@react-navigation/native';
 
 const Schedule = () => {
 
-  const {user, setUser, setSelected,selected } = useGlobalContext()
+  let scrollNumber = 0;
+
+  const {user, setSelected,selected } = useGlobalContext()
 
   const navigation = useNavigation();
   const router = useRouter();
 
 
   useEffect(() => {
-    console.log(user)
+    console.log(user.array[clicked-1])
   }, []);
 
   const todayDateNumber = new Date().getDate();
@@ -54,10 +56,10 @@ const Schedule = () => {
 
 
 
-  if (!user) {
-    // Handle the case where userData is null - maybe render a placeholder or redirect
-    return <Redirect to="/" />;
-  }
+  // if (!user) {
+
+  //   return <Redirect to="/" />;
+  // }
 
   return (
 <SafeAreaView className="h-full bg-gray-800">
@@ -67,21 +69,25 @@ const Schedule = () => {
     horizontal={true}
     showsHorizontalScrollIndicator={false}
   >
-    {
-      user.Schedule && user.Schedule.map((day, index) => {
-        if (day.day > todayDateNumber - 1) {
-          return (
-            <TouchableOpacity  key={index} onPress={() => setClicked(day.day)} className={`flex-col overflow-hidden justify-center items-center w-20 h-12 border-black border-1 ${day.day == clicked ? `bg-gray-600` : ''}`}>
-              <Text className="font-pbold text-gray-300">{day.day}</Text>
-            </TouchableOpacity>
-          );
-        }
-        return null; // Return null for dates that do not meet the condition
-      })
+{
+  user.array && user.array.map((element, index) => {
+    if (index+1 > todayDateNumber - 1 && scrollNumber < 7) {
+      scrollNumber++;
+      return (
+        <TouchableOpacity key={index+1} onPress={() => setClicked(index+1)} className={`flex-col overflow-hidden justify-center items-center w-20 h-12 border-black border-1 ${index+1 == clicked ? `bg-blue-500` : ''}`}>
+          <Text className="font-pbold text-gray-300">{index+1}</Text>
+        </TouchableOpacity>
+      );
     }
+    return null; // Return null for elements that do not meet the condition
+  })
+}
   </ScrollView>
 </View>
-    <HourTable/>
+    <HourTable
+      tasks = {user.array[clicked-1]}
+      clicked = {clicked}
+    />
     <ImageButton 
     title="Add Work Task"
     ImageSource={icons.newPlusIcon}

@@ -10,15 +10,17 @@ import { useGlobalContext } from '../context/GlobalProvider'
 
 const Home = () => {
 
-  const {user, setUser} = useGlobalContext()
+  const {setUser,user,setIsLoading} = useGlobalContext()
 
   useEffect(() => {
     const email = user.email;
     console.log(email)
-    axios.post('https://54bb-188-2-139-122.ngrok-free.app/getUser', {
+    axios.post('https://b108-188-2-139-122.ngrok-free.app/getUser', {
        email 
     }).then(res => {
+      setIsLoading(false);
       setUser(res.data);
+      console.log(user)
     }).catch((e) => {
       console.log(e);
     });

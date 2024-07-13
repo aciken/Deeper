@@ -44,6 +44,8 @@ const RootLayout = () => {
     <Stack.Screen name='(tabs)' options={{headerShown: false}}/>
     {/* <Stack.Screen name='(log)' options={{headerShown: false}}/> */}
     <Stack.Screen name='log/setTask' options={{headerShown: false}} />
+    <Stack.Screen name='log/SomeComponent' options={{headerShown: false}} />
+    <Stack.Screen name='log/editTask' options={{headerShown: false}} />
   </Stack>
   </GlobalProvider>
 

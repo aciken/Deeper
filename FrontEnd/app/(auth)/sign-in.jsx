@@ -25,6 +25,7 @@ const signin = () => {
 
   const [loginSuccess, setLoginSuccess] = useState(false);
   const [isSubmiting, setIsSubmiting] = useState(false)
+  const [updateUser, setUpdateUser] = useState(false)
 
   useEffect(() => {
     if (loginSuccess) {
@@ -32,6 +33,14 @@ const signin = () => {
       router.push('/Home'); 
     }
   }, [loginSuccess]);
+
+  useEffect(() => {
+    if(updateUser){
+      setUser(updateUser)
+      setUpdateUser(false)
+    }
+  }, [updateUser])
+
 
   const submit = () => {
     const {email, password} = form
@@ -44,12 +53,12 @@ const signin = () => {
 
     setIsSubmiting(true)
     
-    axios.post('https://54bb-188-2-139-122.ngrok-free.app/login', {
+    axios.post('https://b108-188-2-139-122.ngrok-free.app/login', {
       email,
       password
     }).then(res => {
       if(res.data !== 'failed'){
-        setUser(res.data);
+        setUpdateUser(res.data)
         setIsLogged(true)
         setLoginSuccess(true)
         
@@ -65,6 +74,7 @@ const signin = () => {
     })
   }
   }
+
 
 
   return (

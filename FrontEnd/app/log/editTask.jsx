@@ -1,5 +1,5 @@
 import { View, Text, ScrollView,TouchableOpacity,Dimensions  } from 'react-native'
-import React,{useEffect, useState} from 'react'
+import React,{useState,useEffect} from 'react'
 import {router} from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLocalSearchParams } from 'expo-router';
@@ -17,91 +17,100 @@ import FormField from '../components/FormField';
 
 const screenHeight = Dimensions.get('window').height;
 
-const setTask = ({route}) => {
+const editTask = () => {
 
-  const {user,setUser} = useGlobalContext()
+    const {user,setUser} = useGlobalContext()
 
-  const { clicked } = useLocalSearchParams();
+    const { clicked, index,task } = useLocalSearchParams();
 
+    const taskArray = task.split(",");
 
-  console.log(`SETTT TASSKKSKSKSK ${clicked}`)
-
-  const hoursArray = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'));
-  const minutesArray = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
-
-
-  const [selectedHour, setSelectedHour] = useState(12);
-  const [selectedMinute, setSelectedMinute] = useState(12);
-  const [selectedPart, setSelectedPart] = useState("AM");
-
-  const [selcetedHourEnd, setSelectedHourEnd] = useState(12);
-  const [selectedMinuteEnd, setSelectedMinuteEnd] = useState(13);
-  const [selectedPartEnd, setSelectedPartEnd] = useState("AM");
-
-  const [workName, setWorkName] = useState('Deep Work');
-
-  const [vertiaclHoursEnd, setVerticalHoursEnd] = useState(false);
-  const [verticalMinutesEnd, setVerticalMinutesEnd] = useState(false);
-
-  const [verticalMinutes, setVerticalMinutes] = useState(false);
-  const [verticalHours, setVerticalHours] = useState(false);
+    console.log(task)
+  
+  
+    console.log(`SETTT TASSKKSKSKSK ${clicked}`)
+  
+    const hoursArray = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'));
+    const minutesArray = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
 
 
-  const handleSelectedMinutes = (minutes) => {
-    setSelectedMinute(minutes);
-    setVerticalMinutes(false);
-
-  };
-
-  const handleSelectHours = (hour) => {
-    setSelectedHour(hour);
-    setVerticalHours(false);
-  };
-
-  const handleSelectedMinutesEnd = (minutes) => {
-    setSelectedMinuteEnd(minutes);
-    setVerticalMinutesEnd(false);
-
-  }
-
-  const handleSelectHoursEnd = (hour) => {
-    setSelectedHourEnd(hour);
-    setVerticalHoursEnd(false);
-  }
-
-  const submitWork = () => {
-    const start = `${selectedHour}:${selectedMinute} ${selectedPart}`;
-    const end = `${selcetedHourEnd}:${selectedMinuteEnd} ${selectedPartEnd}`;
-
-    const data  = [start,end, workName]
+  
+  
+    const [selectedHour, setSelectedHour] = useState(taskArray[0].slice(0, taskArray[0].indexOf(':')));
+    const [selectedMinute, setSelectedMinute] = useState(taskArray[0].slice(taskArray[0].indexOf(':') + 1, taskArray[0].indexOf(':') + 3));
+    const [selectedPart, setSelectedPart] = useState(taskArray[0].slice(-2));
+  
+    const [selcetedHourEnd, setSelectedHourEnd] = useState(taskArray[1].slice(0, taskArray[1].indexOf(':')));
+    const [selectedMinuteEnd, setSelectedMinuteEnd] = useState(taskArray[1].slice(taskArray[1].indexOf(':') + 1, taskArray[1].indexOf(':') + 3));
+    const [selectedPartEnd, setSelectedPartEnd] = useState(taskArray[1].slice(-2));
+  
+    const [workName, setWorkName] = useState(taskArray[2]);
 
 
-    axios.put('https://b108-188-2-139-122.ngrok-free.app/addWork', {
-      data,
-      email: user.email,
-      clicked
-    }).then(res => {
-      useEffect(() => {
-        setUser(res.data);
-      }, []);
-      router.push('/Schedule')
-    }).catch(err => {
-      if (err.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.log(err.response.data);
-        console.log(err.response.status);
-        console.log(err.response.headers);
-      } else if (err.request) {
-        // The request was made but no response was received
-        console.log(err.request);
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        console.log('Error', err.message);
-      }
-    })
-  }
+  
+    const [vertiaclHoursEnd, setVerticalHoursEnd] = useState(false);
+    const [verticalMinutesEnd, setVerticalMinutesEnd] = useState(false);
+  
+    const [verticalMinutes, setVerticalMinutes] = useState(false);
+    const [verticalHours, setVerticalHours] = useState(false);
+  
+  
+    const handleSelectedMinutes = (minutes) => {
+      setSelectedMinute(minutes);
+      setVerticalMinutes(false);
+  
+    };
+  
+    const handleSelectHours = (hour) => {
+      setSelectedHour(hour);
+      setVerticalHours(false);
+    };
+  
+    const handleSelectedMinutesEnd = (minutes) => {
+      setSelectedMinuteEnd(minutes);
+      setVerticalMinutesEnd(false);
+  
+    }
+  
+    const handleSelectHoursEnd = (hour) => {
+      setSelectedHourEnd(hour);
+      setVerticalHoursEnd(false);
+    }
 
+    const editFunc = () => {
+        const start = `${selectedHour}:${selectedMinute} ${selectedPart}`;
+        const end = `${selcetedHourEnd}:${selectedMinuteEnd} ${selectedPartEnd}`;
+    
+        const data  = [start,end, workName]
+
+        axios.put('https://b108-188-2-139-122.ngrok-free.app/editWork', {
+            data,
+            email: user.email,
+            index,
+            clicked
+        }).then(res => {
+            console.log(res.data)
+                setUser(res.data);
+            router.push('/Schedule')
+        }).catch((e) => {
+            console.log(e);
+        }
+        )
+    }
+
+    const deleteFunc = () => {
+        axios.put('https://b108-188-2-139-122.ngrok-free.app/deleteWork', {
+            email: user.email,
+            index,
+            clicked
+        }).then(res => {
+            console.log(res.data)
+                setUser(res.data);
+            router.push('/Schedule')
+        }).catch((e) => {
+            console.log(e);
+        })
+    }
 
 
   return (
@@ -252,12 +261,23 @@ const setTask = ({route}) => {
         
 
 
+        <View className="absolute bottom-2 w-full flex-row items-center justify-between space-x-2">
         <Button 
-          title="Submit"
-          containerStyles="w-full bg-blue-500 absolute bottom-2"
+          title="Save"
+          containerStyles="bg-blue-500 w-[48%] rounded-2xl"
           textStyles="text-blue-200"
-          handlePress={() => {submitWork()}}
+          handlePress={() => {editFunc()}}
         />
+        <Button 
+            title="Delete"
+            containerStyles="bg-red-500 w-[48%] rounded-2xl"
+            textStyles="text-red-200"
+            handlePress={() => {deleteFunc()}}
+        />
+        </View>
+
+
+        
 
         </View>
     </ScrollView>
@@ -265,4 +285,4 @@ const setTask = ({route}) => {
   )
 }
 
-export default setTask
+export default editTask

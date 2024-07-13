@@ -43,50 +43,50 @@ const index = () => {
     router.push('/Home')
   }
 
-  const [userInfo, setUserInfo] = useState(null)
-  const [requset, response, promptAsync] = Google.useAuthRequest({
+//   const [userInfo, setUserInfo] = useState(null)
+//   const [requset, response, promptAsync] = Google.useAuthRequest({
     
 
-    androidClientId: '1003474212666-gqrbg8e8s288508ssmkqrq5f9l6q5mf8.apps.googleusercontent.com',
-    webClientId: '1003474212666-jkpr0kqcpkhckv0qtfg2qo33plvqq97t.apps.googleusercontent.com',
-  })
+//     androidClientId: '1003474212666-gqrbg8e8s288508ssmkqrq5f9l6q5mf8.apps.googleusercontent.com',
+//     webClientId: '1003474212666-jkpr0kqcpkhckv0qtfg2qo33plvqq97t.apps.googleusercontent.com',
+//   })
 
-useEffect(() => {
-  handleSignInWithGoogle();
+// useEffect(() => {
+//   handleSignInWithGoogle();
 
-}, [response])
+// }, [response])
 
 
 
-  async function handleSignInWithGoogle(){
-    const user = await AsyncStorage.getItem('@user');
-    if(!user){
-      if(response?.type === "success"){
-        await getUserInfo(response.authentication.accessToken)
-      }
+//   async function handleSignInWithGoogle(){
+//     const user = await AsyncStorage.getItem('@user');
+//     if(!user){
+//       if(response?.type === "success"){
+//         await getUserInfo(response.authentication.accessToken)
+//       }
 
-    } else {
-      setUserInfo(Json.parse(user))
-    }
-  }
+//     } else {
+//       setUserInfo(Json.parse(user))
+//     }
+//   }
 
-  const getUserInfo = async (token) => {
-    if(!token) return;
-    try {
-      const response = await fetch(
-        "https://www.googleapis.com/userinfo/v2/me",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+//   const getUserInfo = async (token) => {
+//     if(!token) return;
+//     try {
+//       const response = await fetch(
+//         "https://www.googleapis.com/userinfo/v2/me",
+//         {
+//           headers: { Authorization: `Bearer ${token}` },
+//         }
+//       );
 
-      const user = await response.json();
-      await AsyncStorage.setItem('@user', JSON.stringify(user));
-      setUserInfo(user);
-    } catch (error){
+//       const user = await response.json();
+//       await AsyncStorage.setItem('@user', JSON.stringify(user));
+//       setUserInfo(user);
+//     } catch (error){
 
-    }
-  }
+//     }
+//   }
 
   return (
     <SafeAreaView className="bg-gray-800 h-full">
