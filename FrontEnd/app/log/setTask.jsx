@@ -76,14 +76,12 @@ const setTask = ({route}) => {
     const data  = [start,end, workName]
 
 
-    axios.put('https://b108-188-2-139-122.ngrok-free.app/addWork', {
+    axios.put('https://4b0d-188-2-139-122.ngrok-free.app/addWork', {
       data,
       email: user.email,
       clicked
     }).then(res => {
-      useEffect(() => {
         setUser(res.data);
-      }, []);
       router.push('/Schedule')
     }).catch(err => {
       if (err.response) {

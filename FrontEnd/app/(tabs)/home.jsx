@@ -15,7 +15,7 @@ const Home = () => {
   useEffect(() => {
     const email = user.email;
     console.log(email)
-    axios.post('https://b108-188-2-139-122.ngrok-free.app/getUser', {
+    axios.post('https://4b0d-188-2-139-122.ngrok-free.app/getUser', {
        email 
     }).then(res => {
       setIsLoading(false);

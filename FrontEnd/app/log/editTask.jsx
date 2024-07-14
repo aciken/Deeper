@@ -83,7 +83,7 @@ const editTask = () => {
     
         const data  = [start,end, workName]
 
-        axios.put('https://b108-188-2-139-122.ngrok-free.app/editWork', {
+        axios.put('https://4b0d-188-2-139-122.ngrok-free.app/editWork', {
             data,
             email: user.email,
             index,
@@ -99,7 +99,7 @@ const editTask = () => {
     }
 
     const deleteFunc = () => {
-        axios.put('https://b108-188-2-139-122.ngrok-free.app/deleteWork', {
+        axios.put('https://4b0d-188-2-139-122.ngrok-free.app/deleteWork', {
             email: user.email,
             index,
             clicked

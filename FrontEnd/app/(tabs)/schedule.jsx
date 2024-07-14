@@ -56,10 +56,10 @@ const Schedule = () => {
 
 
 
-  // if (!user) {
+  if (!user) {
 
-  //   return <Redirect to="/" />;
-  // }
+    return <Redirect to="/" />;
+  }
 
   return (
 <SafeAreaView className="h-full bg-gray-800">
@@ -87,6 +87,7 @@ const Schedule = () => {
     <HourTable
       tasks = {user.array[clicked-1]}
       clicked = {clicked}
+      todayDateNumber = {todayDateNumber}
     />
     <ImageButton 
     title="Add Work Task"
