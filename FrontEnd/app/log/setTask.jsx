@@ -1,4 +1,4 @@
-import { View, Text, ScrollView,TouchableOpacity,Dimensions  } from 'react-native'
+import { View, Text, ScrollView,TouchableOpacity,Dimensions,Alert  } from 'react-native'
 import React,{useEffect, useState} from 'react'
 import {router} from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -24,7 +24,7 @@ const setTask = ({route}) => {
   const { clicked } = useLocalSearchParams();
 
 
-  console.log(`SETTT TASSKKSKSKSK ${clicked}`)
+
 
   const hoursArray = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'));
   const minutesArray = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
@@ -76,26 +76,37 @@ const setTask = ({route}) => {
     const data  = [start,end, workName]
 
 
-    axios.put('https://4b0d-188-2-139-122.ngrok-free.app/addWork', {
+    axios.put('https://5fe6-188-2-139-122.ngrok-free.app/addWork', {
       data,
       email: user.email,
       clicked
     }).then(res => {
+      if(res.data == 'Time overlap'){
+        Alert.alert('Works are overlapping')
+      } else {
         setUser(res.data);
-      router.push('/Schedule')
+        router.push('/Schedule')
+      }
+      // if(res.data.message == 'Time overlap'){
+      //   Alert.alert('Works are overlapping')
+      // } else {
+      //   console.log('reas')
+      //   setUser(res.data);
+      //   router.push('/Schedule')
+      // }
     }).catch(err => {
       if (err.response) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx
-        console.log(err.response.data);
-        console.log(err.response.status);
-        console.log(err.response.headers);
+
+
+
       } else if (err.request) {
         // The request was made but no response was received
-        console.log(err.request);
+
       } else {
         // Something happened in setting up the request that triggered an Error
-        console.log('Error', err.message);
+
       }
     })
   }

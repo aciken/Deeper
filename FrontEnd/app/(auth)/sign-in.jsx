@@ -49,15 +49,16 @@ const signin = () => {
       
     } else {
 
-    console.log('Submitting')
+
 
     setIsSubmiting(true)
     
-    axios.post('https://4b0d-188-2-139-122.ngrok-free.app/login', {
+    axios.post('https://5fe6-188-2-139-122.ngrok-free.app/login', {
       email,
       password
     }).then(res => {
       if(res.data !== 'failed'){
+        setForm({email: '', password: ''})
         setUpdateUser(res.data)
         setIsLogged(true)
         setLoginSuccess(true)

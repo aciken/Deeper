@@ -1,4 +1,4 @@
-import { View, Text, ScrollView,TouchableOpacity,Dimensions  } from 'react-native'
+import { View, Text, ScrollView,TouchableOpacity,Dimensions,Alert  } from 'react-native'
 import React,{useState,useEffect} from 'react'
 import {router} from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -25,10 +25,10 @@ const editTask = () => {
 
     const taskArray = task.split(",");
 
-    console.log(task)
+
   
   
-    console.log(`SETTT TASSKKSKSKSK ${clicked}`)
+
   
     const hoursArray = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'));
     const minutesArray = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
@@ -83,32 +83,36 @@ const editTask = () => {
     
         const data  = [start,end, workName]
 
-        axios.put('https://4b0d-188-2-139-122.ngrok-free.app/editWork', {
+        axios.put('https://5fe6-188-2-139-122.ngrok-free.app/editWork', {
             data,
             email: user.email,
             index,
             clicked
         }).then(res => {
-            console.log(res.data)
-                setUser(res.data);
+          if(res.data === 'Time overlap'){
+            Alert.alert('Works are overlapping')
+          } else {
+            setUser(res.data);
             router.push('/Schedule')
+          }
+
         }).catch((e) => {
-            console.log(e);
+
         }
         )
     }
 
     const deleteFunc = () => {
-        axios.put('https://4b0d-188-2-139-122.ngrok-free.app/deleteWork', {
+        axios.put('https://5fe6-188-2-139-122.ngrok-free.app/deleteWork', {
             email: user.email,
             index,
             clicked
         }).then(res => {
-            console.log(res.data)
+
                 setUser(res.data);
             router.push('/Schedule')
         }).catch((e) => {
-            console.log(e);
+
         })
     }
 

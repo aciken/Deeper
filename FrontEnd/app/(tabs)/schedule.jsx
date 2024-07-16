@@ -20,12 +20,10 @@ const Schedule = () => {
   const router = useRouter();
 
 
-  useEffect(() => {
-    console.log(user.array[clicked-1])
-  }, []);
+
 
   const todayDateNumber = new Date().getDate();
-  console.log(todayDateNumber)  
+
 
 
   
@@ -44,7 +42,7 @@ const Schedule = () => {
   const [isClicked, setIsClicked] = useState(false)
 
   const handlePress = () => {
-    console.log('Button clicked');
+
 
 
         setSelected(clicked);

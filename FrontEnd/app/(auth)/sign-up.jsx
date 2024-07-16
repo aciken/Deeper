@@ -42,7 +42,7 @@ const signup = () => {
     }).then(res => {
       console.log('reas')
       if(res.data !== 'exist'){
-        console.log('aaaaaaaaaaaaaaa')
+        setForm({email: '', password: '', name: ''})
         setUser(res.data);
         setIsLogged(true)
         setLoginSuccess(true)

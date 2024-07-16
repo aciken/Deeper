@@ -38,10 +38,11 @@ const index = () => {
   }, [isFocused]);
 
 
+  useEffect(() => {
   if(!isLoading && isLogged){
-    console.log('GOING TO HOMEEEE')
     router.push('/Home')
   }
+}, [])
 
 //   const [userInfo, setUserInfo] = useState(null)
 //   const [requset, response, promptAsync] = Google.useAuthRequest({

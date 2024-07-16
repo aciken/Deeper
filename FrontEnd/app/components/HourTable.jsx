@@ -6,7 +6,7 @@ const HourTable = ({tasks, clicked, todayDateNumber}) => {
   const router = useRouter();
   // Generate an array of 24 elements to represent hours
   const hours = Array.from({ length: 24 }, (_, index) => index);
-  console.log(tasks)
+
 
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -23,24 +23,21 @@ const [time, amPm] = formattedTime.split(" ");
 // Split the time part by colon to get hours, minutes, and seconds
 const [hour, minutes, seconds] = time.split(":");
 
-console.log(hour); // "12"
-console.log(minutes); // "04"
-console.log(amPm); // "PM"
 
-console.log(hour, minutes, amPm)
 
 let currentLine = 0;
 if(amPm == "PM" && hour != 12){
   currentLine += 240;
 } 
-currentLine += hour*20;
+  currentLine += hour*20;
+
 currentLine += minutes / 3;
 
 
 
 
 
-  console.log(formattedTime)
+
 
   return (
     <View className=" relative flex-row items-center justify-center h-[75%] w-full mt-6 bg-gray-700 rounded-xl ">
@@ -56,31 +53,34 @@ currentLine += minutes / 3;
             let start = 0;
             let end = 0;
             let dif = 0
-            console.log(task[0].slice(-2));
 
-            if(task[0].slice(-2) == "PM" && task[0].slice(0, task[0].indexOf(':')) != 12){
+
+            if(task[0].slice(-2) == "PM"){
               start += 240;
              
             } else {
               start += 0;
             }
+            if(task[0].slice(0, task[0].indexOf(':')) != 12){
             start += task[0].slice(0, task[0].indexOf(':'))*20;
+            }
             start += task[0].slice(task[0].indexOf(':') + 1, task[0].indexOf(':') + 3) / 3;
 
             
-            if(task[1].slice(-2) == "PM" && task[1].slice(0, task[1].indexOf(':')) != 12){
+            if(task[1].slice(-2) == "PM"){
               end += 240;
              
             } else {
               end += 0;
             }
 
+            if(task[1].slice(0, task[1].indexOf(':')) != 12){
             end += task[1].slice(0, task[1].indexOf(':'))*20;
+            }
             end += task[1].slice(task[1].indexOf(':') + 1, task[1].indexOf(':') + 3) / 3;
 
             dif = end - start;
 
-            console.log(end,start,dif)
 
 
 
@@ -90,15 +90,7 @@ currentLine += minutes / 3;
 
 
 
-            // console.log(task[0].splice(5,2));
 
-            // if(task[0].splice(5,2) == "AM"){
-
-              
-            // } else {
-            //   start += 240;
-
-            // }
             return (
               <TouchableOpacity key={index} style={{ top: start * 4, height: dif * 4 }} className={`absolute z-20 left-20 flex-row justify-start items-end bg-blue-500 rounded-md w-[50%] drop-shadow-2xl p-2`}
                 activeOpacity={0.9}

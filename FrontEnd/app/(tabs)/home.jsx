@@ -13,16 +13,20 @@ const Home = () => {
   const {setUser,user,setIsLoading} = useGlobalContext()
 
   useEffect(() => {
+    console.log('Home')
+  } ,[])
+
+  useEffect(() => {
     const email = user.email;
-    console.log(email)
-    axios.post('https://4b0d-188-2-139-122.ngrok-free.app/getUser', {
+
+    axios.post('https://5fe6-188-2-139-122.ngrok-free.app/getUser', {
        email 
     }).then(res => {
       setIsLoading(false);
       setUser(res.data);
-      console.log(user)
+
     }).catch((e) => {
-      console.log(e);
+
     });
   }, []);
 
