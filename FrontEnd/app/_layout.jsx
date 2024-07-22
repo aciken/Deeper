@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Image } from 'react-native';
 import { Slot, SplashScreen, Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
 import React, { useEffect } from 'react';
@@ -31,8 +31,12 @@ const RootLayout = () => {
 
   if (!fontsLoaded) {
     return (
-      <View style={styles.loadingContainer}>
-        <Text>Loading...</Text>
+      <View className="h-full w-full bg-gray-800 flex-row justify-center items-center">
+        <Image
+        className="w-96 h-56"
+          source={require('../assets/images/deeperLogo.png')}
+          resizeMode='contain'
+        />
       </View>
     );
   }
@@ -47,17 +51,12 @@ const RootLayout = () => {
         <Stack.Screen name='log/setTask' options={{ headerShown: false }} />
         <Stack.Screen name='log/SomeComponent' options={{ headerShown: false }} />
         <Stack.Screen name='log/editTask' options={{ headerShown: false }} />
+        <Stack.Screen name='log/timer' options={{ headerShown: false }} />
       </Stack>
     </GlobalProvider>
   );
 };
 
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
+
 
 export default RootLayout;

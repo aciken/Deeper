@@ -1,4 +1,4 @@
-import { View, Text,ScrollView,TouchableOpacity } from 'react-native';
+import { View, Text,ScrollView,TouchableOpacity, Vibration } from 'react-native';
 import { useRouter } from 'expo-router';
 import React,{useState} from 'react';
 
@@ -46,7 +46,7 @@ currentLine += minutes / 3;
               showsVerticalScrollIndicator={false}
           >
             {todayDateNumber == clicked && (
-              <View style={{top: currentLine * 4}} className="absolute w-full h-[3px] bg-blue-800"/> 
+              <View style={{top: currentLine * 4}} className="absolute z-50 w-full h-[3px] bg-blue-800"/> 
             )}
 
           {tasks && tasks.map((task, index) => {
@@ -94,7 +94,10 @@ currentLine += minutes / 3;
             return (
               <TouchableOpacity key={index} style={{ top: start * 4, height: dif * 4 }} className={`absolute z-20 left-20 flex-row justify-start items-end bg-blue-500 rounded-md w-[50%] drop-shadow-2xl p-2`}
                 activeOpacity={0.9}
-                onPress={() => router.push({ pathname: 'log/editTask', params: {clicked, index, task} })}
+                onPress={() => router.push({pathname: 'log/timer', params: {clicked, index, task, currentLine}})}
+                onLongPress={() => {
+                  Vibration.vibrate(100);
+                  router.push({ pathname: 'log/editTask', params: {clicked, index, task} })}}
               >
                 <Text className="text-gray-200 font-psemibold text-xl">{task[2]}</Text>
                 

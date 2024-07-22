@@ -23,6 +23,10 @@ const editTask = () => {
 
     const { clicked, index,task } = useLocalSearchParams();
 
+    useEffect(() => {
+    console.log(task)
+    }, []);
+
     const taskArray = task.split(",");
 
 
@@ -83,7 +87,7 @@ const editTask = () => {
     
         const data  = [start,end, workName]
 
-        axios.put('https://5fe6-188-2-139-122.ngrok-free.app/editWork', {
+        axios.put('https://6e37-188-2-139-122.ngrok-free.app/editWork', {
             data,
             email: user.email,
             index,
@@ -103,7 +107,7 @@ const editTask = () => {
     }
 
     const deleteFunc = () => {
-        axios.put('https://5fe6-188-2-139-122.ngrok-free.app/deleteWork', {
+        axios.put('https://6e37-188-2-139-122.ngrok-free.app/deleteWork', {
             email: user.email,
             index,
             clicked
@@ -127,7 +131,7 @@ const editTask = () => {
               containerStyles=" top-4 left-4"
               imageStyle="w-6 h-6"
             />
-          <Text className="text-white text-center font-medium text-3xl mt-10">Create New Deep Work</Text>
+          <Text className="text-white text-center font-medium text-3xl mt-10">Edit Deep Work</Text>
             <View>
               <View className="flex-row justify-center items-center space-x-3 pt-10 backdrop-blur h-[160px]">
               <Text className="text-2xl font-pbold text-gray-200 mr-4">START</Text>

@@ -76,7 +76,7 @@ const setTask = ({route}) => {
     const data  = [start,end, workName]
 
 
-    axios.put('https://5fe6-188-2-139-122.ngrok-free.app/addWork', {
+    axios.put('https://6e37-188-2-139-122.ngrok-free.app/addWork', {
       data,
       email: user.email,
       clicked
