@@ -12,6 +12,8 @@ import eyeHide from "../assets/icons/eye-hide.png";
 import eye from "../assets/icons/eye.png";
 import play from "../assets/icons/play.png";
 import newPlusIcon from "../assets/icons/newPlusIcon.png";
+import listBlue from "../assets/icons/listBlue.png";
+import plusBlue from "../assets/icons/plusBlue.png";
 
 export default {
   play,
@@ -28,4 +30,6 @@ export default {
   eyeHide,
   eye,
   newPlusIcon,
+  listBlue,
+  plusBlue,
 };

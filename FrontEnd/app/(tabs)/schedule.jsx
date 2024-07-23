@@ -7,6 +7,8 @@ import { useGlobalContext } from '../context/GlobalProvider'
 import {icons} from '../../constants'
 import HourTable from '../components/HourTable';
 import ImageButton from '../components/ImageButton';
+import IconButton from '../components/IconButton';
+import Button from '../components/Button';
 import {useRouter, Redirect} from 'expo-router'
 import { useNavigation } from '@react-navigation/native';
 
@@ -40,6 +42,7 @@ const Schedule = () => {
 
   const [clicked, setClicked] = useState(todayDateNumber)
   const [isClicked, setIsClicked] = useState(false)
+  const [all, setAll] = useState(false)
 
   const handlePress = () => {
 
@@ -49,6 +52,8 @@ const Schedule = () => {
         router.push('setTask');
     
 };
+
+const [title, setTitle] = useState("One");
 
 
 
@@ -72,7 +77,10 @@ const Schedule = () => {
     if (index+1 > todayDateNumber - 1 && scrollNumber < 7) {
       scrollNumber++;
       return (
-        <TouchableOpacity key={index+1} onPress={() => setClicked(index+1)} className={`flex-col overflow-hidden justify-center items-center w-20 h-12 border-black border-1 ${index+1 == clicked ? `bg-blue-500` : ''}`}>
+        <TouchableOpacity 
+        key={index+1} onPress={() => setClicked(index+1)} className={`flex-col overflow-hidden justify-center items-center w-20 h-12 border-black border-1 ${title == 'All' ? 'bg-blue-500' : ''} ${index+1 == clicked ? `bg-blue-500` : ''}`}
+          activeOpacity={0.9}
+        >
           <Text className="font-pbold text-gray-300">{index+1}</Text>
         </TouchableOpacity>
       );
@@ -83,17 +91,30 @@ const Schedule = () => {
   </ScrollView>
 </View>
     <HourTable
-      tasks = {user.array[clicked-1]}
+    tasks = {all ? user.allArray : user.array[clicked-1]}
       clicked = {clicked}
       todayDateNumber = {todayDateNumber}
+      all = {all}
     />
-    <ImageButton 
-    title="Add Work Task"
-    ImageSource={icons.newPlusIcon}
-    handlePress={() => router.push({ pathname: 'log/setTask', params: {clicked} })}
-    containerStyles={`mt-2 w-full bg-blue-500`}
-    textStyles={`text-white`}
-/>
+    <View className="flex-row">
+      <IconButton
+      ImageSource={icons.plusBlue}
+      handlePress={() => router.push({ pathname: 'log/setTask', params: {clicked} })}
+      containerStyles={`mt-2 w-full bg-blue-600 border border-blue-500 w-[30%] mx-2`}
+      />
+      <IconButton
+      ImageSource={icons.listBlue}
+      handlePress={() => router.push({ pathname: 'log/taskList', params: {clicked} })}
+      containerStyles={`mt-2 w-full bg-blue-600 border border-blue-500 w-[30%] mx-2`}
+      />
+    <Button
+      title={title}
+      ImageSource={icons.newPlusIcon}
+      handlePress={() => {if(title === 'One') {setAll(true); setTitle('All')} else {setAll(false); setTitle('One')}}}
+      containerStyles={`mt-2 w-full ${title == 'One' ? 'bg-gray-700 border-gray-600' : 'bg-blue-600 border-blue-500'} border  w-[30%] mx-2`}
+      textStyles={`text-blue-200`}
+    />
+    </View>
     </View>
   </SafeAreaView>
   )

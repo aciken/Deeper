@@ -23,6 +23,10 @@ const UserSchema = new mongoose.Schema({
   array: {
     type: Array,
     default: () => new Array(31).fill([]) 
+  },
+  allArray: {
+    type: Array,
+    default: []
   }
 });
 

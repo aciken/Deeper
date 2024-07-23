@@ -87,7 +87,7 @@ const editTask = () => {
     
         const data  = [start,end, workName]
 
-        axios.put('https://6e37-188-2-139-122.ngrok-free.app/editWork', {
+        axios.put('https://848d-188-2-139-122.ngrok-free.app/editWork', {
             data,
             email: user.email,
             index,
@@ -97,7 +97,7 @@ const editTask = () => {
             Alert.alert('Works are overlapping')
           } else {
             setUser(res.data);
-            router.push('/Schedule')
+            router.back();
           }
 
         }).catch((e) => {
@@ -107,14 +107,14 @@ const editTask = () => {
     }
 
     const deleteFunc = () => {
-        axios.put('https://6e37-188-2-139-122.ngrok-free.app/deleteWork', {
+        axios.put('https://848d-188-2-139-122.ngrok-free.app/deleteWork', {
             email: user.email,
             index,
             clicked
         }).then(res => {
 
                 setUser(res.data);
-            router.push('/Schedule')
+                router.back();
         }).catch((e) => {
 
         })
@@ -127,7 +127,7 @@ const editTask = () => {
         <View style={{ height: screenHeight}} className={`w-full flex-coljustify-start items-center p-4 relative`}>
             <ClickableIcon
               ImageSource={Arrow}
-              handlePress={() => router.push('/Schedule')}
+              handlePress={() => router.back()}
               containerStyles=" top-4 left-4"
               imageStyle="w-6 h-6"
             />

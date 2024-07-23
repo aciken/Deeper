@@ -1,7 +1,7 @@
 import { View, Text,TouchableOpacity,Image } from 'react-native'
 import React from 'react'
 
-const ImageButton = ({title, containerStyles, handlePress, isLoading, textStyles, ImageSource}) => {
+const IconButton = ({containerStyles, handlePress, isLoading, ImageSource}) => {
   return (
     <TouchableOpacity
     className={`flex-row rounded-xl min-h-[62px] justify-center items-center ${containerStyles}`}
@@ -9,19 +9,13 @@ const ImageButton = ({title, containerStyles, handlePress, isLoading, textStyles
     activeOpacity={0.7}
     disabled={isLoading}
     >
-      <View className="flex-row ">
         <Image
           source={ImageSource}
-          className="w-6 h-6 mr-2 text-center" 
+          className="w-6 h-6" 
           resizeMode='contain'
         />
-        <Text className={` font-psemibold text-lg text-center ${textStyles}`}>
-          {title}
-        </Text>
-      </View>
-
     </TouchableOpacity>
   )
 }
 
-export default ImageButton
+export default IconButton

@@ -43,7 +43,10 @@ const editWork = async (req, res) => {
 
             let counter = 0;
 
+
+
             for(let i = 0; i < user.array[num].length; i++){
+                console.log(startPoints, endPoints)
                 console.log(user.array[num][i])
                 if(i == index){
                     counter++;       
@@ -53,8 +56,8 @@ const editWork = async (req, res) => {
                     counter++;
                 }
             }
-
-            if(counter == user.array[num].length){
+            console.log(counter, user.array[num].length)
+            if(counter == user.array[num].length || counter > user.array[num].length){
             user.array[num][index] = data;
             user.markModified('array');
             await user.save();

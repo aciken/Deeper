@@ -2,7 +2,7 @@ import { View, Text,ScrollView,TouchableOpacity, Vibration } from 'react-native'
 import { useRouter } from 'expo-router';
 import React,{useState} from 'react';
 
-const HourTable = ({tasks, clicked, todayDateNumber}) => {
+const HourTable = ({tasks, clicked, todayDateNumber,all}) => {
   const router = useRouter();
   // Generate an array of 24 elements to represent hours
   const hours = Array.from({ length: 24 }, (_, index) => index);
@@ -92,7 +92,7 @@ currentLine += minutes / 3;
 
 
             return (
-              <TouchableOpacity key={index} style={{ top: start * 4, height: dif * 4 }} className={`absolute z-20 left-20 flex-row justify-start items-end bg-blue-500 rounded-md w-[50%] drop-shadow-2xl p-2`}
+              <TouchableOpacity key={index} style={{ top: start * 4, height: dif * 4 }} className={`absolute z-20 left-20 flex-row justify-start items-end bg-blue-500 rounded-xl border border-gray-800 w-[50%] drop-shadow-2xl p-2`}
                 activeOpacity={0.9}
                 onPress={() => router.push({pathname: 'log/timer', params: {clicked, index, task, currentLine}})}
                 onLongPress={() => {

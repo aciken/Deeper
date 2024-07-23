@@ -52,6 +52,7 @@ const RootLayout = () => {
         <Stack.Screen name='log/SomeComponent' options={{ headerShown: false }} />
         <Stack.Screen name='log/editTask' options={{ headerShown: false }} />
         <Stack.Screen name='log/timer' options={{ headerShown: false }} />
+        <Stack.Screen name='log/taskList' options={{ headerShown: false }} />
       </Stack>
     </GlobalProvider>
   );
