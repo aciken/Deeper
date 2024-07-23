@@ -1,7 +1,7 @@
 const User = require('../DataBase/User');
 
 const addWork = async (req, res) => {
-    const { data, email, clicked } = req.body;
+    const { data, email, clicked, newAll } = req.body;
     console.log(data[0], data[1])
 
     const [startTime, startamPm] = data[0].split(' ');
@@ -46,7 +46,30 @@ const addWork = async (req, res) => {
 
         if(user){
 
-            console.log(user.array[num].length)
+            if(newAll){
+
+                let counter = 0;
+
+                for(let i = 0; i < user.allArray.length; i++){
+                    console.log(user.allArray[i])
+                    if((startPoints > user.allArray[i][3] && startPoints >= user.allArray[i][4]) || (endPoints <= user.allArray[i][3] && endPoints < user.allArray[i][4])){
+                        counter++;
+                    }
+                }
+
+                if(counter == user.allArray.length){
+
+                    user.allArray.push(data);
+                    user.markModified('allArray');
+                    await user.save();
+                    res.json(user);
+                    } else {
+                        res.json('Time overlap');
+                    }
+
+            } else {
+
+            
 
             let counter = 0;
 
@@ -70,6 +93,7 @@ const addWork = async (req, res) => {
             }
 
         }
+    }
         
 } catch (error) {
         res.status(400).json({ message: error.message });

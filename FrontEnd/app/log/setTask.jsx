@@ -1,4 +1,4 @@
-import { View, Text, ScrollView,TouchableOpacity,Dimensions,Alert  } from 'react-native'
+import { View, Text, ScrollView,TouchableOpacity,Dimensions,Alert,Vibration   } from 'react-native'
 import React,{useEffect, useState} from 'react'
 import {router} from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -21,7 +21,15 @@ const setTask = ({route}) => {
 
   const {user,setUser} = useGlobalContext()
 
-  const { clicked } = useLocalSearchParams();
+  const { clicked, all } = useLocalSearchParams();
+
+  const [newAll, setNewAll] = useState(false);
+
+  useEffect(() => {
+    if(all == 'true'){
+      setNewAll(true) 
+    }   
+  }, [])
 
 
 
@@ -79,7 +87,8 @@ const setTask = ({route}) => {
     axios.put('https://848d-188-2-139-122.ngrok-free.app/addWork', {
       data,
       email: user.email,
-      clicked
+      clicked,
+      newAll
     }).then(res => {
       if(res.data == 'Time overlap'){
         Alert.alert('Works are overlapping')
@@ -143,7 +152,7 @@ const setTask = ({route}) => {
                     <TouchableOpacity
                       key={hour}
                       className={`items-center justify-center p-2 rounded-md ${selectedHour === hour ? 'bg-blue-700' : 'bg-transparent'}`}
-                      onPress={() => handleSelectHours(hour)}
+                      onPress={() => {handleSelectHours(hour); Vibration.vibrate(100);}}
                     >
                       <Text className="text-3xl font-bold text-gray-200 drop-shadow-2xl">{hour}</Text>
                     </TouchableOpacity>
@@ -169,7 +178,7 @@ const setTask = ({route}) => {
                       <TouchableOpacity
                         key={minutes}
                         className={`items-center justify-center p-2 rounded-md ${selectedMinute === minutes ? 'bg-blue-700' : 'bg-transparent'}`}
-                        onPress={() => handleSelectedMinutes(minutes)}
+                        onPress={() => {handleSelectedMinutes(minutes); Vibration.vibrate(100);}}
                       >
                         <Text className={`text-3xl font-bold text-gray-200 drop-shadow-2xl`}>{minutes}</Text>
                       </TouchableOpacity>
@@ -206,7 +215,7 @@ const setTask = ({route}) => {
                   <TouchableOpacity
                     key={hour}
                     className={`items-center justify-center p-2 rounded-md ${selcetedHourEnd === hour ? 'bg-blue-700' : 'bg-transparent'}`}
-                    onPress={() => handleSelectHoursEnd(hour)}
+                    onPress={() => {handleSelectHoursEnd(hour); Vibration.vibrate(100);}}
                   >
                     <Text className="text-3xl font-bold text-gray-200 drop-shadow-2xl">{hour}</Text>
                   </TouchableOpacity>
@@ -232,7 +241,7 @@ const setTask = ({route}) => {
         <TouchableOpacity
           key={minutes}
           className={`items-center justify-center p-2 rounded-md ${selectedMinuteEnd === minutes ? 'bg-blue-700' : 'bg-transparent'}`}
-          onPress={() => handleSelectedMinutesEnd(minutes)}
+          onPress={() => {handleSelectedMinutesEnd(minutes); Vibration.vibrate(100);}}
         >
           <Text className={`text-3xl font-bold text-gray-200 drop-shadow-2xl`}>{minutes}</Text>
         </TouchableOpacity>

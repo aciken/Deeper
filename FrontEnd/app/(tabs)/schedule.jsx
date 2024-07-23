@@ -99,12 +99,12 @@ const [title, setTitle] = useState("One");
     <View className="flex-row">
       <IconButton
       ImageSource={icons.plusBlue}
-      handlePress={() => router.push({ pathname: 'log/setTask', params: {clicked} })}
+      handlePress={() => router.push({ pathname: 'log/setTask', params: {clicked, all} })}
       containerStyles={`mt-2 w-full bg-blue-600 border border-blue-500 w-[30%] mx-2`}
       />
       <IconButton
       ImageSource={icons.listBlue}
-      handlePress={() => router.push({ pathname: 'log/taskList', params: {clicked} })}
+      handlePress={() => router.push({ pathname: 'log/taskList', params: {clicked, all} })}
       containerStyles={`mt-2 w-full bg-blue-600 border border-blue-500 w-[30%] mx-2`}
       />
     <Button
