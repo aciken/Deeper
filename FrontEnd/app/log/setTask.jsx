@@ -1,4 +1,4 @@
-import { View, Text, ScrollView,TouchableOpacity,Dimensions,Alert,Vibration   } from 'react-native'
+import { View, Text, ScrollView,TouchableOpacity,Dimensions,Alert,Vibration, Animated } from 'react-native'
 import React,{useEffect, useState} from 'react'
 import {router} from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -34,17 +34,24 @@ const setTask = ({route}) => {
 
 
 
-  const hoursArray = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'));
-  const minutesArray = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
+  // Updated hours array to cover full 24 hours
+  const hoursArray = Array.from({length: 24}, (_, i) => ({
+    id: `hour_${i}`,
+    value: (i === 0 ? 12 : i > 12 ? i - 12 : i).toString().padStart(2, '0')
+  }));
 
+  const minutesArray = Array.from({length: 60}, (_, i) => ({
+    id: `minute_${i}`,
+    value: i.toString().padStart(2, '0')
+  }));
 
-  const [selectedHour, setSelectedHour] = useState(12);
-  const [selectedMinute, setSelectedMinute] = useState(12);
-  const [selectedPart, setSelectedPart] = useState("AM");
+  const [selectedHour, setSelectedHour] = useState('12');
+  const [selectedMinute, setSelectedMinute] = useState('00');
+  const [selectedPeriod, setSelectedPeriod] = useState('AM');
 
-  const [selcetedHourEnd, setSelectedHourEnd] = useState(12);
-  const [selectedMinuteEnd, setSelectedMinuteEnd] = useState(13);
-  const [selectedPartEnd, setSelectedPartEnd] = useState("AM");
+  const [selcetedHourEnd, setSelectedHourEnd] = useState('01');
+  const [selectedMinuteEnd, setSelectedMinuteEnd] = useState('00');
+  const [selectedPeriodEnd, setSelectedPeriodEnd] = useState('AM');
 
   const [workName, setWorkName] = useState('Deep Work');
 
@@ -78,13 +85,13 @@ const setTask = ({route}) => {
   }
 
   const submitWork = () => {
-    const start = `${selectedHour}:${selectedMinute} ${selectedPart}`;
-    const end = `${selcetedHourEnd}:${selectedMinuteEnd} ${selectedPartEnd}`;
+    const start = `${selectedHour}:${selectedMinute} ${selectedPeriod}`;
+    const end = `${selcetedHourEnd}:${selectedMinuteEnd} ${selectedPeriodEnd}`;
 
     const data  = [start,end, workName]
 
 
-    axios.put('https://848d-188-2-139-122.ngrok-free.app/addWork', {
+    axios.put('https://033e-188-2-139-122.ngrok-free.app/addWork', {
       data,
       email: user.email,
       clicked,
@@ -123,164 +130,176 @@ const setTask = ({route}) => {
 
 
   return (
-<SafeAreaView className="h-full bg-gray-800 relative">
-    <ScrollView>
-        <View style={{ height: screenHeight}} className={`w-full flex-coljustify-start items-center p-4 relative`}>
-            <ClickableIcon
-              ImageSource={Arrow}
-              handlePress={() => router.back()}
-              containerStyles=" top-4 left-4"
-              imageStyle="w-6 h-6"
-            />
-          <Text className="text-white text-center font-medium text-3xl mt-10">Create New Deep Work</Text>
-            <View>
-              <View className="flex-row justify-center items-center space-x-3 pt-10 backdrop-blur h-[160px]">
-              <Text className="text-2xl font-pbold text-gray-200 mr-4">START</Text>
-              {!verticalHours ? (
-              <TouchableText
-                Title={selectedHour}
-                handlePress={() => {setVerticalHours(true)}}
-                TextStyle="text-5xl font-bold text-gray-200"
-                ContainerStyle="rounded-xl"
-              />
-                        ) : (
-              <View className="flex-row h-50 w-14">
-                <ScrollView
-                  className="flex-1 h-[160px] rounded-md bg-gray-700"
-                  showsVerticalScrollIndicator={false}>
-                  {hoursArray.map((hour) => (
-                    <TouchableOpacity
-                      key={hour}
-                      className={`items-center justify-center p-2 rounded-md ${selectedHour === hour ? 'bg-blue-700' : 'bg-transparent'}`}
-                      onPress={() => {handleSelectHours(hour); Vibration.vibrate(100);}}
-                    >
-                      <Text className="text-3xl font-bold text-gray-200 drop-shadow-2xl">{hour}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
+    <SafeAreaView className="flex-1 bg-gray-900">
+      <ScrollView contentContainerStyle={{flexGrow: 1}} keyboardShouldPersistTaps="handled">
+        <View className="flex-1 p-6">
+          <ClickableIcon
+            ImageSource={Arrow}
+            handlePress={() => router.back()}
+            containerStyles="absolute top-6 left-6 z-10"
+            imageStyle="w-8 h-8 text-gray-300"
+          />
+          
+          <Text className="text-white text-center font-bold text-3xl mt-16 mb-10">
+            Create New Deep Work
+          </Text>
+
+          <View className="bg-gray-800 rounded-xl p-6 mb-8 z-10">
+            <Text className="text-xl font-semibold text-gray-300 mb-4">Start Time</Text>
+            <View className="flex-row justify-between items-center space-x-2">
+              <View className="flex-1" style={{ zIndex: 3 }}>
+                <TimeSelector
+                  value={selectedHour}
+                  options={hoursArray}
+                  onSelect={handleSelectHours}
+                  isOpen={verticalHours}
+                  setIsOpen={setVerticalHours}
+                />
               </View>
-                        )}
-              
-                      <Text className="text-5xl font-bold text-gray-200 mr-2">:</Text>
-                      { !verticalMinutes ?
-                      <TouchableText
-                      Title={selectedMinute}
-                      handlePress={() => {setVerticalMinutes(true)}}
-                      TextStyle="text-5xl font-bold text-gray-200"
-                      ContainerStyle={"rounded-xl"}
-                    />
-                    : (
-                    <View className="flex-row h-50 w-14">
-                    <ScrollView 
-                      className="flex-1 h-[160px] rounded-md bg-gray-700"
-                      showsVerticalScrollIndicator={false}>
-                    {minutesArray.map((minutes) => (
-                      <TouchableOpacity
-                        key={minutes}
-                        className={`items-center justify-center p-2 rounded-md ${selectedMinute === minutes ? 'bg-blue-700' : 'bg-transparent'}`}
-                        onPress={() => {handleSelectedMinutes(minutes); Vibration.vibrate(100);}}
-                      >
-                        <Text className={`text-3xl font-bold text-gray-200 drop-shadow-2xl`}>{minutes}</Text>
-                      </TouchableOpacity>
-                    ))}
-                      </ScrollView>
-                      </View>
-                    )
-                      }
-              
-                      <TouchableText
-                        Title={selectedPart}
-                        handlePress={() => {if(selectedPart === "AM"){setSelectedPart("PM")}else{setSelectedPart("AM")} }}
-                        TextStyle="text-5xl font-bold text-gray-200"
-                        ContainerStyle={"rounded-xl ml-2"}
-                      />
+              <Text className="text-4xl font-bold text-gray-300">:</Text>
+              <View className="flex-1" style={{ zIndex: 2 }}>
+                <TimeSelector
+                  value={selectedMinute}
+                  options={minutesArray}
+                  onSelect={handleSelectedMinutes}
+                  isOpen={verticalMinutes}
+                  setIsOpen={setVerticalMinutes}
+                />
               </View>
+              <TouchableOpacity
+                onPress={() => {
+                  setSelectedPeriod(selectedPeriod === "AM" ? "PM" : "AM");
+                  Vibration.vibrate(100);
+                }}
+                className="bg-gray-700 px-4 py-3 rounded-lg"
+              >
+                <Text className="text-3xl font-bold text-gray-300">{selectedPeriod}</Text>
+              </TouchableOpacity>
             </View>
+          </View>
 
-<View className="flex-row justify-center items-center space-x-3 pt-10 backdrop-blur h-[160px]">
-<Text className="text-2xl font-pbold text-gray-200 mr-10">END</Text>
-            {!vertiaclHoursEnd ? (
-            <TouchableText 
-              Title={selcetedHourEnd}
-              handlePress={() => {setVerticalHoursEnd(true)}}
-              TextStyle="text-5xl font-bold text-gray-200"
-              ContainerStyle="rounded-xl"
-            />
-          ) : (
-            <View className="flex-row h-50 w-14">
-              <ScrollView 
-                className="flex-1 h-[160px] rounded-md bg-gray-700"
-                showsVerticalScrollIndicator={false}>
-                {hoursArray.map((hour) => (
-                  <TouchableOpacity
-                    key={hour}
-                    className={`items-center justify-center p-2 rounded-md ${selcetedHourEnd === hour ? 'bg-blue-700' : 'bg-transparent'}`}
-                    onPress={() => {handleSelectHoursEnd(hour); Vibration.vibrate(100);}}
-                  >
-                    <Text className="text-3xl font-bold text-gray-200 drop-shadow-2xl">{hour}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
+          <View className="bg-gray-800 rounded-xl p-6 mb-8">
+            <Text className="text-xl font-semibold text-gray-300 mb-4">End Time</Text>
+            <View className="flex-row justify-between items-center space-x-2">
+              <View className="flex-1">
+                <TimeSelector
+                  value={selcetedHourEnd}
+                  options={hoursArray}
+                  onSelect={handleSelectHoursEnd}
+                  isOpen={vertiaclHoursEnd}
+                  setIsOpen={setVerticalHoursEnd}
+                />
+              </View>
+              <Text className="text-4xl font-bold text-gray-300">:</Text>
+              <View className="flex-1">
+                <TimeSelector
+                  value={selectedMinuteEnd}
+                  options={minutesArray}
+                  onSelect={handleSelectedMinutesEnd}
+                  isOpen={verticalMinutesEnd}
+                  setIsOpen={setVerticalMinutesEnd}
+                />
+              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  setSelectedPeriodEnd(selectedPeriodEnd === "AM" ? "PM" : "AM");
+                  Vibration.vibrate(100);
+                }}
+                className="bg-gray-700 px-4 py-3 rounded-lg"
+              >
+                <Text className="text-3xl font-bold text-gray-300">{selectedPeriodEnd}</Text>
+              </TouchableOpacity>
             </View>
-          )}
+          </View>
 
-        <Text className="text-5xl font-bold text-gray-200 mr-2">:</Text>
-        { !verticalMinutesEnd ?
-        <TouchableText
-        Title={selectedMinuteEnd}
-        handlePress={() => {setVerticalMinutesEnd(true)}}
-        TextStyle="text-5xl font-bold text-gray-200"
-        ContainerStyle={"rounded-xl"}
-      />
-      : (
-      <View className="flex-row h-50 w-14">
-      <ScrollView 
-        className="flex-1 h-[160px] rounded-md bg-gray-700"
-        showsVerticalScrollIndicator={false}>
-      {minutesArray.map((minutes) => (
-        <TouchableOpacity
-          key={minutes}
-          className={`items-center justify-center p-2 rounded-md ${selectedMinuteEnd === minutes ? 'bg-blue-700' : 'bg-transparent'}`}
-          onPress={() => {handleSelectedMinutesEnd(minutes); Vibration.vibrate(100);}}
-        >
-          <Text className={`text-3xl font-bold text-gray-200 drop-shadow-2xl`}>{minutes}</Text>
-        </TouchableOpacity>
-      ))}
-        </ScrollView>
-        </View>
-      )
-        }
-
-        <TouchableText
-          Title={selectedPartEnd}
-          handlePress={() => {if(selectedPartEnd === "AM"){setSelectedPartEnd("PM")}else{setSelectedPartEnd("AM")} }}
-          TextStyle="text-5xl font-bold text-gray-200"
-          ContainerStyle={"rounded-xl ml-2"}
-        />
-</View>
-
-<FormField
-          title="Deep Work Name"
-          placeholder="Enter Task Name"
-          value={workName}
-          handleTextChange={(e) => {setWorkName(e)}}
-          containerStyles="mt-7"
+          <FormField
+            title="Deep Work Name"
+            placeholder="Enter Task Name"
+            value={workName}
+            handleTextChange={setWorkName}
+            containerStyles="mb-8"
           />
 
-        
-
-
-        <Button 
-          title="Submit"
-          containerStyles="w-full bg-blue-500 absolute bottom-2"
-          textStyles="text-blue-200"
-          handlePress={() => {submitWork()}}
-        />
-
+          <Button 
+            title="Submit"
+            containerStyles="w-full bg-blue-600 py-4 rounded-xl"
+            textStyles="text-white font-bold text-lg"
+            handlePress={submitWork}
+          />
         </View>
-    </ScrollView>
-</SafeAreaView>
+      </ScrollView>
+    </SafeAreaView>
   )
 }
+
+// New TimeSelector component
+const TimeSelector = ({ value, options, onSelect, isOpen, setIsOpen }) => {
+  const [animation] = useState(new Animated.Value(0));
+
+  useEffect(() => {
+    Animated.timing(animation, {
+      toValue: isOpen ? 1 : 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [isOpen]);
+
+  const scaleY = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 1],
+  });
+
+  return (
+    <View style={{ zIndex: 1 }}>
+      <TouchableOpacity
+        onPress={() => setIsOpen(!isOpen)}
+        className="bg-gray-700 px-4 py-3 rounded-lg flex-row justify-between items-center"
+      >
+        <Text className="text-3xl font-bold text-gray-300">{value}</Text>
+        <Text className="text-gray-400 text-lg">
+          {isOpen ? '▲' : '▼'}
+        </Text>
+      </TouchableOpacity>
+      <Animated.View 
+        style={{ 
+          transform: [{ scaleY }],
+          opacity: animation,
+          height: 150,
+          overflow: 'hidden',
+          position: 'absolute',
+          top: '100%',
+          left: 0,
+          right: 0,
+          zIndex: 1000,
+        }}
+      >
+        <ScrollView
+          className="flex-1 bg-gray-700 rounded-b-lg"
+          showsVerticalScrollIndicator={false}
+        >
+          {options.map((option) => (
+            <TouchableOpacity
+              key={option.id}  // Use the unique id as the key
+              className={`items-center justify-center p-3 border-t border-gray-600 ${
+                value === option.value ? 'bg-blue-600' : 'bg-transparent'
+              }`}
+              onPress={() => {
+                onSelect(option.value);
+                setIsOpen(false);
+                Vibration.vibrate(100);
+              }}
+            >
+              <Text className={`text-2xl font-bold ${
+                value === option.value ? 'text-white' : 'text-gray-300'
+              }`}>
+                {option.value}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </Animated.View>
+    </View>
+  );
+};
 
 export default setTask

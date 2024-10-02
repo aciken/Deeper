@@ -19,7 +19,7 @@ const Home = () => {
   useEffect(() => {
     const email = user.email;
 
-    axios.post('https://848d-188-2-139-122.ngrok-free.app/getUser', {
+    axios.post('https://033e-188-2-139-122.ngrok-free.app/getUser', {
        email 
     }).then(res => {
       setIsLoading(false);
@@ -46,7 +46,7 @@ const Home = () => {
   }, [isFocused]);
 
   return (
-<SafeAreaView className="h-full bg-gray-800">
+<SafeAreaView className="h-full bg-gray-950">
   <ScrollView>
     <View className="w-full justify-start items-center px-4 my-6">
       <Text className="text-2xl text-gray-100 font-psemibold">Home</Text>

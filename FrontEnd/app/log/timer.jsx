@@ -10,29 +10,33 @@ const screenHeight = Dimensions.get('window').height;
 
 const timer = () => {
 
-    const {clicked, index, task,currentLine, todayDateNumber} = useLocalSearchParams();
+    const {clicked, index, task,currentLine, todayDateNumber, all} = useLocalSearchParams();
 
-    const today = new Date(); // Creates a new Date object with the current date and time
-const dayOfMonth = today.getDate(); // Gets the day of the month
-
-
+    const today = new Date(); 
+const dayOfMonth = today.getDate();
 
 
 
 
 
-    const currentTime = new Date(); // Creates a new Date object with the current date and time
-const h = currentTime.getHours(); // Gets the current hours
-const m= currentTime.getMinutes(); // Gets the current minutes
-const s = currentTime.getSeconds(); // Gets the current seconds
+
+
+    const [currentTime, setCurrentTime] = useState(new Date()); 
+const [h, setH] = useState(currentTime.getHours()); 
+const [m, setM]= useState(currentTime.getMinutes()); 
+const [s, setS] = useState(currentTime.getSeconds());
+
+
 
     const taskArray = task.split(',');
-    const  realTime = (h * 20 + m / 3) / 20 * 3600 + s;
+    const  [realTime, setRealTime] = useState((h * 20 + m / 3) / 20 * 3600 + s);
+
+
 
     const [timeInSeconds, setTimeInSeconds] = useState(Math.round(((taskArray[4] / 20) * 3600) - realTime));
 
     useEffect(() => {
-    if(currentLine < taskArray[3] && clicked == dayOfMonth){
+    if(currentLine-600 < taskArray[3] && (clicked == dayOfMonth)) {
         setTimeInSeconds(Math.round(((taskArray[3] / 20) * 3600) - realTime));
         } else if(clicked > dayOfMonth) {
             setTimeInSeconds(Math.round(((taskArray[3] / 20) * 3600)) -realTime + 86400 * (clicked - dayOfMonth));
@@ -40,38 +44,70 @@ const s = currentTime.getSeconds(); // Gets the current seconds
     }
     }, [] )
 
-    console.log(timeInSeconds)
+
+    console.log(`${timeInSeconds} - time, ${realTime} - current time`)
 
     
 
     useEffect(() => {
-      // Exit early when we reach 0
+
       if (timeInSeconds === 0) return;
   
-      // Save intervalId to clear the interval when the component re-renders
+
       const intervalId = setInterval(() => {
-        // Decrease time by 1
-        setTimeInSeconds(timeInSeconds - 1);
+
+        const rightTime = new Date()
+
+        const inH = rightTime.getHours()
+        const inM = rightTime.getMinutes()
+        const inS = rightTime.getSeconds()
+
+        
+
+
+            const inRealTime = ((inH * 20 + inM / 3) / 20 * 3600 + inS);
+
+            console.log(Math.round(((taskArray[4] / 20) * 3600)), inRealTime)
+
+        setTimeInSeconds(Math.round(((taskArray[4] / 20) * 3600) - inRealTime));
+
+
+          if(currentLine - 600 < taskArray[3] && (clicked == dayOfMonth)) {
+              setTimeInSeconds(Math.round(((taskArray[3] / 20) * 3600) - inRealTime));
+              } else if(clicked > dayOfMonth) {
+                  setTimeInSeconds(Math.round(((taskArray[3] / 20) * 3600)) -inRealTime + 86400 * (clicked - dayOfMonth));
+                  console.log(timeInSeconds)
+          }
+
       }, 1000);
   
-      // Clear interval on re-render to avoid memory leaks
+
       return () => clearInterval(intervalId);
-      // Add timeInSeconds as a dependency to re-run the effect when it changes
+
     }, [timeInSeconds]);
   
-    // Convert time in seconds to hours, minutes, and seconds
+
     const hours = Math.floor(timeInSeconds / 3600);
     const minutes = Math.floor((timeInSeconds % 3600) / 60);
     const seconds = timeInSeconds % 60;
   
-    // Format time for display
+
     const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes
       .toString()
       .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
+      console.log(taskArray[4], taskArray[3], currentLine, clicked, dayOfMonth)
+
+  useEffect(() => {
+    const logInterval = setInterval(() => {
+      console.log(`Current line: ${currentLine}, Task start: ${taskArray[3]}`);
+    }, 3000);
+
+    return () => clearInterval(logInterval);
+  }, []);
+
   return (
     <SafeAreaView className="h-full bg-gray-800 relative">
-      <ScrollView>
         <View style={{ height: screenHeight}} className={`w-full h-full flex-col justify-center items-center p-4 relative`}>
         <ClickableIcon
           ImageSource={Arrow}
@@ -79,16 +115,15 @@ const s = currentTime.getSeconds(); // Gets the current seconds
           containerStyles=" top-4 left-4"
           imageStyle="w-6 h-6"
         />
-        {currentLine > taskArray[4] && clicked == dayOfMonth ? (
+        {parseInt(currentLine-600) > parseInt(taskArray[4]) && (clicked == dayOfMonth || all == 'true') ?  (
             <Text className="font-psemibold text-white text-3xl">This Task Is Finished</Text>
-            ) : currentLine < taskArray[3] || clicked != dayOfMonth ? (
-                <Text className="font-psemibold text-white text-3xl">This Task Starts in: {formattedTime} </Text>
+            ) : parseInt(currentLine-600) < (taskArray[3]) || clicked != dayOfMonth ? (
+                <Text className="font-psemibold text-white text-3xl">This Task Starts in: {formattedTime}</Text>
             ) : (
                 <Text className="font-psemibold text-white text-3xl text-center">{formattedTime}</Text>
             
         )}
         </View>
-      </ScrollView>
     </SafeAreaView>
   );
 };

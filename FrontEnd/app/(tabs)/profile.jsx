@@ -20,7 +20,7 @@ const Profile = () => {
   }
 
   return (
-<SafeAreaView className="h-full bg-gray-800">
+<SafeAreaView className="h-full bg-gray-950">
   <ScrollView>
     <View className="w-full justify-start items-center px-4 my-6 relative">
       <ClickableIcon

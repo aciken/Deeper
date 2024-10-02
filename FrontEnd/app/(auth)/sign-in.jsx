@@ -30,6 +30,8 @@ const signin = () => {
   useEffect(() => {
     if (loginSuccess) {
       setIsLoading(false);
+      setUpdateUser(false);
+      setLoginSuccess(false);
       router.push('/Home'); 
     }
   }, [loginSuccess]);
@@ -50,10 +52,10 @@ const signin = () => {
     } else {
 
 
-
+      console.log('Submitting')
     setIsSubmiting(true)
     
-    axios.post('https://848d-188-2-139-122.ngrok-free.app/login', {
+    axios.post('https://033e-188-2-139-122.ngrok-free.app/login', {
       email,
       password
     }).then(res => {
@@ -62,6 +64,7 @@ const signin = () => {
         setUpdateUser(res.data)
         setIsLogged(true)
         setLoginSuccess(true)
+
         
       } else {
         Alert.alert('Invalid email or password');
