@@ -85,13 +85,13 @@ const setTask = ({route}) => {
   }
 
   const submitWork = () => {
-    const start = `${selectedHour}:${selectedMinute} ${selectedPeriod}`;
-    const end = `${selcetedHourEnd}:${selectedMinuteEnd} ${selectedPeriodEnd}`;
+    const start = `${selectedHour}:${selectedMinute}`;
+    const end = `${selcetedHourEnd}:${selectedMinuteEnd}`;
 
     const data  = [start,end, workName]
 
 
-    axios.put('https://033e-188-2-139-122.ngrok-free.app/addWork', {
+    axios.put('https://38f6-188-2-139-122.ngrok-free.app/addWork', {
       data,
       email: user.email,
       clicked,

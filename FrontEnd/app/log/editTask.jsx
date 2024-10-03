@@ -73,7 +73,7 @@ const EditTask = () => {
         const end = `${selcetedHourEnd}:${selectedMinuteEnd} ${selectedPartEnd}`;
         const data  = [start,end, workName]
 
-        axios.put('https://033e-188-2-139-122.ngrok-free.app/editWork', {
+        axios.put('https://38f6-188-2-139-122.ngrok-free.app/editWork', {
             data,
             email: user.email,
             index,
@@ -92,7 +92,7 @@ const EditTask = () => {
     }
 
     const deleteFunc = () => {
-        axios.put('https://033e-188-2-139-122.ngrok-free.app/deleteWork', {
+        axios.put('https://38f6-188-2-139-122.ngrok-free.app/deleteWork', {
             email: user.email,
             index,
             clicked,

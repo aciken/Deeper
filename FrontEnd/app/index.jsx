@@ -90,7 +90,7 @@ const index = () => {
 //   }
 
   return (
-    <SafeAreaView className="bg-gray-800 h-full">
+    <SafeAreaView className="bg-gray-950 h-full">
     <ScrollView contentContainerStyle={{ height: '100%' }}>
       <View className="w-full justify-around items-center h-full px-4 flex-col my-10">
         <View className="w-full flex-col justify-center items-center mb-10">
@@ -113,13 +113,13 @@ const index = () => {
         <View className="flex-row justify-center items-center w-full mt-10">
           <Text className="text-white text-lg font-pregular">
             Already have an account?{' '}
-            <Link href="/sign-in" className="text-blue-500 text-lg font-psemibold underline">Sign in</Link>
+            <Link href="/sign-in" className="text-sky-400 text-lg font-psemibold underline">Sign in</Link>
           </Text>
         </View>
       </View>
     </ScrollView>
     <StatusBar
-      backgroundColor='#1f2937'
+      backgroundColor='#030712'
       style='light'
     />
   </SafeAreaView>

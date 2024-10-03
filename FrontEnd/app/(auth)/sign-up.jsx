@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Image, Alert} from 'react-native'
+import { View, Text, ScrollView, Image, Alert, TouchableOpacity} from 'react-native'
 import React,{useState, useEffect} from 'react'
 import {router,Link} from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -35,7 +35,7 @@ const signup = () => {
     console.log('Submitting')
     const {name, email, password} = form
     setIsSubmiting(true)
-    axios.put('https://033e-188-2-139-122.ngrok-free.app/signup', {
+    axios.put('https://8c98-188-2-139-122.ngrok-free.app/signup', {
       name,
       email,
       password
@@ -61,7 +61,7 @@ const signup = () => {
 
 
   return (
-    <SafeAreaView className="bg-gray-800 h-full">
+    <SafeAreaView className="bg-gray-950 h-full">
     <ScrollView contentContainerStyle={{ height: '100%' }}>
       <View className="w-full h-full justify-center items-start relative px-4">
         <ClickableIcon
@@ -93,16 +93,16 @@ const signup = () => {
           handleTextChange={(e) => setForm({...form, password: e})}
           containerStyles="mt-7"
           />
+          <TouchableOpacity
+          className="w-full h-16 bg-sky-400 rounded-lg items-center justify-center mt-10"
+          onPress={() => submit()}
+          >
 
-          <Button
-          title="Sign Up"
-          containerStyles="mt-10 w-full"
-          isLoading={isSubmiting}
-          handlePress={() => submit()}
-          />
+            <Text className="text-lg font-psemibold text-gray-900">Sign Up</Text>
+          </TouchableOpacity>
           <View className="w-full flex-row justify-center mt-4">
             <Text className="text-lg font-pregular text-gray-400 mr-2">Already have Account?</Text>
-            <Link className='text-lg font-psemibold text-blue-500' href="/sign-in">Sign In</Link>
+            <Link className='text-lg font-psemibold text-sky-400' href="/sign-in">Sign In</Link>
             </View>
 
 
