@@ -5,7 +5,7 @@ import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 
 
-const HourTable = ({ tasks, clicked, todayDateNumber, all }) => {
+const HourTable = ({ tasks, clicked, todayDateNumber, all, changeEditVisible, changeEditData }) => {
   const router = useRouter();
   const hours = useMemo(() => Array.from({ length: 25 }, (_, index) => index), []);
 
@@ -27,6 +27,18 @@ const HourTable = ({ tasks, clicked, todayDateNumber, all }) => {
 
     return () => clearInterval(intervalId);
   }, []);
+
+  function convertTimeStringToDate(timeString) {
+    const [hours, minutes] = timeString.split(':');
+    
+    let date = new Date();
+    date.setHours(parseInt(hours, 10));
+    date.setMinutes(parseInt(minutes, 10));
+    date.setSeconds(0);
+    date.setMilliseconds(0);
+    
+    return date;
+  }
 
   const renderTasks = useMemo(() => {
     return tasks && tasks.map((task, index) => {
@@ -50,7 +62,12 @@ const HourTable = ({ tasks, clicked, todayDateNumber, all }) => {
           onPress={() => router.push({pathname: 'log/timer', params: {clicked, index, task, currentLine, all}})}
           onLongPress={() => {
             Vibration.vibrate(100);
-            router.push({ pathname: 'log/editTask', params: {clicked, index, task, all} })
+            changeEditVisible()
+            changeEditData(
+              convertTimeStringToDate(task[0]),
+              convertTimeStringToDate(task[1]),
+              task[2]
+            )
           }}
         >
           <LinearGradient 

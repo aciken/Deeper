@@ -15,6 +15,7 @@ import newPlusIcon from "../assets/icons/newPlusIcon.png";
 import listBlue from "../assets/icons/listBlue.png";
 import plusBlue from "../assets/icons/plusBlue.png";
 import calendar from "../assets/icons/calendar-blank-custom.png";
+import trash from "../assets/icons/trash.png";
 
 export default {
   play,
@@ -34,4 +35,5 @@ export default {
   listBlue,
   plusBlue,
   calendar,
+  trash,
 };
