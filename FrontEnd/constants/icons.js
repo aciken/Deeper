@@ -16,6 +16,10 @@ import listBlue from "../assets/icons/listBlue.png";
 import plusBlue from "../assets/icons/plusBlue.png";
 import calendar from "../assets/icons/calendar-blank-custom.png";
 import trash from "../assets/icons/trash.png";
+import clockGrad from "../assets/icons/clockGrad.png";
+import taskGrad from "../assets/icons/taskGrad.png";
+import plusGrad from "../assets/icons/plusGrad.png";
+
 
 export default {
   play,
@@ -36,4 +40,7 @@ export default {
   plusBlue,
   calendar,
   trash,
+  clockGrad,
+  taskGrad,
+  plusGrad,
 };

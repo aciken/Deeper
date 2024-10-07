@@ -83,7 +83,7 @@ const HourTable = ({ user, clicked, todayDateNumber, all, changeEditVisible, cha
 							end={{x: 1, y: 1}}
 							className="w-full h-full rounded-lg justify-center items-center">
             <View className="p-2 z-10">
-          <Text className="text-white font-semibold text-lg">{task[2]}{index}</Text>
+          <Text className="text-white font-semibold text-lg">{task[2]}</Text>
           </View>
           </LinearGradient>
         </TouchableOpacity>
