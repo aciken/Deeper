@@ -99,21 +99,21 @@ const TabsLayout = () => {
           )
         }}
       />
-      <Tabs.Screen name="Schedule"
-        options={{
-          title: 'Schedule',
-          headerShown: false,
-          tabBarIcon: ({color, focused}) => (
-            <TabIcon icon={icons.bookmark} color={color} focused={focused} name='Schedule'/>
-          )
-        }}
-      />
       <Tabs.Screen name="Tasks"
         options={{
           title: 'Tasks',
           headerShown: false,
           tabBarIcon: ({color, focused}) => (
             <TabIcon icon={icons.plus} color={color} focused={focused} name='Tasks'/>
+          )
+        }}
+      />
+      <Tabs.Screen name="Schedule"
+        options={{
+          title: 'Schedule',
+          headerShown: false,
+          tabBarIcon: ({color, focused}) => (
+            <TabIcon icon={icons.bookmark} color={color} focused={focused} name='Schedule'/>
           )
         }}
       />

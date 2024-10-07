@@ -1,7 +1,7 @@
 const User = require('../DataBase/User');
 
 const editWork = async (req, res) => {
-    const {data, email, clicked, index, newAll} = req.body;
+    const {data, id, clicked, index} = req.body;
 
     const [startTime, startamPm] = data[0].split(' ');
     const [startHour, startMinute] = startTime.split(':');
@@ -12,66 +12,27 @@ const editWork = async (req, res) => {
     let startPoints = 0;
     let endPoints = 0;
 
-    if(startamPm == 'PM'){
-        startPoints += 240;
-    }
+ 
 
-    if(startHour != 12){
     startPoints += startHour * 20;
-    }
     startPoints += startMinute / 3;
 
-    if(endamPm == 'PM'){
-        endPoints += 240;
-    }
+ 
 
-    if(endHour != 12){
+  
     endPoints += endHour * 20;
-    }
     endPoints += endMinute / 3;
 
     data.push(startPoints);
     data.push(endPoints);
 
-    const num = clicked-1
-
-    console.log(data)
+        const num = clicked-1
 
     try {
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ _id: id });
         if(user){
-
-            if(newAll){
-
-                let counter = 0;
-
-
-                for(let i = 0; i < user.allArray.length; i++){
-                    console.log(startPoints, endPoints)
-                    console.log(user.allArray[i])
-                    if(i == index){
-                        counter++;       
-                    }
-                    if((startPoints > user.allArray[i][3] && startPoints >= user.allArray[i][4]) || (endPoints <= user.allArray[i][3] && endPoints < user.allArray[i][4])){
-    
-                        counter++;
-                    }
-                }
-                console.log(counter, user.array[num].length)
-                if(counter == user.allArray.length || counter > user.allArray.length){
-                user.allArray[index] = data;
-                user.markModified('allArray');
-                await user.save();
-                res.json(user);
-            } else {
-                res.json('Time overlap')
-            }
-
-            } else {
     
             let counter = 0;
-
-
 
             for(let i = 0; i < user.array[num].length; i++){
                 console.log(startPoints, endPoints)
@@ -93,7 +54,6 @@ const editWork = async (req, res) => {
         } else {
             res.json('Time overlap')
         }
-    }
     } 
 } catch (error) {
         res.status(400).json({ message: error.message });

@@ -29,11 +29,10 @@ const Schedule = () => {
 	const [endTime, setEndTime] = useState(new Date());
 	const [showStartPicker, setShowStartPicker] = useState(false);
 	const [showEndPicker, setShowEndPicker] = useState(false);
+	const [index,setIndex] = useState(null)
 
-	
-	const changeEditVisible = () => {
-		setIsEditVisible(!isEditVisible);
-	};
+	console.log(user.array[clicked-1])
+
 
 	if (!user) {
 		return <Redirect to="/" />;
@@ -84,18 +83,20 @@ const Schedule = () => {
 
 	const [sessionName, setSessionName] = useState('Work Session');
 
-	const submitWork = (start, end, name) => {
-		console.log(start, end);
+	const submitWork = (start, end, name,dates) => {
+		const dayIndices = dates.map(date => new Date(date).getDate() - 1);
+
+		
 	
 		const data  = [start,end, name]
 
-		console.log(data);
 
-		axios.put('https://c4dc-188-2-139-122.ngrok-free.app/addWork', {
+
+		axios.put('https://510f-188-2-139-122.ngrok-free.app/addWork', {
 		  data,
 		  id: user._id,
 		  clicked,
-		  newAll
+		  dayIndices,
 		}).then(res => {
 			console.log('data', res.data)
 		  if(res.data == 'Time overlap'){
@@ -115,6 +116,44 @@ const Schedule = () => {
 		  }
 		})
 	}
+
+	
+    const deleteFunc = () => {
+		console.log(index)
+        axios.put('https://510f-188-2-139-122.ngrok-free.app/deleteWork', {
+            id: user._id,
+            index,
+            clicked,
+        }).then(res => {
+            setUser(res.data);
+			setIsEditVisible(!isEditVisible)
+
+        }).catch((e) => {
+            console.error(e);
+        })
+    }
+
+
+    const editFunc = (start, end, name) => {
+
+        const data  = [start,end, name]
+
+        axios.put('https://510f-188-2-139-122.ngrok-free.app/editWork', {
+            data,
+            id: user._id,
+            index,
+            clicked,
+        }).then(res => {
+            if(res.data === 'Time overlap'){
+                alert('Works are overlapping')
+            } else {
+                setUser(res.data);
+                setIsEditVisible(!isEditVisible)
+            }
+        }).catch((e) => {
+            console.error(e);
+        })
+    }
 
 	const changeEditData = (start, end, name) => {
 		setStartTime(start)
@@ -152,6 +191,10 @@ const Schedule = () => {
 	const [selectedWork, setSelectedWork] = useState('');
 	const [selectedDate, setSelectedDate] = useState(null);
 	const [showDatePicker, setShowDatePicker] = useState(false);
+
+	useEffect(() => {
+		console.log(selectedDates)
+	}, [selectedDates])
 	  
 
 	return (
@@ -190,12 +233,13 @@ const Schedule = () => {
 
 				<View className="h-[73%]"> 
 					<HourTable
-						tasks={multiSelect ? [] : (all ? user.allArray : user.array[clicked - 1])}
+						user={user}
 						clicked={clicked}
 						todayDateNumber={todayDateNumber}
 						all={all}
-						changeEditVisible={() => setIsEditVisible(!isEditVisible)}
+						changeEditVisible={() => setIsEditVisible(true)}
 						changeEditData={changeEditData}
+						setIndex= {setIndex}
 					/>
 				</View>
 
@@ -316,7 +360,7 @@ const Schedule = () => {
 					)}
 					<View className="flex-row justify-center items-center gap-4 w-full">
 						<TouchableOpacity
-							onPress={handleAddDeepWork}
+							onPress={() => editFunc(formatTime(startTime), formatTime(endTime), sessionName)}
 						className=" h-16 mt-4 overflow-hidden w-[70%]"
 					>
 						<LinearGradient
@@ -331,7 +375,7 @@ const Schedule = () => {
 						</LinearGradient>
 					</TouchableOpacity>
 						<TouchableOpacity
-							onPress={() => setIsPopupVisible(false)}
+							onPress={() => deleteFunc()}
 							className=" h-16 w-16 mt-4 overflow-hidden"
 						>
 							<LinearGradient
@@ -364,9 +408,16 @@ const Schedule = () => {
 								{[...Array(7)].map((_, index) => {
 									const date = new Date();
 									date.setDate(date.getDate() + index);
+									const isClickedDate = date.getDate() === clicked;
 									const isSelected = selectedDates.some(selectedDate => 
 										selectedDate.toDateString() === date.toDateString()
 									);
+									if(selectedDates.length == 0){
+										const newDate = new Date();
+										newDate.setDate(newDate.getDate(), clicked)
+										console.log(newDate)
+										setSelectedDates([...selectedDates, newDate])
+									}
 									return (
 										<TouchableOpacity
 											key={index}
@@ -375,6 +426,7 @@ const Schedule = () => {
 												const existingIndex = newSelectedDates.findIndex(
 													selectedDate => selectedDate.toDateString() === date.toDateString()
 												);
+	
 												if (existingIndex !== -1) {
 													newSelectedDates.splice(existingIndex, 1);
 												} else {
@@ -383,17 +435,17 @@ const Schedule = () => {
 												setSelectedDates(newSelectedDates);
 											}}
 											className={`w-16 h-20 justify-center items-center rounded-xl mr-2 ${
-												isSelected ? 'bg-sky-500' : 'bg-gray-700'
+												isSelected || (isClickedDate && selectedDates.length === 0) ? 'bg-sky-500' : 'bg-gray-700'
 											}`}
 										>
 											<LinearGradient
-												colors={isSelected ? ['#38bdf8', '#3b82f6'] : ['#374151', '#374151']}
+												colors={isSelected || (isClickedDate && selectedDates.length === 0) ? ['#38bdf8', '#3b82f6'] : ['#374151', '#374151']}
 												start={{x: 0, y: 0}}
 												end={{x: 1, y: 1}}
 												className="w-full h-full rounded-xl justify-center items-center"
 											>
 												<Text className={`text-xs mb-1 ${
-													isSelected ? 'text-gray-100' : 'text-gray-400'
+													isSelected || (isClickedDate && selectedDates.length === 0) ? 'text-gray-100' : 'text-gray-400'
 												}`}>{date.toLocaleDateString('en-US', { weekday: 'short' })}</Text>
 												<Text className="text-gray-100 text-lg font-bold">{date.getDate()}</Text>
 											</LinearGradient>
@@ -520,27 +572,35 @@ const Schedule = () => {
 					<Text className="text-3xl font-bold text-white mb-6 text-center">Task List</Text>
 					<ScrollView className="w-full max-h-[70vh]">
 						{user && user.array && user.array[clicked - 1] && user.array[clicked - 1].length > 0 ? (
-							user.array[clicked - 1].sort((a, b) => a[3] - b[3]).map((task, index) => (
-								<TouchableOpacity
-									key={index}
-									className="w-full flex-row items-center justify-between h-20 bg-gray-700 rounded-xl border border-gray-600 p-2 mb-4"
-									onPress={() => {
-										setIsTaskListVisible(false);
-										changeEditData(
-											convertTimeStringToDate(task[0]),
-											convertTimeStringToDate(task[1]),
-											task[2]
-										)
-										setTimeout(() => {
-											setIsEditVisible(true);
-										}, 250);
-									}}
-									activeOpacity={0.8}
-								>
-									<Text className="text-gray-200 text-lg font-semibold">{task[2]}</Text>
-									<Text className="text-gray-200 text-lg font-semibold">{task[0]}-{task[1]}</Text>
-								</TouchableOpacity>
-							))
+							user.array[clicked - 1]
+								.map((task, index) => ({ task, index }))
+								.sort((a, b) => {
+									const timeA = a.task[0].split(':').map(Number);
+									const timeB = b.task[0].split(':').map(Number);
+									return timeA[0] * 60 + timeA[1] - (timeB[0] * 60 + timeB[1]);
+								})
+								.map(({ task, index }) => (
+									<TouchableOpacity
+										key={index}
+										className="w-full flex-row items-center justify-between h-20 bg-gray-700 rounded-xl border border-gray-600 p-2 mb-4"
+										onPress={() => {
+											setIsTaskListVisible(false);
+											changeEditData(
+												convertTimeStringToDate(task[0]),
+												convertTimeStringToDate(task[1]),
+												task[2]
+											)
+											setTimeout(() => {
+												setIsEditVisible(true);
+												setIndex(index)
+											}, 250);
+										}}
+										activeOpacity={0.8}
+									>
+										<Text className="text-gray-200 text-lg font-semibold">{task[2]}</Text>
+										<Text className="text-gray-200 text-lg font-semibold">{task[0]}-{task[1]}</Text>
+									</TouchableOpacity>
+								))
 						) : (
 							<View className="w-full flex-col justify-center items-center">
 								<Text className="font-semibold text-gray-200 text-lg">No tasks yet</Text>

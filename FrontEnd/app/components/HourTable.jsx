@@ -5,7 +5,7 @@ import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 
 
-const HourTable = ({ tasks, clicked, todayDateNumber, all, changeEditVisible, changeEditData }) => {
+const HourTable = ({ user, clicked, todayDateNumber, all, changeEditVisible, changeEditData,setIndex }) => {
   const router = useRouter();
   const hours = useMemo(() => Array.from({ length: 25 }, (_, index) => index), []);
 
@@ -28,6 +28,8 @@ const HourTable = ({ tasks, clicked, todayDateNumber, all, changeEditVisible, ch
     return () => clearInterval(intervalId);
   }, []);
 
+
+
   function convertTimeStringToDate(timeString) {
     const [hours, minutes] = timeString.split(':');
     
@@ -40,8 +42,11 @@ const HourTable = ({ tasks, clicked, todayDateNumber, all, changeEditVisible, ch
     return date;
   }
 
+  console.log(user.array[clicked-1])
+
   const renderTasks = useMemo(() => {
-    return tasks && tasks.map((task, index) => {
+    return user.array[clicked-1] && user.array[clicked-1].map((task, index) => {
+      console.log(task,index)
       const [startHour, startMinute] = task[0].split(':');
       const [endHour, endMinute] = task[1].split(':');
 
@@ -63,6 +68,8 @@ const HourTable = ({ tasks, clicked, todayDateNumber, all, changeEditVisible, ch
           onLongPress={() => {
             Vibration.vibrate(100);
             changeEditVisible()
+            setIndex(index)
+            console.log(index)
             changeEditData(
               convertTimeStringToDate(task[0]),
               convertTimeStringToDate(task[1]),
@@ -76,13 +83,13 @@ const HourTable = ({ tasks, clicked, todayDateNumber, all, changeEditVisible, ch
 							end={{x: 1, y: 1}}
 							className="w-full h-full rounded-lg justify-center items-center">
             <View className="p-2 z-10">
-            <Text className="text-white font-semibold text-lg">{task[2]}</Text>
+          <Text className="text-white font-semibold text-lg">{task[2]}{index}</Text>
           </View>
           </LinearGradient>
         </TouchableOpacity>
       );
     });
-  }, [tasks, currentLine, clicked, todayDateNumber, router, all]);
+  }, [user, currentLine, clicked, todayDateNumber, router, all]);
 
   return (
     <View className="relative flex-1 h-[75%] w-full mt-6 border border-gray-700 bg-gray-900 rounded-md overflow-hidden">
