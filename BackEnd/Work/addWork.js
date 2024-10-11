@@ -36,7 +36,7 @@ const addWork = async (req, res) => {
                 let counter = 0;
 
                 for(let i = 0; i < user.array[dayIndex].length; i++){
-                    if((startPoints > user.array[dayIndex][i][3] && startPoints >= user.array[dayIndex][i][4]) || (endPoints <= user.array[dayIndex][i][3] && endPoints < user.array[dayIndex][i][4])){
+                    if((startPoints > user.array[dayIndex][i][4] && startPoints >= user.array[dayIndex][i][5]) || (endPoints <= user.array[dayIndex][i][4] && endPoints < user.array[dayIndex][i][5])){
                         counter++;
                     }
                 }

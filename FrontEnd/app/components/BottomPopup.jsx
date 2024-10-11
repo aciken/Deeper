@@ -83,7 +83,7 @@ const BottomPopup = ({ visible, onClose, children }) => {
       backgroundColor: 'rgba(0, 0, 0, 0.4)',
     },
     modalContent: {
-      backgroundColor: '#1f2937',
+      backgroundColor: '#111827',
       borderTopLeftRadius: 20,
       borderTopRightRadius: 20,
       minHeight: SCREEN_HEIGHT * 0.75, // 75% of screen height

@@ -40,7 +40,7 @@ const editWork = async (req, res) => {
                 if(i == index){
                     counter++;       
                 }
-                if((startPoints > user.array[num][i][3] && startPoints >= user.array[num][i][4]) || (endPoints <= user.array[num][i][3] && endPoints < user.array[num][i][4])){
+                if((startPoints > user.array[num][i][4] && startPoints >= user.array[num][i][5]) || (endPoints <= user.array[num][i][4] && endPoints < user.array[num][i][5])){
 
                     counter++;
                 }

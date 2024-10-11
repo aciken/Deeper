@@ -17,7 +17,7 @@ const HourTable = ({ user, clicked, todayDateNumber, all, changeEditVisible, cha
       const hours24 = currentTime.getHours();
       const minutes = currentTime.getMinutes();
 
-      let newCurrentLine = hours24 * 20 + minutes / 3;
+      let newCurrentLine = 10 + hours24 * 20 + minutes / 3;
 
       setCurrentLine(newCurrentLine);
     };
@@ -73,7 +73,8 @@ const HourTable = ({ user, clicked, todayDateNumber, all, changeEditVisible, cha
             changeEditData(
               convertTimeStringToDate(task[0]),
               convertTimeStringToDate(task[1]),
-              task[2]
+              task[2],
+              task[3]
             )
           }}
         >

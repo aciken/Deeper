@@ -7,6 +7,7 @@ import axios from 'axios';
 import { useGlobalContext } from '../context/GlobalProvider';
 import { Ionicons } from '@expo/vector-icons';
 import icons from '../../constants/icons';
+
 const Home = () => {
 	const { setUser, user, setIsLoading } = useGlobalContext();
 	const isFocused = useIsFocused();
@@ -33,7 +34,7 @@ const Home = () => {
 		console.log('Home');
 		const email = user.email;
 
-		axios.post('https://912a-188-2-139-122.ngrok-free.app/getUser', { email })
+		axios.post('https://894b-188-2-139-122.ngrok-free.app/getUser', { email })
 			.then(res => {
 				setIsLoading(false);
 				setUser(res.data);

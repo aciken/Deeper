@@ -27,6 +27,10 @@ const UserSchema = new mongoose.Schema({
   allArray: {
     type: Array,
     default: []
+  },
+  goals: {
+    type: Array,
+    default: []
   }
 });
 

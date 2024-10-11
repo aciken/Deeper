@@ -11,7 +11,8 @@ const GetUser = require('./GetData/GetUser');
 const addWork = require('./Work/addWork');
 const editWork = require('./Work/editWork');
 const deleteWork = require('./Work/deleteWork');
-
+const addJob = require('./Jobs/addJob');
+const getGoals = require('./GetData/getGoals');
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
@@ -23,6 +24,8 @@ app.post('/getUser', GetUser)
 app.put('/addWork', addWork);
 app.put('/editWork', editWork);
 app.put('/deleteWork', deleteWork);
+app.post('/addJob', addJob);
+app.post('/getGoals', getGoals);
 
 
 

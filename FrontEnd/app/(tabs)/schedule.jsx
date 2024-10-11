@@ -11,6 +11,8 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { LinearGradient } from 'expo-linear-gradient';
 import axios from 'axios';
 import { useEffect } from 'react';
+import { Picker } from '@react-native-picker/picker';
+
 
 
 const Schedule = () => {
@@ -32,6 +34,8 @@ const Schedule = () => {
 	const [index,setIndex] = useState(null)
 
 	console.log(user.array[clicked-1])
+
+	const [showWorkPicker, setShowWorkPicker] = useState(false);
 
 
 	if (!user) {
@@ -88,11 +92,11 @@ const Schedule = () => {
 
 		
 	
-		const data  = [start,end, name]
+		const data  = [start,end, name, selectedWork]
 
 
 
-		axios.put('https://912a-188-2-139-122.ngrok-free.app/addWork', {
+		axios.put('https://894b-188-2-139-122.ngrok-free.app/addWork', {
 		  data,
 		  id: user._id,
 		  clicked,
@@ -120,7 +124,7 @@ const Schedule = () => {
 	
     const deleteFunc = () => {
 		console.log(index)
-        axios.put('https://912a-188-2-139-122.ngrok-free.app/deleteWork', {
+        axios.put('https://894b-188-2-139-122.ngrok-free.app/deleteWork', {
             id: user._id,
             index,
             clicked,
@@ -136,9 +140,9 @@ const Schedule = () => {
 
     const editFunc = (start, end, name) => {
 
-        const data  = [start,end, name]
+        const data  = [start,end, name, selectedWork]
 
-        axios.put('https://912a-188-2-139-122.ngrok-free.app/editWork', {
+        axios.put('https://894b-188-2-139-122.ngrok-free.app/editWork', {
             data,
             id: user._id,
             index,
@@ -155,10 +159,11 @@ const Schedule = () => {
         })
     }
 
-	const changeEditData = (start, end, name) => {
+	const changeEditData = (start, end, name, work) => {
 		setStartTime(start)
 		setEndTime(end)
 		setSessionName(name)
+		setSelectedWork(work)
 	}
 
 	const formatTime = (time) => {
@@ -290,6 +295,7 @@ const Schedule = () => {
 					visible={isEditVisible}
 					onClose={() => setIsEditVisible(false)}
 				>
+					<ScrollView className="flex-grow">
 					<Text className="text-3xl font-bold text-white mb-6 text-center">Edit Deep Work Session</Text>
 					<View className="mb-6">
 						<Text className="text-lg text-blue-300 mb-2">Session Name:</Text>
@@ -300,6 +306,28 @@ const Schedule = () => {
 							onChangeText={(text) => setSessionName(text)}
 							value={sessionName}
 						/>
+												<Text className="text-lg text-blue-300 mb-2">Select Work:</Text>
+							<View className="bg-gray-700 py-3 px-4 rounded-xl mb-4">
+								<TouchableOpacity onPress={() => setShowWorkPicker(true)}>
+									<Text className="text-white">{selectedWork || "Select a work"}</Text>
+								</TouchableOpacity>
+							</View>
+						{showWorkPicker && (
+							<ScrollView className="max-h-40 bg-gray-800 rounded-xl mb-4">
+								{user.goals.map((goal, index) => (
+									<TouchableOpacity
+										key={index}
+										onPress={() => {
+												setSelectedWork(goal.name);
+												setShowWorkPicker(false);
+											}}
+											className="py-2 px-4 border-b border-gray-700"
+										>
+											<Text className="text-white">{goal.name}</Text>
+										</TouchableOpacity>
+									))}
+								</ScrollView>
+							)}
 						<Text className="text-lg text-blue-300 mb-2">Duration:</Text>
 						<View className="flex-row justify-between items-center mb-4">
 							<TouchableOpacity
@@ -388,6 +416,7 @@ const Schedule = () => {
 							</LinearGradient>
 						</TouchableOpacity>	
 					</View>
+					</ScrollView>
 				</BottomPopup>
 
 				<BottomPopup
@@ -412,11 +441,11 @@ const Schedule = () => {
 									const isSelected = selectedDates.some(selectedDate => 
 										selectedDate.toDateString() === date.toDateString()
 									);
-									if(selectedDates.length == 0){
+									if(selectedDates.length === 0){
 										const newDate = new Date();
-										newDate.setDate(newDate.getDate(), clicked)
-										console.log(newDate)
-										setSelectedDates([...selectedDates, newDate])
+										newDate.setDate(clicked);
+										console.log(newDate);
+										setSelectedDates([newDate]);
 									}
 									return (
 										<TouchableOpacity
@@ -465,14 +494,27 @@ const Schedule = () => {
 								value={sessionName}
 							/>
 							<Text className="text-lg text-blue-300 mb-2">Select Work:</Text>
-							<TouchableOpacity
-								onPress={() => {/* TODO: Implement work selection */}}
-								className="bg-gray-700 py-3 px-4 rounded-xl mb-4"
-							>
-								<Text className="text-white">
-									{selectedWork ? selectedWork : "Select a work"}
-								</Text>
-							</TouchableOpacity>
+							<View className="bg-gray-700 py-3 px-4 rounded-xl mb-4">
+								<TouchableOpacity onPress={() => setShowWorkPicker(true)}>
+									<Text className="text-white">{selectedWork || "Select a work"}</Text>
+								</TouchableOpacity>
+							</View>
+							{showWorkPicker && (
+								<ScrollView className="max-h-40 bg-gray-800 rounded-xl mb-4">
+									{user.goals.map((goal, index) => (
+										<TouchableOpacity
+											key={index}
+											onPress={() => {
+												setSelectedWork(goal.name);
+												setShowWorkPicker(false);
+											}}
+											className="py-2 px-4 border-b border-gray-700"
+										>
+											<Text className="text-white">{goal.name}</Text>
+										</TouchableOpacity>
+									))}
+								</ScrollView>
+							)}
 							<Text className="text-lg text-blue-300 mb-2">Duration:</Text>
 							<View className="flex-row justify-between items-center mb-4 h-10">
 								<TouchableOpacity
@@ -588,7 +630,8 @@ const Schedule = () => {
 											changeEditData(
 												convertTimeStringToDate(task[0]),
 												convertTimeStringToDate(task[1]),
-												task[2]
+												task[2],
+												task[3]
 											)
 											setTimeout(() => {
 												setIsEditVisible(true);
