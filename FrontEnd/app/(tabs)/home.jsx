@@ -7,6 +7,9 @@ import axios from 'axios';
 import { useGlobalContext } from '../context/GlobalProvider';
 import { Ionicons } from '@expo/vector-icons';
 import icons from '../../constants/icons';
+import iceberg from '../../assets/images/iceberg.png';
+import { BlurView } from 'expo-blur';
+import MaskedView from '@react-native-masked-view/masked-view';
 
 const Home = () => {
 	const { setUser, user, setIsLoading } = useGlobalContext();
@@ -30,11 +33,17 @@ const Home = () => {
 	// Use state for animation instead of Animated.Value
 	const [barHeights, setBarHeights] = useState(weekData.map(() => 0));
 
+	// Add this new constant for level data
+	const currentLevel = {
+		name: 'Professional',
+		progress: 80, // percentage of progress (0-100)
+	};
+
 	useEffect(() => {
 		console.log('Home');
 		const email = user.email;
 
-		axios.post('https://894b-188-2-139-122.ngrok-free.app/getUser', { email })
+		axios.post('https://70ae-188-2-139-122.ngrok-free.app/getUser', { email })
 			.then(res => {
 				setIsLoading(false);
 				setUser(res.data);
@@ -85,25 +94,91 @@ const Home = () => {
 					<Text className="text-white text-4xl font-bold">deeper</Text>
 				</View>
 
+				{/* New Iceberg Level Design Section */}
+				<View className="mx-4 mb-8 bg-gray-900 p-6 rounded-2xl">
+					<Text className="text-white text-xl font-bold mb-4">Knowledge Depth</Text>
+					<TouchableOpacity className="items-center">
+						<MaskedView
+							style={{ width: 200, height: 200, zIndex: 2, opacity: 0.9 }}
+							maskElement={
+								<View style={{ backgroundColor: 'transparent' }}>
+									<Image
+										source={iceberg}
+										style={{ width: 200, height: 200 }}
+										resizeMode="contain"
+									/>
+								</View>
+							}
+						>
+
+								<View style={{ flex: 1 }}>
+										<LinearGradient
+											colors={['#93c5fd', '#030712']}
+										style={{
+											position: 'absolute',
+											bottom: 0,
+											left: 0,
+											right: 0,
+											height: `${100 - currentLevel.progress}%`,
+										}}
+										start={{ x: 0, y: 0 }}
+										end={{ x: 0, y: 1 }}
+									/>
+									<View style={{
+										position: 'absolute',
+										top: 0,
+										left: 0,
+										right: 0,
+										bottom: `${100 - currentLevel.progress}%`,
+										backgroundColor: 'transparent',
+									}} />
+								</View>
+								<View style={{ 
+									position: 'absolute', 
+									top: 0, 
+									left: 0, 
+									right: 0, 
+									bottom: 0, 
+									justifyContent: 'center', 
+									alignItems: 'center' 
+								}}>
+									<Text className="text-white text-lg font-bold z-10">{currentLevel.name}</Text>
+								</View>
+
+						</MaskedView>
+						<View style={{ width: 200, height: 200, position: 'absolute' }}>	
+							<Image
+								source={iceberg}
+								style={{ width: 200, height: 200, zIndex: 1 }}
+								resizeMode="contain"
+							/>
+						</View>
+
+					</TouchableOpacity>
+						<Text className="text-gray-400 text-sm mt-2 text-center">
+							Dive deeper to unlock new levels of understanding
+						</Text>
+				</View>
+
 				{/* Quick Actions */}
 				<View className="flex-row justify-around mb-6">
 					<TouchableOpacity className="items-center">
 						<View className="bg-gray-800 p-3 rounded-full border border-gray-700">
 							<Image source={icons.plusGrad} className="w-8 h-8"  />
 						</View>
-						<Text className="text-white mt-1">New Task</Text>
+						<Text className="text-white mt-1">Start Session</Text>
 					</TouchableOpacity>
 					<TouchableOpacity className="items-center">
 						<View className="bg-gray-800 p-3 rounded-full border border-gray-700">
 							<Image source={icons.taskGrad} className="w-8 h-8"  />
 						</View>
-						<Text className="text-white mt-1">Analytics</Text>
+						<Text className="text-white mt-1">Challenge</Text>
 					</TouchableOpacity>
 					<TouchableOpacity className="items-center">
 						<View className="bg-gray-800 p-3 rounded-full border border-gray-700">
 							<Image source={icons.clockGrad} className="w-8 h-8"  />
 						</View>
-						<Text className="text-white mt-1">Settings</Text>
+						<Text className="text-white mt-1">Schedule</Text>
 					</TouchableOpacity>
 				</View>
 

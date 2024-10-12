@@ -6,11 +6,12 @@ import BottomPopup from '../components/BottomPopup';
 import icons from '../../constants/icons';
 import axios from 'axios';
 import { useGlobalContext } from '../context/GlobalProvider';
+import { useRouter } from 'expo-router';
 
 const Tasks = () => {
 
   const { user } = useGlobalContext();
-
+  const router = useRouter();
   const [goals, setGoals] = useState([]);
   // const [goals, setGoals] = useState([
   //   { id: 1, name: 'Complete project proposal' },
@@ -19,7 +20,8 @@ const Tasks = () => {
   // ]);
 
   useEffect(() => {
-    axios.post('https://894b-188-2-139-122.ngrok-free.app/getGoals', { id: user._id })
+    console.log('Fetching goals...');
+    axios.post('https://70ae-188-2-139-122.ngrok-free.app/getGoals', { id: user._id })
     .then(res => {
       setGoals(res.data);
     })
@@ -34,7 +36,9 @@ const Tasks = () => {
   const [newWorkTasks, setNewWorkTasks] = useState('');
   const [isJobVisible, setIsJobVisible] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
-
+  const [nextTask, setNextTask] = useState([]);
+  const [nextTaskIndex, setNextTaskIndex] = useState(0);
+  const [dayToday, setDayToday] = useState(0);
   const jobSelected = (job) => {
     setSelectedJob(job);
     setIsJobVisible(true);
@@ -45,7 +49,7 @@ const Tasks = () => {
   };
 
   const handleAddWork = () => {
-    axios.post('https://894b-188-2-139-122.ngrok-free.app/addJob', { id: user._id, job: { name: newWorkName, color: newWorkColor, time: expectedDailyHours, count: 0 } })
+    axios.post('https://70ae-188-2-139-122.ngrok-free.app/addJob', { id: user._id, job: { name: newWorkName, color: newWorkColor, time: expectedDailyHours, count: 0 } })
     .then(res => {
       setGoals(res.data);
       setIsTaskListVisible(false);
@@ -59,25 +63,66 @@ const Tasks = () => {
     })
   };
 
-  const handleSuggestion = () => {
-    // Here you would typically fetch a suggestion from an API
-    console.log('Getting suggestion...');
-  };
+  useEffect(() => {
+    console.log('Finding next task...');
+    const getCurrentDayOfMonth = () => {
+      const today = new Date();
+      return today.getDate();
+    };
+
+    const currentDay = getCurrentDayOfMonth();
+    setDayToday(currentDay);
+    let smallestFifthElement = null;
+    let smallestFifthElementIndex = -1;
+    let dayToCheck = currentDay - 1;
+
+    while (!smallestFifthElement && dayToCheck < user.array.length) {
+      if (user.array[dayToCheck] && user.array[dayToCheck].length > 0) {
+        user.array[dayToCheck].forEach((task, index) => {
+          if (!smallestFifthElement || task[5] < smallestFifthElement[5]) {
+            smallestFifthElement = task;
+            smallestFifthElementIndex = index;
+          }
+        });
+      }
+      dayToCheck++;
+    }
+
+    if (smallestFifthElement) {
+      console.log('Task with smallest fifth element:', smallestFifthElement);
+      console.log('Index of task:', smallestFifthElementIndex);
+      setNextTask(smallestFifthElement);
+      setNextTaskIndex(smallestFifthElementIndex);
+    } else {
+      console.log('No tasks found in any day');
+    }
+  }, [user]);
+
+  
+
+
+
+  const openNextTask = () => {
+    router.push({pathname: 'log/timer', params: {clicked: dayToday, index: nextTaskIndex, task: nextTask, currentLine: 0, all: []}})
+  }
   
   const [expectedDailyHours, setExpectedDailyHours] = useState(0);
 
   return (
     <SafeAreaView className="h-full bg-gray-950">
       <ScrollView>
-        <View className="w-full justify-start items-center px-4 my-6">
+
           {/* Upcoming Work Section */}
-          <View className="w-full mb-8">
-            <Text className="text-white text-2xl font-bold mb-4">Upcoming Work</Text>
-            <View className="bg-gray-800 p-4 rounded-lg">
-              <Text className="text-white text-lg">Team meeting at 2 PM</Text>
-              <Text className="text-gray-400 mt-2">Discuss project milestones</Text>
+
+            <View className="w-full justify-start items-center px-4 my-6">
+              <View className="w-full mb-8">
+             <Text className="text-white text-2xl font-bold mb-4">Upcoming Work Session</Text>
+             <TouchableOpacity onPress={openNextTask} className="bg-gray-800 p-4 rounded-lg">
+                <Text className="text-white text-lg">{nextTask[2]} at {nextTask[0]}</Text>
+                <Text className="text-gray-400 mt-2">{nextTask[3]}</Text>
+              </TouchableOpacity>
             </View>
-          </View>
+
 
           {/* Add Goal Button */}
           <TouchableOpacity 
@@ -167,13 +212,51 @@ const Tasks = () => {
             visible={isJobVisible}
             onClose={() => setIsJobVisible(false)}
           >
-            <View className="p-2 bg-gray-900 rounded-t-3xl">
-              <Text className="text-white text-2xl font-bold mb-6">
+            <View className="p-6 bg-gray-900 rounded-t-3xl">
+              <Text className="text-white text-3xl font-bold mb-8 text-center">
                 {selectedJob ? selectedJob.name : 'Job Details'}
               </Text>
-              <Text className="text-white text-lg mb-6">
-                time worked: {selectedJob ? selectedJob.count : '0'}
-              </Text>
+              
+              <View className="flex-row justify-between mb-8">
+                <View className="items-center">
+                  <Text className="text-gray-400 text-lg mb-2">Time Worked</Text>
+                  <Text className="text-white text-4xl font-bold">
+                    {selectedJob ? selectedJob.count : '0'}
+                  </Text>
+                  <Text className="text-gray-400 text-lg">hours</Text>
+                </View>
+                <View className="items-center">
+                  <Text className="text-gray-400 text-lg mb-2">Daily Goal</Text>
+                  <Text className="text-white text-4xl font-bold">
+                    {selectedJob ? selectedJob.time : 'N/A'}
+                  </Text>
+                  <Text className="text-gray-400 text-lg">hours</Text>
+                </View>
+              </View>
+              
+              <View className="bg-gray-800 p-5 rounded-2xl mb-8">
+                <View className="flex-row justify-between mb-4">
+                  <View>
+                    <Text className="text-gray-400 text-lg mb-1">Start Date</Text>
+                    <Text className="text-white text-xl font-semibold">
+                      {selectedJob ? selectedJob.startDate : 'N/A'}
+                    </Text>
+                  </View>
+                  <View>
+                    <Text className="text-gray-400 text-lg mb-1">Last Worked</Text>
+                    <Text className="text-white text-xl font-semibold">
+                      {selectedJob ? selectedJob.lastWorked : 'N/A'}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+              
+              <TouchableOpacity 
+                className="bg-blue-600 p-4 rounded-xl"
+                onPress={() => {/* Handle edit job */}}
+              >
+                <Text className="text-white text-center font-bold text-lg">Edit Job</Text>
+              </TouchableOpacity>
             </View>
           </BottomPopup>
         </View>

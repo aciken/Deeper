@@ -124,7 +124,7 @@ const Schedule = () => {
 	
     const deleteFunc = () => {
 		console.log(index)
-        axios.put('https://894b-188-2-139-122.ngrok-free.app/deleteWork', {
+        axios.put('https://70ae-188-2-139-122.ngrok-free.app/deleteWork', {
             id: user._id,
             index,
             clicked,
@@ -142,7 +142,7 @@ const Schedule = () => {
 
         const data  = [start,end, name, selectedWork]
 
-        axios.put('https://894b-188-2-139-122.ngrok-free.app/editWork', {
+        axios.put('https://70ae-188-2-139-122.ngrok-free.app/editWork', {
             data,
             id: user._id,
             index,
@@ -252,7 +252,7 @@ const Schedule = () => {
 				</View>
 
 				<View className="flex-row justify-center ">
-					<TouchableOpacity onPress={() => setIsPopupVisible(true)}  className="w-28 h-16 rounded-2xl shadow-lg justify-center items-center m-1 bg-gray-800">
+					<TouchableOpacity onPress={() => setIsPopupVisible(true)}  className="w-28 h-16 rounded-2xl shadow-lg justify-center items-center m-1 bg-gray-800 border border-gray-700">
 						<View className="items-center">
 							<Image source={icons.plusBlue} className="w-6 h-6 tint-white mb-1" />
 							<Text className="text-white text-xs font-semibold">Add Task</Text>
@@ -262,7 +262,7 @@ const Schedule = () => {
 					<TouchableOpacity 	
 						onPress={() => {if(!multiSelect) setIsTaskListVisible(!isTaskListVisible)}}
 						disabled={multiSelect ? true : false}
-						className={`w-28 h-16 rounded-2xl shadow-lg justify-center items-center m-1 ${multiSelect ? 'bg-gray-900 opacity-60' : 'bg-gray-800'}`}
+						className={`w-28 h-16 rounded-2xl shadow-lg justify-center items-center m-1 ${multiSelect ? 'bg-gray-900 opacity-60' : 'bg-gray-800 border border-gray-700'}`}
 					>
 						<View className="items-center">
 							<Image source={icons.listBlue} className="w-6 h-6 tint-white mb-1" />
@@ -277,7 +277,7 @@ const Schedule = () => {
 								setSelectedDates([]);
 							}
 						}}
-						className={`w-28 h-16 rounded-2xl shadow-lg justify-center items-center m-1 ${multiSelect ? 'bg-sky-500' : 'bg-gray-800'}`}
+						className={`w-28 h-16 rounded-2xl shadow-lg justify-center items-center m-1 ${multiSelect ? 'bg-sky-500' : 'bg-gray-800 border border-gray-700'}`}
 					>
 						<View className="items-center">
 							<Image 
