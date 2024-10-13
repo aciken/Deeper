@@ -96,7 +96,7 @@ const Schedule = () => {
 
 
 
-		axios.put('https://894b-188-2-139-122.ngrok-free.app/addWork', {
+		axios.put('https://c3b8-188-2-139-122.ngrok-free.app/addWork', {
 		  data,
 		  id: user._id,
 		  clicked,
@@ -124,7 +124,7 @@ const Schedule = () => {
 	
     const deleteFunc = () => {
 		console.log(index)
-        axios.put('https://70ae-188-2-139-122.ngrok-free.app/deleteWork', {
+        axios.put('https://c3b8-188-2-139-122.ngrok-free.app/deleteWork', {
             id: user._id,
             index,
             clicked,
@@ -142,7 +142,7 @@ const Schedule = () => {
 
         const data  = [start,end, name, selectedWork]
 
-        axios.put('https://70ae-188-2-139-122.ngrok-free.app/editWork', {
+        axios.put('https://c3b8-188-2-139-122.ngrok-free.app/editWork', {
             data,
             id: user._id,
             index,

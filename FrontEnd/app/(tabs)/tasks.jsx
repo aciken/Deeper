@@ -21,7 +21,7 @@ const Tasks = () => {
 
   useEffect(() => {
     console.log('Fetching goals...');
-    axios.post('https://70ae-188-2-139-122.ngrok-free.app/getGoals', { id: user._id })
+    axios.post('https://c3b8-188-2-139-122.ngrok-free.app/getGoals', { id: user._id })
     .then(res => {
       setGoals(res.data);
     })
@@ -49,7 +49,7 @@ const Tasks = () => {
   };
 
   const handleAddWork = () => {
-    axios.post('https://70ae-188-2-139-122.ngrok-free.app/addJob', { id: user._id, job: { name: newWorkName, color: newWorkColor, time: expectedDailyHours, count: 0 } })
+    axios.post('https://c3b8-188-2-139-122.ngrok-free.app/addJob', { id: user._id, job: { name: newWorkName, color: newWorkColor, time: expectedDailyHours, count: 0 } })
     .then(res => {
       setGoals(res.data);
       setIsTaskListVisible(false);

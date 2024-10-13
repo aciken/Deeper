@@ -8,7 +8,7 @@ import { useGlobalContext } from '../context/GlobalProvider';
 import { Ionicons } from '@expo/vector-icons';
 import icons from '../../constants/icons';
 import iceberg from '../../assets/images/iceberg.png';
-import { BlurView } from 'expo-blur';
+import BottomPopup from '../components/BottomPopup';
 import MaskedView from '@react-native-masked-view/masked-view';
 
 const Home = () => {
@@ -16,6 +16,8 @@ const Home = () => {
 	const isFocused = useIsFocused();
 	const screenWidth = Dimensions.get('window').width;
 	const barWidth = (screenWidth - 80) / 7; // 80 is total padding
+
+	const [isChallengePopupVisible, setIsChallengePopupVisible] = useState(false);
 
 	// Sample data for the last week (hours worked each day)
 	const weekData = [
@@ -35,15 +37,15 @@ const Home = () => {
 
 	// Add this new constant for level data
 	const currentLevel = {
-		name: 'Professional',
-		progress: 80, // percentage of progress (0-100)
+		name: 'Intermediate',
+		progress: 40, // percentage of progress (0-100)
 	};
 
 	useEffect(() => {
 		console.log('Home');
 		const email = user.email;
 
-		axios.post('https://70ae-188-2-139-122.ngrok-free.app/getUser', { email })
+		axios.post('https://c3b8-188-2-139-122.ngrok-free.app/getUser', { email })
 			.then(res => {
 				setIsLoading(false);
 				setUser(res.data);
@@ -97,7 +99,7 @@ const Home = () => {
 				{/* New Iceberg Level Design Section */}
 				<View className="mx-4 mb-8 bg-gray-900 p-6 rounded-2xl">
 					<Text className="text-white text-xl font-bold mb-4">Knowledge Depth</Text>
-					<TouchableOpacity className="items-center">
+					<TouchableOpacity onPress={() => setIsChallengePopupVisible(true)} className="items-center">
 						<MaskedView
 							style={{ width: 200, height: 200, zIndex: 2, opacity: 0.9 }}
 							maskElement={
@@ -161,7 +163,7 @@ const Home = () => {
 				</View>
 
 				{/* Quick Actions */}
-				<View className="flex-row justify-around mb-6">
+				{/* <View className="flex-row justify-around mb-6">
 					<TouchableOpacity className="items-center">
 						<View className="bg-gray-800 p-3 rounded-full border border-gray-700">
 							<Image source={icons.plusGrad} className="w-8 h-8"  />
@@ -180,7 +182,7 @@ const Home = () => {
 						</View>
 						<Text className="text-white mt-1">Schedule</Text>
 					</TouchableOpacity>
-				</View>
+				</View> */}
 
 				{/* Today's Focus */}
 				<View className="mx-4 mb-6 p-4 bg-gray-800 rounded-lg">
@@ -214,6 +216,12 @@ const Home = () => {
 						))}
 					</View>
 				</View>
+				<BottomPopup
+					visible={isChallengePopupVisible}
+					onClose={() => setIsChallengePopupVisible(false)}
+				>
+					<Text className="text-3xl font-bold text-white mb-6 text-center">Challenges</Text>
+				</BottomPopup>
 			</ScrollView>
 		</SafeAreaView>
 	);
