@@ -37,15 +37,15 @@ const Home = () => {
 
 	// Add this new constant for level data
 	const currentLevel = {
-		name: 'Intermediate',
-		progress: 40, // percentage of progress (0-100)
+		name: 'Pro',
+		progress: 85, // percentage of progress (0-100)
 	};
 
 	useEffect(() => {
 		console.log('Home');
 		const email = user.email;
 
-		axios.post('https://c3b8-188-2-139-122.ngrok-free.app/getUser', { email })
+		axios.post('https://c6b9-188-2-139-122.ngrok-free.app/getUser', { email })
 			.then(res => {
 				setIsLoading(false);
 				setUser(res.data);
@@ -101,7 +101,7 @@ const Home = () => {
 					<Text className="text-white text-xl font-bold mb-4">Knowledge Depth</Text>
 					<TouchableOpacity onPress={() => setIsChallengePopupVisible(true)} className="items-center">
 						<MaskedView
-							style={{ width: 200, height: 200, zIndex: 2, opacity: 0.9 }}
+							style={{ width: 200, height: 200, zIndex: 2, opacity: 0.97 }}
 							maskElement={
 								<View style={{ backgroundColor: 'transparent' }}>
 									<Image

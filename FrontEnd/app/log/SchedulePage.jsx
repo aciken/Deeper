@@ -11,13 +11,14 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { LinearGradient } from 'expo-linear-gradient';
 import axios from 'axios';
 import { useEffect } from 'react';
-import { Picker } from '@react-native-picker/picker';
+import { useNavigation } from '@react-navigation/native';
 
 
 
-const Schedule = () => {
+const SchedulePage = () => {
 	const { user, setUser, setSelected } = useGlobalContext();
 	const router = useRouter();
+	const navigation = useNavigation();
 	const todayDateNumber = new Date().getDate();
 	const [clicked, setClicked] = useState(todayDateNumber);
 	const [all, setAll] = useState(false);
@@ -96,7 +97,7 @@ const Schedule = () => {
 
 
 
-		axios.put('https://c3b8-188-2-139-122.ngrok-free.app/addWork', {
+		axios.put('https://c6b9-188-2-139-122.ngrok-free.app/addWork', {
 		  data,
 		  id: user._id,
 		  clicked,
@@ -124,7 +125,7 @@ const Schedule = () => {
 	
     const deleteFunc = () => {
 		console.log(index)
-        axios.put('https://c3b8-188-2-139-122.ngrok-free.app/deleteWork', {
+        axios.put('https://c6b9-188-2-139-122.ngrok-free.app/deleteWork', {
             id: user._id,
             index,
             clicked,
@@ -142,7 +143,7 @@ const Schedule = () => {
 
         const data  = [start,end, name, selectedWork]
 
-        axios.put('https://c3b8-188-2-139-122.ngrok-free.app/editWork', {
+        axios.put('https://c6b9-188-2-139-122.ngrok-free.app/editWork', {
             data,
             id: user._id,
             index,
@@ -205,6 +206,20 @@ const Schedule = () => {
 	return (
 		<SafeAreaView className="flex-1 bg-gray-950">
 			<View className="flex-1 p-4">
+				<View className="flex-row items-center justify-between mb-4 underline ">
+					<TouchableOpacity 
+						onPress={() => navigation.goBack()}
+						className="flex-row items-center"
+					>
+						<Image 
+							source={icons.backIcon} 
+							className="w-6 h-6 tint-white ml-1"
+						/>
+						<Text className="text-white text-lg font-medium ml-2">Back</Text>
+					</TouchableOpacity>
+
+				</View>
+
 				<ScrollView
 					horizontal
 					showsHorizontalScrollIndicator={false}
@@ -674,4 +689,4 @@ const Schedule = () => {
 	);
 };
 
-export default Schedule;
+export default SchedulePage;

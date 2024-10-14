@@ -19,7 +19,9 @@ import trash from "../assets/icons/trash.png";
 import clockGrad from "../assets/icons/clockGrad.png";
 import taskGrad from "../assets/icons/taskGrad.png";
 import plusGrad from "../assets/icons/plusGrad.png";
-
+import backIcon from "../assets/icons/backIcon.png";
+import presets from "../assets/icons/presets.png";
+import work from "../assets/icons/work.png";
 
 export default {
   play,
@@ -43,4 +45,7 @@ export default {
   clockGrad,
   taskGrad,
   plusGrad,
+  backIcon,
+  presets,
+  work,
 };

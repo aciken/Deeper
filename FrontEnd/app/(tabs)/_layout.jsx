@@ -108,7 +108,7 @@ const TabsLayout = () => {
           )
         }}
       />
-      <Tabs.Screen name="Schedule"
+      {/* <Tabs.Screen name="Schedule"
         options={{
           title: 'Schedule',
           headerShown: false,
@@ -116,7 +116,7 @@ const TabsLayout = () => {
             <TabIcon icon={icons.bookmark} color={color} focused={focused} name='Schedule'/>
           )
         }}
-      />
+      /> */}
       <Tabs.Screen name="Profile"
         options={{
           title: 'Profile',
