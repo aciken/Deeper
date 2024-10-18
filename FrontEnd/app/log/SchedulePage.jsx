@@ -97,7 +97,7 @@ const SchedulePage = () => {
 
 
 
-		axios.put('https://c6b9-188-2-139-122.ngrok-free.app/addWork', {
+		axios.put('https://505c-188-2-139-122.ngrok-free.app/addWork', {
 		  data,
 		  id: user._id,
 		  clicked,
@@ -125,7 +125,7 @@ const SchedulePage = () => {
 	
     const deleteFunc = () => {
 		console.log(index)
-        axios.put('https://c6b9-188-2-139-122.ngrok-free.app/deleteWork', {
+        axios.put('https://505c-188-2-139-122.ngrok-free.app/deleteWork', {
             id: user._id,
             index,
             clicked,
@@ -143,7 +143,7 @@ const SchedulePage = () => {
 
         const data  = [start,end, name, selectedWork]
 
-        axios.put('https://c6b9-188-2-139-122.ngrok-free.app/editWork', {
+        axios.put('https://505c-188-2-139-122.ngrok-free.app/editWork', {
             data,
             id: user._id,
             index,

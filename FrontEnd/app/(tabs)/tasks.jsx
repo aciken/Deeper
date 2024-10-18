@@ -25,7 +25,7 @@ const Tasks = () => {
 
   const fetchGoals = async () => {
     try {
-      const response = await axios.post('https://c6b9-188-2-139-122.ngrok-free.app/getGoals', { id: user._id });
+      const response = await axios.post('https://505c-188-2-139-122.ngrok-free.app/getGoals', { id: user._id });
       setGoals(response.data);
     } catch (error) {
       console.error('Error fetching goals:', error);
@@ -34,7 +34,7 @@ const Tasks = () => {
 
   const fetchPresets = async () => {
     try {
-      const response = await axios.post('https://c6b9-188-2-139-122.ngrok-free.app/getPresets', { id: user._id });
+      const response = await axios.post('https://505c-188-2-139-122.ngrok-free.app/getPresets', { id: user._id });
       setPresets(response.data);
     } catch (error) {
       console.error('Error fetching presets:', error);
@@ -51,8 +51,8 @@ const Tasks = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-950">
-      <ScrollView className="flex-1 px-4">
+    <SafeAreaView className="flex-1 h-full bg-gray-950">
+      <ScrollView className="flex-1 h-full px-4">
         <View className="my-6">
           <TouchableOpacity 
             onPress={() => router.push({pathname: 'log/SchedulePage'})}  
