@@ -22,6 +22,10 @@ import plusGrad from "../assets/icons/plusGrad.png";
 import backIcon from "../assets/icons/backIcon.png";
 import presets from "../assets/icons/presets.png";
 import work from "../assets/icons/work.png";
+import clockGray from "../assets/icons/clock-gray.png";
+import plusGray from "../assets/icons/plus-gray.png";
+import workGray from "../assets/icons/workGray.png";
+import chevronRight from "../assets/icons/chevron-right-gray.png";
 
 export default {
   play,
@@ -48,4 +52,8 @@ export default {
   backIcon,
   presets,
   work,
+  clockGray,
+  plusGray,
+  workGray,
+  chevronRight,
 };

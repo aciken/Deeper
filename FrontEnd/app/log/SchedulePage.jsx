@@ -12,8 +12,45 @@ import { LinearGradient } from 'expo-linear-gradient';
 import axios from 'axios';
 import { useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
+import MaskedView from '@react-native-masked-view/masked-view';
 
 
+const DownButton = ({buttonText, icon, onPress}) => {
+	return(
+		<TouchableOpacity onPress={onPress}  className="w-28 h-16 rounded-2xl shadow-lg justify-center items-center m-1 bg-zinc-900 border border-zinc-700">
+			<View className="items-center">
+			<MaskedView
+				maskElement={
+					<Image source={icon} className="w-6 h-6 tint-white mb-1" />
+				}
+				>
+				<LinearGradient
+					colors={['#d4d4d8', '#52525b']}
+					start={{x: 0, y: 0}}
+					end={{x: 0, y: 1}}
+				>
+					<Image source={icon} className="w-6 h-6 tint-white mb-1 opacity-0" />
+				</LinearGradient>
+			</MaskedView>
+
+			<MaskedView
+				maskElement={
+					<Text className="text-white text-xs font-semibold">{buttonText}</Text>
+				}
+				>
+				<LinearGradient
+					colors={['#d4d4d8', '#52525b']}
+					start={{x: 0, y: 0}}
+					end={{x: 0, y: 1}}
+				>
+				<Text className="text-white text-xs font-semibold opacity-0">{buttonText}</Text>
+				</LinearGradient>
+			</MaskedView>
+
+			</View>
+		</TouchableOpacity>
+	)
+}
 
 const SchedulePage = () => {
 	const { user, setUser, setSelected } = useGlobalContext();
@@ -97,7 +134,7 @@ const SchedulePage = () => {
 
 
 
-		axios.put('https://505c-188-2-139-122.ngrok-free.app/addWork', {
+		axios.put('https://de30-188-2-139-122.ngrok-free.app/addWork', {
 		  data,
 		  id: user._id,
 		  clicked,
@@ -125,7 +162,7 @@ const SchedulePage = () => {
 	
     const deleteFunc = () => {
 		console.log(index)
-        axios.put('https://505c-188-2-139-122.ngrok-free.app/deleteWork', {
+        axios.put('https://de30-188-2-139-122.ngrok-free.app/deleteWork', {
             id: user._id,
             index,
             clicked,
@@ -143,7 +180,7 @@ const SchedulePage = () => {
 
         const data  = [start,end, name, selectedWork]
 
-        axios.put('https://505c-188-2-139-122.ngrok-free.app/editWork', {
+        axios.put('https://de30-188-2-139-122.ngrok-free.app/editWork', {
             data,
             id: user._id,
             index,
@@ -204,7 +241,7 @@ const SchedulePage = () => {
 	  
 
 	return (
-		<SafeAreaView className="flex-1 bg-gray-950">
+		<SafeAreaView className="flex-1 bg-zinc-950" edges={['top']}>
 			<View className="flex-1 p-4">
 				<View className="flex-row items-center justify-between mb-4 underline ">
 					<TouchableOpacity 
@@ -225,33 +262,45 @@ const SchedulePage = () => {
 					showsHorizontalScrollIndicator={false}
 					className=""
 				>
-					{user.array && user.array.map((_, index) => {
-						if (index + 1 > todayDateNumber - 1 && index < todayDateNumber + 6) {
+					{user.array && user.array.map((_, index) =>{
+						if (index + 1 > todayDateNumber - 1 && index < todayDateNumber + 6){
 							const currentDate = index + 1;
-							return (
+							return(
 								<TouchableOpacity
 									key={currentDate}
 									onPress={() => handleDateClick(currentDate)}
-									className={`w-12 h-16 justify-center items-center rounded-xl mr-2 ${
-										(multiSelect ? selectedDates.includes(currentDate) : currentDate === clicked)
-											? 'bg-sky-500'
-											: 'bg-gray-800'
-									} ${multiSelect ? 'border border-gray-300' : ''}`}
-								>
-									<Text className={`text-xs mb-1 ${
-										(multiSelect ? selectedDates.includes(currentDate) : currentDate === clicked)
-											? 'text-gray-100'
-											: 'text-gray-400'
-									}`}>{getDayName(currentDate)}</Text>
-									<Text className="text-gray-100 text-lg font-bold">{currentDate}</Text>
-								</TouchableOpacity>
-							);
+									className={`w-12 h-16 justify-center items-center rounded-xl mr-2`}
+									>
+										{currentDate === clicked ?
+										<LinearGradient
+											colors={['#0EA5E9', '#60A5FA']}
+											start={{x: 0, y: 0}}
+											end={{x: 0, y: 1}}
+											className="w-full h-full rounded-xl justify-center items-center"
+										>
+											<Text className="text-white text-xs mb-1">{getDayName(currentDate)}</Text>
+											<Text className="text-white text-lg font-bold">{currentDate}</Text>
+										</LinearGradient>
+										:
+										<LinearGradient
+											colors={['#18181B', '#27272A']}
+											start={{x: 0, y: 0}}
+											end={{x: 0, y: 1}}
+											className="w-full h-full rounded-xl justify-center items-center"
+										>
+											<Text className="text-gray-400 text-xs mb-1">{getDayName(currentDate)}</Text>
+											<Text className="text-gray-400 text-lg font-bold">{currentDate}</Text>
+										</LinearGradient>
+										}
+									</TouchableOpacity>
+									
+							)
 						}
-						return null;
 					})}
+
 				</ScrollView>
 
-				<View className="h-[73%]"> 
+				<View className="h-[70%]"> 
 					<HourTable
 						user={user}
 						clicked={clicked}
@@ -266,44 +315,10 @@ const SchedulePage = () => {
 				<View className="flex-row justify-center items-center mt-4">
 				</View>
 
-				<View className="flex-row justify-center ">
-					<TouchableOpacity onPress={() => setIsPopupVisible(true)}  className="w-28 h-16 rounded-2xl shadow-lg justify-center items-center m-1 bg-gray-800 border border-gray-700">
-						<View className="items-center">
-							<Image source={icons.plusBlue} className="w-6 h-6 tint-white mb-1" />
-							<Text className="text-white text-xs font-semibold">Add Task</Text>
-						</View>
-					</TouchableOpacity>
-
-					<TouchableOpacity 	
-						onPress={() => {if(!multiSelect) setIsTaskListVisible(!isTaskListVisible)}}
-						disabled={multiSelect ? true : false}
-						className={`w-28 h-16 rounded-2xl shadow-lg justify-center items-center m-1 ${multiSelect ? 'bg-gray-900 opacity-60' : 'bg-gray-800 border border-gray-700'}`}
-					>
-						<View className="items-center">
-							<Image source={icons.listBlue} className="w-6 h-6 tint-white mb-1" />
-							<Text className="text-white text-xs font-semibold">Task List</Text>
-						</View>
-					</TouchableOpacity>
-
-					<TouchableOpacity 	
-						onPress={() => {
-							setMultiSelect(!multiSelect);
-							if (!multiSelect) {
-								setSelectedDates([]);
-							}
-						}}
-						className={`w-28 h-16 rounded-2xl shadow-lg justify-center items-center m-1 ${multiSelect ? 'bg-sky-500' : 'bg-gray-800 border border-gray-700'}`}
-					>
-						<View className="items-center">
-							<Image 
-								source={icons.calendar} 
-								className={`w-6 h-6 ${multiSelect ? 'tint-white' : 'tint-white'} mb-1`}
-							/>
-							<Text className="text-white text-xs font-semibold">
-								{multiSelect ? 'Multi On' : 'Multi Off'}
-							</Text>
-						</View>
-					</TouchableOpacity>
+				<View className="flex-row justify-center pb-4 ">
+						<DownButton buttonText="Add Task" icon={icons.plusGray} onPress={() => setIsPopupVisible(true)} />
+						<DownButton buttonText="Task List" icon={icons.listBlue} onPress={() => setIsTaskListVisible(!isTaskListVisible)} />
+						<DownButton buttonText="Presets" icon={icons.presets} onPress={() => {}} />
 				</View>
 
 				<BottomPopup

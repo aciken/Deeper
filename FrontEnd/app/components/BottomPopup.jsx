@@ -4,7 +4,7 @@ import { View, Modal, Animated, TouchableWithoutFeedback, StyleSheet, PanRespond
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const DISMISS_THRESHOLD = 150; // Pixels to drag before dismissing
 
-const BottomPopup = ({ visible, onClose, children }) => {
+const BottomPopup = ({ visible, onClose, children, height }) => {
     const [showModal, setShowModal] = useState(visible);
     const slideAnimation = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   
@@ -61,7 +61,7 @@ const BottomPopup = ({ visible, onClose, children }) => {
           <View style={styles.modalOverlay}>
             <Animated.View
               {...panResponder.panHandlers}
-              style={[styles.modalContent, slideInStyle]}
+              style={[styles.modalContent(height), slideInStyle]}
             >
               <View style={styles.dragIndicatorContainer}>
                 <View style={styles.dragIndicator} />
@@ -82,13 +82,13 @@ const BottomPopup = ({ visible, onClose, children }) => {
       justifyContent: 'flex-end',
       backgroundColor: 'rgba(0, 0, 0, 0.4)',
     },
-    modalContent: {
-      backgroundColor: '#111827',
+    modalContent: (height) => ({
+      backgroundColor: '#18181b',
       borderTopLeftRadius: 20,
       borderTopRightRadius: 20,
-      minHeight: SCREEN_HEIGHT * 0.75, // 75% of screen height
-      maxHeight: SCREEN_HEIGHT * 0.9, // 90% of screen height
-    },
+      minHeight: SCREEN_HEIGHT * height,
+      maxHeight: SCREEN_HEIGHT * height,
+    }),
     dragIndicatorContainer: {
       width: '100%',
       alignItems: 'center',
@@ -102,7 +102,7 @@ const BottomPopup = ({ visible, onClose, children }) => {
     },
     childrenContainer: {
       flex: 1,
-      padding: 22,
+      padding: 10,
     },
   });
   

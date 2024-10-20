@@ -28,7 +28,7 @@ const UserSchema = new mongoose.Schema({
     type: Array,
     default: []
   },
-  goals: {
+  work: {
     type: Array,
     default: []
   }

@@ -12,7 +12,7 @@ const addWork = require('./Work/addWork');
 const editWork = require('./Work/editWork');
 const deleteWork = require('./Work/deleteWork');
 const addJob = require('./Jobs/addJob');
-const getGoals = require('./GetData/getGoals');
+const getJob = require('./GetData/getJob');
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
@@ -25,7 +25,7 @@ app.put('/addWork', addWork);
 app.put('/editWork', editWork);
 app.put('/deleteWork', deleteWork);
 app.post('/addJob', addJob);
-app.post('/getGoals', getGoals);
+app.post('/getJob', getJob);
 
 
 

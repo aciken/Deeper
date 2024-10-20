@@ -59,7 +59,7 @@ const HourTable = ({ user, clicked, todayDateNumber, all, changeEditVisible, cha
           key={index} 
           style={{ top: start * 4, height: dif * 4 }} 
           className={`absolute z-20 left-20 flex-row justify-start items-end rounded-lg overflow-hidden ${
-            currentLine > start && currentLine < end ? 'border border-sky-200' : 'border border-gray-700'
+            currentLine > start && currentLine < end ? 'border border-sky-200' : 'border border-zinc-700'
           } w-[70%] ${
             task[4] < (currentLine-10) && clicked === todayDateNumber ? 'opacity-60' : ''
           }`}
@@ -93,7 +93,7 @@ const HourTable = ({ user, clicked, todayDateNumber, all, changeEditVisible, cha
   }, [user, currentLine, clicked, todayDateNumber, router, all]);
 
   return (
-    <View className="relative flex-1 h-[75%] w-full mt-6 border border-gray-700 bg-gray-900 rounded-md overflow-hidden">
+    <View className="relative flex-1 h-[75%] w-full mt-6 border border-zinc-700 bg-zinc-900 rounded-md overflow-hidden">
       <ScrollView
         vertical={true} 
         showsVerticalScrollIndicator={false}
@@ -106,11 +106,11 @@ const HourTable = ({ user, clicked, todayDateNumber, all, changeEditVisible, cha
         {renderTasks}
 
         {hours.map((hour) => (
-          <View key={hour} className="flex-row items-center h-20 border-b border-gray-800">
-            <Text className="text-xs font-medium text-gray-500 w-16 text-right pr-2">
+          <View key={hour} className="flex-row items-center h-20 border-b border-zinc-800">
+            <Text className="text-xs font-medium text-zinc-500 w-16 text-right pr-2">
               {hour.toString().padStart(2, '0')}:00
             </Text>
-            <View className="flex-1 h-[1px] bg-gray-800" />               
+            <View className="flex-1 h-[1px] bg-zinc-800" />               
           </View>
         ))}
       </ScrollView>
