@@ -83,17 +83,13 @@ const Home = () => {
 
 
 
-	const works = [
-		{ name: 'Mobile app', color: ['#DC2626', '#761414'] },
-		{ name: 'School', color: ['#16A34A', '#083D1C'] },
-		{ name: 'Learning Coding', color: ['#2563EB', '#153885'] },
-	];
+	const [works, setWorks] = useState(user?.work || []);
 
 	useEffect(() => {
 		console.log('Home');
 		const email = user.email;
 
-		axios.post('https://de30-188-2-139-122.ngrok-free.app/getUser', { email })
+		axios.post('https://421e-188-2-139-122.ngrok-free.app/getUser', { email })
 			.then(res => {
 				setIsLoading(false);
 				setUser(res.data);
@@ -549,7 +545,7 @@ const Home = () => {
 							<View className="flex-row items-center">
 								{selectedWork ? (
 									<LinearGradient
-										colors={selectedWork.color}
+										colors={selectedWork.colors}
 										start={{x: 0, y: 0}}
 										end={{x: 1, y: 1}}
 										className="w-5 h-5 rounded-full mr-3"
@@ -580,7 +576,7 @@ const Home = () => {
 										}}
 									>
 										<LinearGradient
-											colors={work.color}
+											colors={work.colors}
 											start={{x: 0, y: 0}}
 											end={{x: 1, y: 0}}
 											className="w-4 h-4 rounded-full mr-3"

@@ -74,6 +74,8 @@ const SchedulePage = () => {
 	console.log(user.array[clicked-1])
 
 	const [showWorkPicker, setShowWorkPicker] = useState(false);
+	const [isWorkDropdownVisible, setIsWorkDropdownVisible] = useState(false);
+
 
 
 	if (!user) {
@@ -123,7 +125,7 @@ const SchedulePage = () => {
 		</TouchableOpacity>
 	);
 
-	const [sessionName, setSessionName] = useState('Work Session');
+	const [sessionName, setSessionName] = useState('');
 
 	const submitWork = (start, end, name,dates) => {
 		const dayIndices = dates.map(date => new Date(date).getDate() - 1);
@@ -134,7 +136,7 @@ const SchedulePage = () => {
 
 
 
-		axios.put('https://de30-188-2-139-122.ngrok-free.app/addWork', {
+		axios.put('https://421e-188-2-139-122.ngrok-free.app/addWork', {
 		  data,
 		  id: user._id,
 		  clicked,
@@ -162,7 +164,7 @@ const SchedulePage = () => {
 	
     const deleteFunc = () => {
 		console.log(index)
-        axios.put('https://de30-188-2-139-122.ngrok-free.app/deleteWork', {
+        axios.put('https://421e-188-2-139-122.ngrok-free.app/deleteWork', {
             id: user._id,
             index,
             clicked,
@@ -180,7 +182,7 @@ const SchedulePage = () => {
 
         const data  = [start,end, name, selectedWork]
 
-        axios.put('https://de30-188-2-139-122.ngrok-free.app/editWork', {
+        axios.put('https://421e-188-2-139-122.ngrok-free.app/editWork', {
             data,
             id: user._id,
             index,
@@ -231,7 +233,11 @@ const SchedulePage = () => {
 	  }
 
 	  
-	const [selectedWork, setSelectedWork] = useState('');
+	const [selectedWork, setSelectedWork] = useState({
+		name: '',
+		colors: ['', ''],
+		currentTime: ''
+	});
 	const [selectedDate, setSelectedDate] = useState(null);
 	const [showDatePicker, setShowDatePicker] = useState(false);
 
@@ -288,8 +294,8 @@ const SchedulePage = () => {
 											end={{x: 0, y: 1}}
 											className="w-full h-full rounded-xl justify-center items-center"
 										>
-											<Text className="text-gray-400 text-xs mb-1">{getDayName(currentDate)}</Text>
-											<Text className="text-gray-400 text-lg font-bold">{currentDate}</Text>
+											<Text className="text-zinc-400 text-xs mb-1">{getDayName(currentDate)}</Text>
+											<Text className="text-zinc-400 text-lg font-bold">{currentDate}</Text>
 										</LinearGradient>
 										}
 									</TouchableOpacity>
@@ -324,141 +330,226 @@ const SchedulePage = () => {
 				<BottomPopup
 					visible={isEditVisible}
 					onClose={() => setIsEditVisible(false)}
+					height={0.5}
 				>
 					<ScrollView className="flex-grow">
-					<Text className="text-3xl font-bold text-white mb-6 text-center">Edit Deep Work Session</Text>
-					<View className="mb-6">
-						<Text className="text-lg text-blue-300 mb-2">Session Name:</Text>
-						<TextInput
-							placeholder="Enter session name"
-							placeholderTextColor="#9CA3AF" 
-							className="bg-gray-700 text-white py-3 px-4 rounded-xl mb-4"
-							onChangeText={(text) => setSessionName(text)}
-							value={sessionName}
-						/>
-												<Text className="text-lg text-blue-300 mb-2">Select Work:</Text>
-							<View className="bg-gray-700 py-3 px-4 rounded-xl mb-4">
-								<TouchableOpacity onPress={() => setShowWorkPicker(true)}>
-									<Text className="text-white">{selectedWork || "Select a work"}</Text>
-								</TouchableOpacity>
-							</View>
-						{showWorkPicker && (
-							<ScrollView className="max-h-40 bg-gray-800 rounded-xl mb-4">
-								{user.goals.map((goal, index) => (
-									<TouchableOpacity
-										key={index}
-										onPress={() => {
-												setSelectedWork(goal.name);
-												setShowWorkPicker(false);
-											}}
-											className="py-2 px-4 border-b border-gray-700"
-										>
-											<Text className="text-white">{goal.name}</Text>
-										</TouchableOpacity>
-									))}
-								</ScrollView>
-							)}
-						<Text className="text-lg text-blue-300 mb-2">Duration:</Text>
-						<View className="flex-row justify-between items-center mb-4">
-							<TouchableOpacity
-								onPress={() => {
-									setShowStartPicker(true);
-									setShowEndPicker(false);
-								}}
-								className="flex-1 mr-2 py-3 rounded-xl items-center bg-gray-700"
-							>
-								<Text className="text-white font-bold">Start: {formatTime(startTime)}</Text>
-							</TouchableOpacity>
-							<TouchableOpacity
-								onPress={() => {
-									setShowStartPicker(false);
-									setShowEndPicker(true);
-								}}
-								className="flex-1 ml-2 py-3 rounded-xl items-center bg-gray-700"
-							>
-								<Text className="text-white font-bold">End: {formatTime(endTime)}</Text>
-							</TouchableOpacity>
-						</View>
-					</View>
-					{Platform.OS === 'ios' ? (
-						<>
-							{showStartPicker && (
-								<DateTimePicker
-									value={startTime}
-									mode="time"
-									is24Hour={true}
-									display="spinner"
-									onChange={(event, selectedTime) => handleTimeChange(event, selectedTime, true)}
-									textColor="white"
-									style={{backgroundColor: 'transparent'}}
-								/>
-							)}
-							{showEndPicker && (
-								<DateTimePicker
-									value={endTime}
-									mode="time"
-									is24Hour={true}
-									display="spinner"
-									onChange={(event, selectedTime) => handleTimeChange(event, selectedTime, false)}
-									textColor="white"
-									style={{backgroundColor: 'transparent'}}
-								/>
-							)}
-						</>
-					) : (
-						(showStartPicker || showEndPicker) && (
-							<DateTimePicker
-								value={showStartPicker ? startTime : endTime}
-								mode="time"
-								is24Hour={true}
-								display="default"
-								onChange={(event, selectedTime) => handleTimeChange(event, selectedTime, showStartPicker)}
-							/>
-						)
-					)}
-					<View className="flex-row justify-center items-center gap-4 w-full">
-						<TouchableOpacity
-							onPress={() => editFunc(formatTime(startTime), formatTime(endTime), sessionName)}
-						className=" h-16 mt-4 overflow-hidden w-[70%]"
-					>
-						<LinearGradient
-							colors={['#38bdf8', '#818cf8']}
-							start={{x: 0, y: 0}}
-							end={{x: 1, y: 1}}
-							className="w-full h-full rounded-xl justify-center items-center"
-						>
-							<Text className="text-sky-100 font-bold text-lg">
-								Edit Work Session
-							</Text>
-						</LinearGradient>
-					</TouchableOpacity>
-						<TouchableOpacity
-							onPress={() => deleteFunc()}
-							className=" h-16 w-16 mt-4 overflow-hidden"
+					
+						<MaskedView
+							maskElement={
+								<Text className="text-white text-3xl font-bold mb-6 text-center">Edit Deep Work Session</Text>
+							}
 						>
 							<LinearGradient
-								colors={['#ef4444', '#b91c1c']}
+								colors={['#D4D4D8', '#71717A']}
 								start={{x: 0, y: 0}}
-								end={{x: 1, y: 1}}
-								className="w-full h-full rounded-xl justify-center items-center"
+								end={{x: 0, y: 1}}
 							>
-								<Image source={icons.trash} className="w-8 h-8 tint-white" />
+								<Text className="text-white text-3xl font-bold mb-6 text-center opacity-0">Edit Deep Work Session</Text>
 							</LinearGradient>
-						</TouchableOpacity>	
-					</View>
+						</MaskedView>
+
+						<View className="mb-4">
+							<TextInput
+								placeholder="Enter session name"
+								placeholderTextColor="#52525b"
+								className="bg-zinc-800 text-base text-white py-3 px-4 rounded-xl mb-4"
+								onChangeText={(text) => setSessionName(text)}
+								value={sessionName}
+							/>
+						</View>
+
+						<View className="mb-4 z-10">
+							<TouchableOpacity 
+								onPress={() => setShowWorkPicker(!showWorkPicker)}
+								className="bg-zinc-800 py-3 px-4 rounded-xl mb-4 flex-row justify-between items-center"
+							>
+								<View className="flex-row items-center">
+									{selectedWork ? (
+										<LinearGradient
+											colors={selectedWork.colors}
+											start={{x: 0, y: 0}}
+											end={{x: 1, y: 1}}
+											className="w-4 h-4 rounded-full mr-2"
+										/>
+									) : (
+										<Image source={icons.workGray} className="w-4 h-4 mr-2 tint-gray-400" />
+									)}
+									<Text className={`text-base ${selectedWork ? 'text-white' : 'text-zinc-400'}`}>
+										{selectedWork ? selectedWork.name : "Select a work"}
+									</Text>
+								</View>
+								<Image 
+									source={icons.chevronRight} 
+									className={`w-4 h-4 tint-gray-400 ${showWorkPicker ? 'rotate-90' : ''}`} 
+								/>
+							</TouchableOpacity>
+							
+							{showWorkPicker && (
+								<View className="absolute top-full left-0 right-0 bg-zinc-800 rounded-xl mt-2 p-2 border border-zinc-700">
+									<ScrollView>
+										{user.work.map((work, index) => (
+											<TouchableOpacity
+												key={index}
+												onPress={() => {
+													setSelectedWork(work);
+													setShowWorkPicker(false);
+												}}
+												className="py-2 px-4 border-b border-zinc-700 flex-row items-center"
+											>
+												<LinearGradient
+													colors={work.colors}
+													start={{x: 0, y: 0}}
+													end={{x: 1, y: 1}}
+													className="w-4 h-4 rounded-full mr-2"
+												/>
+												<Text className="text-white">{work.name}</Text>
+											</TouchableOpacity>
+										))}
+									</ScrollView>
+								</View>
+							)}
+						</View>
+
+						<View className="flex-row justify-between items-center mb-4 h-10">
+							<TouchableOpacity
+								onPress={() => {
+									if(showStartPicker){
+										setShowStartPicker(false);
+									} else {
+										setShowStartPicker(true);
+										setShowEndPicker(false);
+									}
+								}}
+								className="flex-1 mr-2 overflow-hidden"
+							>
+								<LinearGradient
+									colors={showStartPicker ? ['#38bdf8', '#3b82f6'] : ['#27272a', '#27272a']}
+									start={{x: 0, y: 0}}
+									end={{x: 1, y: 1}}
+									className="w-full h-full rounded-xl justify-center items-center"
+								>
+									<Text className={`font-bold text-base ${showStartPicker ? 'text-white' : 'text-zinc-400'}`}>
+										Start: {formatTime(startTime)}
+									</Text>
+								</LinearGradient>
+							</TouchableOpacity>
+							<TouchableOpacity
+								onPress={() => {
+									if(showEndPicker){
+										setShowEndPicker(false);
+									} else {
+										setShowStartPicker(false);
+										setShowEndPicker(true);
+									}
+								}}
+								className="flex-1 ml-2 overflow-hidden"
+							>
+								<LinearGradient
+									colors={showEndPicker ? ['#38bdf8', '#3b82f6'] : ['#27272a', '#27272a']}
+									start={{x: 0, y: 0}}
+									end={{x: 1, y: 1}}
+									className="w-full h-full rounded-xl justify-center items-center"
+								>
+									<Text className={`font-bold text-base ${showEndPicker ? 'text-white' : 'text-zinc-400'}`}>
+										End: {formatTime(endTime)}
+									</Text>
+								</LinearGradient>
+							</TouchableOpacity>
+						</View>
+
+						{Platform.OS === 'ios' ? (
+							<>
+								{showStartPicker && (
+									<DateTimePicker
+										value={startTime}
+										mode="time"
+										is24Hour={true}
+										display="spinner"
+										onChange={(event, selectedTime) => handleTimeChange(event, selectedTime, true)}
+										textColor="white"
+										style={{backgroundColor: 'transparent'}}
+									/>
+								)}
+								{showEndPicker && (
+									<DateTimePicker
+										value={endTime}
+											mode="time"
+											is24Hour={true}
+											display="spinner"
+											onChange={(event, selectedTime) => handleTimeChange(event, selectedTime, false)}
+											textColor="white"
+											style={{backgroundColor: 'transparent'}}
+									/>
+								)}
+							</>
+						) : (
+							(showStartPicker || showEndPicker) && (
+								<DateTimePicker
+									value={showStartPicker ? startTime : endTime}
+									mode="time"
+									is24Hour={true}
+									display="default"
+									onChange={(event, selectedTime) => handleTimeChange(event, selectedTime, showStartPicker)}
+									className="z-10"
+								/>
+							)
+						)}
+
 					</ScrollView>
+
+
+						<View className="flex-row justify-between mb-4">
+							<TouchableOpacity
+								onPress={() => editFunc(formatTime(startTime), formatTime(endTime), sessionName)}
+								className="flex-1 mr-2 h-14 rounded-full overflow-hidden"
+							>
+								<LinearGradient
+									colors={['#0ea5e9', '#60a5fa']}
+									start={{x: 0, y: 0}}
+									end={{x: 1, y: 1}}
+									className="w-full h-full rounded-full justify-center items-center"
+								>
+									<Text className="text-white text-lg font-semibold">Edit Work Session</Text>
+								</LinearGradient>
+							</TouchableOpacity>
+							<TouchableOpacity
+								onPress={() => deleteFunc()}
+								className="w-14 h-14 rounded-full overflow-hidden"
+							>
+								<LinearGradient
+									colors={['#ef4444', '#b91c1c']}
+									start={{x: 0, y: 0}}
+									end={{x: 1, y: 1}}
+									className="w-full h-full rounded-full justify-center items-center"
+								>
+									<Image source={icons.trash} className="w-6 h-6 tint-white" />
+								</LinearGradient>
+							</TouchableOpacity>
+						</View>
 				</BottomPopup>
 
 				<BottomPopup
 					visible={isPopupVisible}
 					onClose={() => setIsPopupVisible(false)}
+					height={0.65}
 				>
 					<ScrollView className="flex-grow">
-						<Text className="text-3xl font-bold text-white mb-6 text-center">Add Deep Work Session</Text>
+					<MaskedView
+              maskElement={
+				<Text className="text-3xl font-bold text-white mb-6 text-center">Add Deep Work Session</Text>
+                  }
+                >
+                <LinearGradient
+                  colors={['#D4D4D8', '#71717A']}
+                  start={{x: 0, y: 0}}
+                  end={{x: 0, y: 1}}
+                >
+					<Text className="text-3xl font-bold text-white mb-6 text-center opacity-0">Add Deep Work Session</Text>
+                </LinearGradient>
+              </MaskedView>
 						
 						{/* Date selection */}
 						<View className="mb-6">
-							<Text className="text-lg text-blue-300 mb-2">Select Date(s):</Text>
 							<ScrollView 
 								horizontal 
 								showsHorizontalScrollIndicator={false}
@@ -494,19 +585,19 @@ const SchedulePage = () => {
 												setSelectedDates(newSelectedDates);
 											}}
 											className={`w-16 h-20 justify-center items-center rounded-xl mr-2 ${
-												isSelected || (isClickedDate && selectedDates.length === 0) ? 'bg-sky-500' : 'bg-gray-700'
+												isSelected || (isClickedDate && selectedDates.length === 0) ? 'bg-sky-500' : 'bg-zinc-700'
 											}`}
 										>
 											<LinearGradient
-												colors={isSelected || (isClickedDate && selectedDates.length === 0) ? ['#38bdf8', '#3b82f6'] : ['#374151', '#374151']}
+												colors={isSelected || (isClickedDate && selectedDates.length === 0) ? ['#0EA5E9', '#7dd3fc'] : ['#18181B', '#27272A']}
 												start={{x: 0, y: 0}}
 												end={{x: 1, y: 1}}
-												className="w-full h-full rounded-xl justify-center items-center"
+												className="w-full h-full rounded-xl justify-center items-center border border-zinc-700"
 											>
 												<Text className={`text-xs mb-1 ${
-													isSelected || (isClickedDate && selectedDates.length === 0) ? 'text-gray-100' : 'text-gray-400'
+													isSelected || (isClickedDate && selectedDates.length === 0) ? 'text-zinc-100' : 'text-zinc-400'
 												}`}>{date.toLocaleDateString('en-US', { weekday: 'short' })}</Text>
-												<Text className="text-gray-100 text-lg font-bold">{date.getDate()}</Text>
+												<Text className="text-zinc-100 text-lg font-bold">{date.getDate()}</Text>
 											</LinearGradient>
 										</TouchableOpacity>
 									);
@@ -515,68 +606,101 @@ const SchedulePage = () => {
 						</View>
 
 						<View className="mb-6">
-							<Text className="text-lg text-blue-300 mb-2">Session Name:</Text>
 							<TextInput
 								placeholder="Enter session name"
-								placeholderTextColor="#9CA3AF"
-								className="bg-gray-700 text-white py-3 px-4 rounded-xl mb-4"
+								placeholderTextColor="#52525b"
+								className="bg-zinc-800 text-base text-white py-3 px-4 rounded-xl mb-4"
 								onChangeText={(text) => setSessionName(text)}
 								value={sessionName}
 							/>
-							<Text className="text-lg text-blue-300 mb-2">Select Work:</Text>
-							<View className="bg-gray-700 py-3 px-4 rounded-xl mb-4">
-								<TouchableOpacity onPress={() => setShowWorkPicker(true)}>
-									<Text className="text-white">{selectedWork || "Select a work"}</Text>
+							<View className="relative z-10">
+								<TouchableOpacity 
+									onPress={() => {setShowWorkPicker(!showWorkPicker)}}
+									className="bg-zinc-800 py-3 px-4 rounded-xl mb-4 flex-row justify-between items-center"
+								>
+
+									<View className="flex-row items-center">
+										{selectedWork.colors[0] !== '' ? (
+											<LinearGradient
+												colors={selectedWork.colors}
+												start={{x: 0, y: 0}}
+												end={{x: 1, y: 1}}
+												className="w-4 h-4 rounded-full mr-2"
+											>
+											</LinearGradient>
+										) : (
+											<Image source={icons.workGray} className="w-4 h-4 mr-2 tint-gray-400" />
+										)}
+										<Text className={`text-base ${selectedWork.colors[0] ? 'text-white' : 'text-zinc-400'}`}>{selectedWork.name || "Select a work"}</Text>
+									</View>
+									<Image 
+										source={icons.chevronRight} 
+										className={`w-4 h-4 tint-gray-400 ${showWorkPicker ? 'rotate-90' : ''}`} 
+									/>
 								</TouchableOpacity>
+								
+								{showWorkPicker && (
+									<View className="z-20 p-2 mb-2 bg-zinc-800 rounded-xl shadow-lg border border-zinc-700">
+										{user.work.map((work, index) => (
+											<TouchableOpacity
+												key={index}
+												onPress={() => {
+													setSelectedWork(work);
+													setShowWorkPicker(false);
+												}}
+												className="p-3 flex-row items-center"
+											>
+												<LinearGradient
+													colors={work.colors}
+													start={{x: 0, y: 0}}
+													end={{x: 1, y: 1}}
+													className="w-4 h-4 rounded-full mr-2"
+												/>
+												<Text className="text-white text-base">{work.name}</Text>
+											</TouchableOpacity>
+										))}
+									</View>
+								)}
 							</View>
-							{showWorkPicker && (
-								<ScrollView className="max-h-40 bg-gray-800 rounded-xl mb-4">
-									{user.goals.map((goal, index) => (
-										<TouchableOpacity
-											key={index}
-											onPress={() => {
-												setSelectedWork(goal.name);
-												setShowWorkPicker(false);
-											}}
-											className="py-2 px-4 border-b border-gray-700"
-										>
-											<Text className="text-white">{goal.name}</Text>
-										</TouchableOpacity>
-									))}
-								</ScrollView>
-							)}
-							<Text className="text-lg text-blue-300 mb-2">Duration:</Text>
 							<View className="flex-row justify-between items-center mb-4 h-10">
 								<TouchableOpacity
 									onPress={() => {
-										setShowStartPicker(true);
-										setShowEndPicker(false);
+										if(showStartPicker){
+											setShowStartPicker(false);
+										} else {
+											setShowStartPicker(true);
+											setShowEndPicker(false);
+										}
 									}}
 									className="flex-1 mr-2 overflow-hidden"
 								>
 									<LinearGradient
-										colors={showStartPicker ? ['#38bdf8', '#3b82f6'] : ['#374151', '#374151']}
+										colors={showStartPicker ? ['#38bdf8', '#3b82f6'] : ['#27272a', '#27272a']}
 										start={{x: 0, y: 0}}
 										end={{x: 1, y: 1}}
 										className="w-full h-full  rounded-xl justify-center items-center"
 									>
-										<Text className={`font-bold ${showStartPicker ? 'text-gray-100' : 'text-white'}`}>Start: {formatTime(startTime)}</Text>
+										<Text className={`font-bold text-base ${showStartPicker ? 'text-white' : 'text-zinc-400'}`}>Start: {formatTime(startTime)}</Text>
 									</LinearGradient>
 								</TouchableOpacity>
 								<TouchableOpacity
 									onPress={() => {
-										setShowStartPicker(false);
-										setShowEndPicker(true);
+										if(showEndPicker){
+											setShowEndPicker(false);
+										} else {
+											setShowStartPicker(false);
+											setShowEndPicker(true);
+										}
 									}}
 									className="flex-1 ml-2 overflow-hidden"
 								>
 									<LinearGradient
-										colors={showEndPicker ? ['#38bdf8', '#3b82f6'] : ['#374151', '#374151']}
+										colors={showEndPicker ? ['#38bdf8', '#3b82f6'] : ['#27272a', '#27272a']}
 										start={{x: 0, y: 0}}
 										end={{x: 1, y: 1}}
 										className="w-full h-full  rounded-xl justify-center items-center"
 									>
-										<Text className={`font-bold ${showEndPicker ? 'text-gray-100' : 'text-white'}`}>End: {formatTime(endTime)}</Text>
+										<Text className={`font-bold text-base ${showEndPicker ? 'text-white' : 'text-zinc-400'}`}>End: {formatTime(endTime)}</Text>
 									</LinearGradient>
 								</TouchableOpacity>
 							</View>
@@ -592,6 +716,7 @@ const SchedulePage = () => {
 										onChange={(event, selectedTime) => handleTimeChange(event, selectedTime, true)}
 										textColor="white"
 										style={{backgroundColor: 'transparent'}}
+										className="z-10"
 									/>
 								)}
 								{showEndPicker && (
@@ -603,6 +728,7 @@ const SchedulePage = () => {
 										onChange={(event, selectedTime) => handleTimeChange(event, selectedTime, false)}
 										textColor="white"
 										style={{backgroundColor: 'transparent'}}
+										className="z-10"
 									/>
 								)}
 							</>
@@ -620,7 +746,7 @@ const SchedulePage = () => {
 							</>
 						)}
 					</ScrollView>
-					<TouchableOpacity
+					{/* <TouchableOpacity
 						onPress={() => submitWork(formatTime(startTime), formatTime(endTime), sessionName, selectedDates)}
 						className="h-16 mt-4 overflow-hidden"
 					>
@@ -634,12 +760,26 @@ const SchedulePage = () => {
 								Schedule Work Session
 							</Text>
 						</LinearGradient>
+					</TouchableOpacity> */}
+					<TouchableOpacity 
+          onPress={() => submitWork(formatTime(startTime), formatTime(endTime), sessionName, selectedDates)}
+          className="w-full rounded-full overflow-hidden shadow-lg pt-2 mb-4"
+        >
+          <LinearGradient
+            colors={['#0ea5e9', '#60a5fa']}
+            start={{x: 0, y: 0}}
+            end={{x: 1, y: 1}}
+            className="w-full rounded-full h-14 flex-row justify-center items-center"
+          >
+						<Text className="text-white text-lg font-semibold">Schedule Work Session</Text>
+					</LinearGradient>
 					</TouchableOpacity>
 				</BottomPopup>
 
 				<BottomPopup
 					visible={isTaskListVisible}
 					onClose={() => setIsTaskListVisible(false)}
+					height={0.65}
 				>
 					<Text className="text-3xl font-bold text-white mb-6 text-center">Task List</Text>
 					<ScrollView className="w-full max-h-[70vh]">
@@ -654,7 +794,7 @@ const SchedulePage = () => {
 								.map(({ task, index }) => (
 									<TouchableOpacity
 										key={index}
-										className="w-full flex-row items-center justify-between h-20 bg-gray-700 rounded-xl border border-gray-600 p-2 mb-4"
+										className="w-full flex-row items-center justify-between h-20 bg-zinc-700 rounded-xl border border-zinc-600 p-2 mb-4"
 										onPress={() => {
 											setIsTaskListVisible(false);
 											changeEditData(
@@ -670,13 +810,13 @@ const SchedulePage = () => {
 										}}
 										activeOpacity={0.8}
 									>
-										<Text className="text-gray-200 text-lg font-semibold">{task[2]}</Text>
-										<Text className="text-gray-200 text-lg font-semibold">{task[0]}-{task[1]}</Text>
+										<Text className="text-zinc-200 text-lg font-semibold">{task[2]}</Text>
+										<Text className="text-zinc-200 text-lg font-semibold">{task[0]}-{task[1]}</Text>
 									</TouchableOpacity>
 								))
 						) : (
 							<View className="w-full flex-col justify-center items-center">
-								<Text className="font-semibold text-gray-200 text-lg">No tasks yet</Text>
+								<Text className="font-semibold text-zinc-200 text-lg">No tasks yet</Text>
 							</View>
 						)}
 					</ScrollView>

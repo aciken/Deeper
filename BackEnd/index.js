@@ -13,6 +13,8 @@ const editWork = require('./Work/editWork');
 const deleteWork = require('./Work/deleteWork');
 const addJob = require('./Jobs/addJob');
 const getJob = require('./GetData/getJob');
+const deleteJob = require('./Jobs/deleteJob');
+const editJob = require('./Jobs/editJob');
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
@@ -24,9 +26,10 @@ app.post('/getUser', GetUser)
 app.put('/addWork', addWork);
 app.put('/editWork', editWork);
 app.put('/deleteWork', deleteWork);
-app.post('/addJob', addJob);
+app.put('/addJob', addJob);
 app.post('/getJob', getJob);
-
+app.put('/deleteJob', deleteJob);
+app.put('/editJob', editJob);
 
 
 

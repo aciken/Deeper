@@ -13,7 +13,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 
 
 const Tasks = () => {
-  const { user } = useGlobalContext();
+  const { user, setUser } = useGlobalContext();
   const router = useRouter();
   const [goals, setGoals] = useState([]);
   const [presets, setPresets] = useState([]);
@@ -28,36 +28,36 @@ const Tasks = () => {
 
 
   const [isStartSessionPopupVisible, setIsStartSessionPopupVisible] = useState(false);
+  const [isWorkEditPopupVisible, setIsWorkEditPopupVisible] = useState(false);
+
+  const [works, setWorks] = useState(user.work);
+
 
 
   
 
-  const works = [
-    {
-      name: "Mobile app",
-      colors: ['#0EA5E9', '#085D83'],
-      currentTime: 22,
-      totalTime: 40
-    },
-    {
-      name: "School",
-      colors: ['#DC2626', '#761414'],
-      currentTime: 9,
-      totalTime: 8,
-    },
-    {
-      name: "Learning Coding",
-      colors: ['#22C55E', '#105F2D'],
-      currentTime: 7,
-      totalTime: 8,
-    }
-  ]
+  // const works = [
+  //   {
+  //     name: "Mobile app",
+  //     colors: ['#0EA5E9', '#085D83'],
+  //     currentTime: 22,
+  //     totalTime: 40
+  //   },
+  //   {
+  //     name: "School",
+  //     colors: ['#DC2626', '#761414'],
+  //     currentTime: 9,
+  //     totalTime: 8,
+  //   },
+  //   {
+  //     name: "Learning Coding",
+  //     colors: ['#22C55E', '#105F2D'],
+  //     currentTime: 7,
+  //     totalTime: 8,
+  //   }
+  // ]
 
-  const existingColors = [
-    ['#DC2626', '#761414'],
-    ['#16A34A', '#083D1C'],
-    ['#2563EB', '#153885'],
-  ]
+
 
   const ballColors = [
     ['#DC2626', '#761414'],
@@ -77,6 +77,28 @@ const [newWork, setNewWork] = useState({
   colors: ['', ''],
   currentTime: '1h',
 })
+const [editIndex, setEditIndex] = useState(null)
+
+const [editWork, setEditWork] = useState({
+  name: '',
+  colors: ['', ''],
+  currentTime: '1h',
+})
+
+
+const [initialEditWork, setInitialEditWork] = useState({
+  name: '',
+  colors: ['', ''],
+  currentTime: '1h',
+})
+
+const openEditWork = (work, index) => {
+  console.log('work', work)
+  setEditWork(work)
+  setInitialEditWork(work)
+  setEditIndex(index)
+  setIsWorkEditPopupVisible(true)
+}
 
 const onTimeChange = (event, selectedTime) => {
   setShowTimePicker(Platform.OS === 'ios');
@@ -88,6 +110,57 @@ const onTimeChange = (event, selectedTime) => {
   }
 };
 
+
+
+const submitNewWork = () => {
+  axios.put('https://421e-188-2-139-122.ngrok-free.app/addJob', {
+    newWork,
+    id: user._id,
+  }).then(res => {
+    console.log('newWork', res.data)
+    setWorks(res.data.work)
+    setUser(res.data)
+    setIsWorkVisible(false)
+    setNewWork({
+      name: '',
+      colors: ['', ''],
+      currentTime: '1h',
+    })
+  })
+}
+
+const submitEditWork = () => {
+ axios.put('https://421e-188-2-139-122.ngrok-free.app/editJob', {
+  editWork,
+  index: editIndex,
+  id: user._id,
+ }).then(res => {
+  setWorks(res.data)
+  setIsWorkEditPopupVisible(false)
+  setEditWork({
+    name: '',
+    colors: ['', ''],
+    currentTime: '1h',
+  })
+  setEditIndex(null)
+ })
+}
+
+const submitDeleteWork = () => {
+  axios.put('https://421e-188-2-139-122.ngrok-free.app/deleteJob', {
+    index: editIndex,
+    id: user._id,
+  }).then(res => {
+    setWorks(res.data)
+    setIsWorkEditPopupVisible(false)
+    setEditWork({
+      name: '',
+      colors: ['', ''],
+      currentTime: '1h',
+    })
+    setEditIndex(null)
+  })
+}
 
   return(
       <SafeAreaView className="flex-1 h-full bg-zinc-950" edges={['top']}>
@@ -166,7 +239,7 @@ const onTimeChange = (event, selectedTime) => {
 
             <View>
               {works.map((work, index) => (
-                <TouchableOpacity key={index} className="flex-row justify-between items-center w-full mb-6">
+                <TouchableOpacity onPress={() => openEditWork(work, index)} key={index} className="flex-row justify-between items-center w-full mb-6">
                   <View className="flex-row justify-center items-center">
                     <LinearGradient
                       colors={work.colors}
@@ -179,7 +252,7 @@ const onTimeChange = (event, selectedTime) => {
                   <Text className="text-white text-base font-psemibold pl-2">{work.name}</Text>
                   </View>
                   <View className="flex-row justify-center items-center">
-                    <Text className={` text-base font-psemibold ${work.currentTime >= work.totalTime ? 'text-sky-400' : 'text-white'}`}>{work.currentTime}h <Text className={`${work.currentTime >= work.totalTime ? 'text-sky-400' : 'text-gray-400'}`}>/ {work.totalTime}h week</Text></Text>
+                    <Text className={` text-base font-psemibold ${0 >= work.currentTime ? 'text-sky-400' : 'text-white'}`}>0h <Text className={`${0 >= work.currentTime ? 'text-sky-400' : 'text-gray-400'}`}>/ {work.currentTime} week</Text></Text>
                   </View>
                 </TouchableOpacity>
               ))}
@@ -211,7 +284,20 @@ const onTimeChange = (event, selectedTime) => {
   height={0.65}
 >
   <View className="p-2 bg-zinc-900 rounded-t-3xl flex-1">
-    <Text className="text-white text-3xl font-bold mb-6 text-center">Add Work</Text>
+             <MaskedView
+              maskElement={
+                <Text className="text-white text-3xl font-bold mb-6 text-center">Add Work</Text>
+                  }
+                >
+                <LinearGradient
+                  colors={['#D4D4D8', '#71717A']}
+                  start={{x: 0, y: 0}}
+                  end={{x: 1, y: 1}}
+                >
+                  <Text className="text-white text-3xl font-bold mb-6 text-center opacity-0">Add Work</Text>
+                </LinearGradient>
+              </MaskedView>
+
     
     <View className="mb-4">
       <Text className="text-gray-400 text-sm mb-2">Work Name</Text>
@@ -239,13 +325,17 @@ const onTimeChange = (event, selectedTime) => {
             key={index}
             style={{ backgroundColor: color }}
             className={`w-8 h-8 rounded-full `}
-            onPress={() => setNewWork({...newWork, colors: color})}
+            onPress={() => {
+              if (!works.some(work => work.colors[0] === color[0] && work.colors[1] === color[1])) {
+                setNewWork({...newWork, colors: color});
+              }
+            }}
           >
             <LinearGradient
               colors={color}
               start={{x: 0, y: 0}}
               end={{x: 1, y: 1}}
-              className={`w-8 h-8 rounded-full ${existingColors.some(ec => ec[0] === color[0] && ec[1] === color[1]) ? 'opacity-20' : ''} ${newWork.colors[0] === color[0] && newWork.colors[1] === color[1] ? 'border-2 border-white' : ''}`}
+              className={`w-8 h-8 rounded-full ${works.some(work => work.colors[0] === color[0] && work.colors[1] === color[1]) ? 'opacity-20' : ''} ${newWork.colors[0] === color[0] && newWork.colors[1] === color[1] ? 'border-2 border-white' : ''}`}
             >
             </LinearGradient>
           </TouchableOpacity>
@@ -260,9 +350,9 @@ const onTimeChange = (event, selectedTime) => {
         <TouchableOpacity 
         onPress={() => {
           if (newWork.currentTime.includes('m')) { 
-            setNewWork({...newWork, currentTime: parseInt(newWork.currentTime.replace('h', '')) - 1 + 'h'})
+            setNewWork({...newWork, currentTime: parseInt(newWork.currentTime.replace('h', '')) + 'h'})
           } else {
-            setNewWork({...newWork, currentTime: parseInt(newWork.currentTime.replace('h', '')) + 'h 30m'})
+            setNewWork({...newWork, currentTime: parseInt(newWork.currentTime.replace('h', '')) - 1 + 'h 30m'})
           }
         }}
         className="bg-zinc-700 w-10 h-10 rounded-full items-center justify-center">
@@ -288,7 +378,7 @@ const onTimeChange = (event, selectedTime) => {
     
     <View className="pb-2">
         <TouchableOpacity 
-          onPress={() => {}}
+          onPress={submitNewWork}
           className="w-full rounded-full overflow-hidden shadow-lg pt-2"
         >
           <LinearGradient
@@ -297,8 +387,7 @@ const onTimeChange = (event, selectedTime) => {
             end={{x: 1, y: 1}}
             className="w-full rounded-full h-14 flex-row justify-center items-center"
           >
-            <Image source={icons.play} className="w-6 h-6 mr-2 tint-white" />
-						<Text className="text-white text-lg font-semibold">Start Session</Text>
+						<Text className="text-white text-lg font-semibold">Add New Work</Text>
 					</LinearGradient>
 					</TouchableOpacity>
 				</View>
@@ -429,6 +518,136 @@ const onTimeChange = (event, selectedTime) => {
 					</TouchableOpacity>
 				</View>
 			</BottomPopup>
+
+      <BottomPopup
+        visible={isWorkEditPopupVisible}
+        onClose={() => setIsWorkEditPopupVisible(false)}
+        height={0.65}
+      >
+  <View className="p-2 bg-zinc-900 rounded-t-3xl flex-1">
+    <MaskedView
+              maskElement={
+                <Text className="text-white text-3xl font-bold mb-6 text-center">Edit Work</Text>
+                  }
+                >
+                <LinearGradient
+                  colors={['#D4D4D8', '#71717A']}
+                  start={{x: 0, y: 0}}
+                  end={{x: 1, y: 1}}
+                >
+                <Text className="text-white text-3xl font-bold mb-6 text-center opacity-0">Edit Work</Text>
+                </LinearGradient>
+              </MaskedView>
+
+    
+    <View className="mb-4">
+      <Text className="text-gray-400 text-sm mb-2">Work Name</Text>
+      <TextInput
+        className="bg-zinc-800 text-white p-3 rounded-xl"
+        placeholder="Work Name"
+        placeholderTextColor="#71717A" 
+        value={editWork.name}
+        onChangeText={(text) => setEditWork({...editWork, name: text})}
+      />
+    </View>
+    
+    <View className="mb-4">
+      <Text className="text-gray-400 text-sm mb-2">Choose color:</Text>
+      <View className="flex-row justify-between">
+        {/* {['#DC2626', '#16A34A', '#2563EB', '#9333EA', '#CA8A04', '#0EA5E9', '#EC4899'].map((color, index) => (
+          <TouchableOpacity
+            key={index}
+            style={{ backgroundColor: color }}
+            className="w-8 h-8 rounded-full"
+          />
+        ))} */}
+        {ballColors.map((color, index) => (
+          <TouchableOpacity
+            key={index}
+            style={{ backgroundColor: color }}
+            className={`w-8 h-8 rounded-full `}
+            onPress={() => {
+              if (!works.some(work => work.colors[0] === color[0] && work.colors[1] === color[1]) || (initialEditWork.colors[0] === color[0] && initialEditWork.colors[1] === color[1])) {
+                setEditWork({...editWork, colors: color});
+              }
+            }}
+          >
+            <LinearGradient
+              colors={color}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 1}}
+              className={`w-8 h-8 rounded-full ${works.some(work => work.colors[0] === color[0] && work.colors[1] === color[1]) && (initialEditWork.colors[0] !== color[0] && initialEditWork.colors[1] !== color[1]) ? 'opacity-20' : ''} ${editWork.colors[0] === color[0] && editWork.colors[1] === color[1] ? 'border-2 border-white' : ''}`}
+            >
+            </LinearGradient>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+    </View>
+    
+    <View className="mb-4">
+      <Text className="text-gray-400 text-sm mb-2">Targeted work per week:</Text>
+      <View className="flex-row items-center justify-between bg-zinc-800 rounded-xl p-2">
+        <TouchableOpacity 
+        onPress={() => {
+          if (editWork.currentTime.includes('m')) { 
+            setEditWork({...editWork, currentTime: parseInt(editWork.currentTime.replace('h', '')) + 'h'})
+          } else {
+            setEditWork({...editWork, currentTime: parseInt(editWork.currentTime.replace('h', '')) - 1 + 'h 30m'})
+          }
+        }}
+        className="bg-zinc-700 w-10 h-10 rounded-full items-center justify-center">
+          <Text className="text-white text-xl">-</Text>
+        </TouchableOpacity>
+        <Text className="text-white text-2xl font-bold">{editWork.currentTime}</Text>
+        <TouchableOpacity 
+        onPress={() => {
+          if (editWork.currentTime.includes('m')) {
+            setEditWork({...editWork, currentTime: parseInt(editWork.currentTime.replace('h', '')) + 1 + 'h'})
+          } else {
+            setEditWork({...editWork, currentTime: parseInt(editWork.currentTime.replace('h', '')) + 'h 30m'})
+          }
+        }}
+        className="bg-zinc-700 w-10 h-10 rounded-full items-center justify-center">
+          <Text className="text-white text-xl">+</Text>
+        </TouchableOpacity>
+      </View>
+      <Text className="text-gray-500 text-sm mt-2 text-center">overall work per week left: 37h 30m</Text>
+    </View>
+    
+    <View className="flex-1" />
+    
+    <View className="flex-row justify-between">
+      <TouchableOpacity 
+        onPress={submitEditWork}
+        className="flex-1 mr-2"
+      >
+        <LinearGradient
+          colors={['#0ea5e9', '#60a5fa']}
+          start={{x: 0, y: 0}}
+          end={{x: 1, y: 1}}
+          className="rounded-full py-4 items-center"
+        >
+          <Text className="text-white text-lg font-semibold">Edit Work</Text>
+        </LinearGradient>
+      </TouchableOpacity>
+      <TouchableOpacity 
+        onPress={submitDeleteWork}
+
+        className=" w-14 h-14 rounded-full items-center justify-center"
+      >
+        <LinearGradient
+          colors={['#DC2626', '#761414']}
+          start={{x: 0, y: 0}}
+          end={{x: 1, y: 1}}
+          className="w-14 h-14 rounded-full items-center justify-center"
+        >
+          <Image source={icons.trash} className="w-6 h-6 tint-white" />
+        </LinearGradient>
+      </TouchableOpacity>
+    </View>
+  </View> 
+      </BottomPopup>
 
       </SafeAreaView>
   )
