@@ -781,7 +781,19 @@ const SchedulePage = () => {
 					onClose={() => setIsTaskListVisible(false)}
 					height={0.65}
 				>
-					<Text className="text-3xl font-bold text-white mb-6 text-center">Task List</Text>
+					<MaskedView
+						maskElement={
+							<Text className="text-3xl font-bold text-white mb-6 text-center">Session List</Text>
+                  }
+                >
+                <LinearGradient
+                  colors={['#D4D4D8', '#71717A']}
+                  start={{x: 0, y: 0}}
+                  end={{x: 0, y: 1}}
+							>
+								<Text className="text-3xl font-bold text-white mb-6 text-center opacity-0">Session List</Text>
+							</LinearGradient>
+						</MaskedView>
 					<ScrollView className="w-full max-h-[70vh]">
 						{user && user.array && user.array[clicked - 1] && user.array[clicked - 1].length > 0 ? (
 							user.array[clicked - 1]
@@ -794,7 +806,7 @@ const SchedulePage = () => {
 								.map(({ task, index }) => (
 									<TouchableOpacity
 										key={index}
-										className="w-full flex-row items-center justify-between h-20 bg-zinc-700 rounded-xl border border-zinc-600 p-2 mb-4"
+										className="w-full flex-row items-center justify-between p-2 bg-zinc-800 rounded-xl border border-zinc-700 mb-4"
 										onPress={() => {
 											setIsTaskListVisible(false);
 											changeEditData(
@@ -810,8 +822,19 @@ const SchedulePage = () => {
 										}}
 										activeOpacity={0.8}
 									>
-										<Text className="text-zinc-200 text-lg font-semibold">{task[2]}</Text>
-										<Text className="text-zinc-200 text-lg font-semibold">{task[0]}-{task[1]}</Text>
+										<View className="flex-row items-center">
+											<LinearGradient
+												colors={task[3].colors}
+												start={{x: 0, y: 0}}
+												end={{x: 1, y: 1}}
+												className="w-6 h-6 rounded-full mr-1"
+											/>
+											<View className="flex-col items-start">
+												<Text className="text-zinc-200 text-base font-psemibold">{task[2]}</Text>
+												<Text className="text-zinc-600 text-sm font-pmedium">{task[3].name}</Text>
+											</View>
+										</View>
+										<Text className="text-zinc-200 text-lg font-psemibold">{task[0]}-{task[1]}</Text>
 									</TouchableOpacity>
 								))
 						) : (
