@@ -27,7 +27,7 @@ const signup = () => {
   useEffect(() => {
     if (loginSuccess) {
       setIsLoading(false);
-      router.push('/home'); 
+      router.push('/Home'); 
     }
   }, [loginSuccess]);
 
@@ -35,7 +35,7 @@ const signup = () => {
     console.log('Submitting')
     const {name, email, password} = form
     setIsSubmiting(true)
-    axios.post('https://44a8-188-2-139-122.ngrok-free.app/signup', {
+    axios.put('https://44ca-188-2-139-122.ngrok-free.app/signup', {
       name, 
       email,
       password

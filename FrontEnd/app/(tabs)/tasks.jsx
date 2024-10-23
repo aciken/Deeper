@@ -25,12 +25,91 @@ const Tasks = () => {
   const [selectedWork, setSelectedWork] = useState(null);
 	const [duration, setDuration] = useState({ hours: 0, minutes: 0 });
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [nextTaskIndex, setNextTaskIndex] = useState(null);
 
 
   const [isStartSessionPopupVisible, setIsStartSessionPopupVisible] = useState(false);
   const [isWorkEditPopupVisible, setIsWorkEditPopupVisible] = useState(false);
 
   const [works, setWorks] = useState(user.work);
+
+  const [currentTime, setCurrentTime] = useState(0);
+  
+  useEffect(() => {
+    const updateCurrentLine = () => {
+      const currentTime = new Date();
+      const hours24 = currentTime.getHours();
+      const minutes = currentTime.getMinutes();
+
+      let newCurrentLine = 10 + hours24 * 20 + minutes / 3;
+
+      setCurrentTime(newCurrentLine);
+    };
+
+    updateCurrentLine();
+    const intervalId = setInterval(updateCurrentLine, 60000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
+    const currentDate = new Date();
+    const dayOfMonth = currentDate.getDate();
+
+
+
+    works.forEach(work => {
+      let timeWorked = 0;
+    user.array[dayOfMonth-1].forEach(task => {
+      console.log(task[5], task[4])
+      if(task[3].name === work.name && task[5] <= currentTime-10){
+        timeWorked += task[5] - task[4]
+      }
+    })
+    // Round timeWorked to the nearest integer
+    timeWorked = Math.round(timeWorked);
+    axios.put('https://44ca-188-2-139-122.ngrok-free.app/updateWeeklyWork', {
+      work,
+      timeWorked,
+      id: user._id,
+    }).then(res => {
+      setWorks(res.data)
+      })
+    })
+  }, [currentTime])
+
+    // console.log(currentTime-10)
+    // const hours = Math.floor(timeWorked / 20);
+    // const minutes = Math.round((timeWorked / 20 - hours) * 60);
+    // const time = minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+    
+
+
+
+    // return time
+
+    const getWorkTime = (name) => {
+      const job = works.find(work => work.name === name);
+
+    const hours = Math.floor(job.weeklyWork / 20);
+    const minutes = Math.round((job.weeklyWork / 20 - hours) * 60);
+    const time = minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+      return time
+    }
+
+    const isItDone = (totalTime, currentTime) => {
+      const parseTime = (time) => {
+        const [hours, minutes] = time.split('h');
+        return parseInt(hours) * 60 + parseInt(minutes || 0);
+      };
+
+      const totalMinutes = parseTime(totalTime);
+      const currentMinutes = parseTime(currentTime);
+
+      return currentMinutes >= totalMinutes;
+    }
+
+
 
 
 
@@ -76,6 +155,8 @@ const [newWork, setNewWork] = useState({
   name: '',
   colors: ['', ''],
   currentTime: '1h',
+  weeklyWork: 0,
+  updatedAt: new Date(),
 })
 const [editIndex, setEditIndex] = useState(null)
 
@@ -83,6 +164,8 @@ const [editWork, setEditWork] = useState({
   name: '',
   colors: ['', ''],
   currentTime: '1h',
+  weeklyWork: 0,
+  updatedAt: new Date(),
 })
 
 
@@ -90,10 +173,21 @@ const [initialEditWork, setInitialEditWork] = useState({
   name: '',
   colors: ['', ''],
   currentTime: '1h',
+  weeklyWork: 0,
+  updatedAt: new Date(),
 })
 
+useEffect(() => {
+    axios.put('https://44ca-188-2-139-122.ngrok-free.app/restartNumber', {
+      id: user._id,
+    }).then(res => {
+      setUser(res.data)
+      setWorks(res.data.work)
+    })
+}, [])
+
+
 const openEditWork = (work, index) => {
-  console.log('work', work)
   setEditWork(work)
   setInitialEditWork(work)
   setEditIndex(index)
@@ -113,11 +207,10 @@ const onTimeChange = (event, selectedTime) => {
 
 
 const submitNewWork = () => {
-  axios.put('https://421e-188-2-139-122.ngrok-free.app/addJob', {
+  axios.put('https://44ca-188-2-139-122.ngrok-free.app/addJob', {
     newWork,
     id: user._id,
   }).then(res => {
-    console.log('newWork', res.data)
     setWorks(res.data.work)
     setUser(res.data)
     setIsWorkVisible(false)
@@ -125,29 +218,36 @@ const submitNewWork = () => {
       name: '',
       colors: ['', ''],
       currentTime: '1h',
+      weeklyWork: 0,
+      updatedAt: new Date(),
     })
   })
 }
 
 const submitEditWork = () => {
- axios.put('https://421e-188-2-139-122.ngrok-free.app/editJob', {
+ axios.put('https://44ca-188-2-139-122.ngrok-free.app/editJob', {
   editWork,
   index: editIndex,
   id: user._id,
  }).then(res => {
-  setWorks(res.data)
+  setUser(res.data)
+  setWorks(res.data.work)
   setIsWorkEditPopupVisible(false)
   setEditWork({
     name: '',
     colors: ['', ''],
     currentTime: '1h',
+    weeklyWork: 0,
+    updatedAt: new Date(),
   })
   setEditIndex(null)
  })
 }
 
+
+
 const submitDeleteWork = () => {
-  axios.put('https://421e-188-2-139-122.ngrok-free.app/deleteJob', {
+  axios.put('https://44ca-188-2-139-122.ngrok-free.app/deleteJob', {
     index: editIndex,
     id: user._id,
   }).then(res => {
@@ -157,10 +257,48 @@ const submitDeleteWork = () => {
       name: '',
       colors: ['', ''],
       currentTime: '1h',
+      weeklyWork: 0,
+      updatedAt: new Date(),
     })
     setEditIndex(null)
   })
 }
+
+const timeFromPoints = (points) => {
+  const hours = Math.floor(points / 20);
+  const minutes = Math.round((points / 20 - hours) * 60);
+  const time = minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+  return time
+}
+
+const findCurrentSession = () => {
+  const task = user.array[new Date().getDate() - 1].find(task => currentTime-10 > task[4] && currentTime-10 < task[5])
+  return task
+ }
+
+ let nextIndex = null;
+
+ const findFirstNextSession = () => {
+  const today = new Date().getDate() - 1;
+  nextIndex = today;
+  for (let i = today; i < user.array.length; i++) {
+    const task = user.array[i].find(task => {
+      if (i === today) {
+
+        return currentTime - 10 < task[4];
+      }
+      nextIndex = i;
+
+      return true; // For future days, return the first task
+    });
+    if (task) {
+      return task;
+    }
+  }
+  return null; // If no future tasks are found
+ }
+
+
 
   return(
       <SafeAreaView className="flex-1 h-full bg-zinc-950" edges={['top']}>
@@ -170,10 +308,13 @@ const submitDeleteWork = () => {
 							<Text className="text-white text-2xl font-bold">Next</Text>
             </View>
 
+            {findFirstNextSession() ? (
             <TouchableOpacity className="flex-row justify-between items-center p-4 bg-zinc-900 rounded-xl mb-4">
 							<View className="flex-row justify-center items-center">
 							<LinearGradient
-									colors={['#0EA5E9', '#085D83']}
+									colors={
+                  findFirstNextSession()[3].colors
+                  }
 									start={{x: 0, y: 0}}
 									end={{x: 0, y: 1}}
 									className="w-6 h-6 rounded-full"
@@ -181,15 +322,31 @@ const submitDeleteWork = () => {
 								</LinearGradient>
 						
 								<View className="flex-col justify-center items-start pl-2">
-									<Text className="text-white text-base font-semibold">Mobile app</Text>
-									<Text className="text-gray-400 text-sm font-pregular">coding</Text>
+									<Text className="text-white text-base font-semibold">{findFirstNextSession()[3].name}</Text>
+									<Text className="text-gray-400 text-sm font-pregular">{findFirstNextSession()[2]}</Text>
 								</View>
 							</View>
               <View className="flex-row justify-center items-center bg-zinc-800 rounded-xl px-2 py-1">
                 <Image source={icons.clockGray} className="w-3 h-3 mr-1" />
-                <Text className="text-gray-400 text-xs font-pregular">starting in 1h 37m</Text>
+                <Text className="text-gray-400 text-xs font-pregular">
+                  starting in {nextIndex !== new Date().getDate() - 1 
+                    ? timeFromPoints(findFirstNextSession()[4] + 
+                        ((nextIndex - (new Date().getDate() - 1)) > 1 
+                          ? (((nextIndex - 1) - (new Date().getDate() - 1)) * 480) 
+                          : 0) + 
+                        (480 - (currentTime-10)))
+                    : timeFromPoints(findFirstNextSession()[4]-(currentTime-10))}
+
+
+                </Text>
               </View>
 						</TouchableOpacity>
+            ) : 
+            (
+              <View className="flex-row justify-center items-center p-4 bg-zinc-900 rounded-xl mb-4">
+                <Text className="text-gray-400 text-sm font-pregular">No Tasks Scheduled</Text>
+              </View>
+            )}
 
             <TouchableOpacity
             onPress={() => router.push({pathname: 'log/SchedulePage'})} 
@@ -252,7 +409,7 @@ const submitDeleteWork = () => {
                   <Text className="text-white text-base font-psemibold pl-2">{work.name}</Text>
                   </View>
                   <View className="flex-row justify-center items-center">
-                    <Text className={` text-base font-psemibold ${0 >= work.currentTime ? 'text-sky-400' : 'text-white'}`}>0h <Text className={`${0 >= work.currentTime ? 'text-sky-400' : 'text-gray-400'}`}>/ {work.currentTime} week</Text></Text>
+                    <Text className={` text-base font-psemibold ${isItDone(work.currentTime, getWorkTime(work.name)) ? 'text-sky-400' : 'text-white'}`}>{getWorkTime(work.name)} <Text className={`${isItDone(work.currentTime, getWorkTime(work.name)) ? 'text-sky-400' : 'text-gray-400'}`}>/ {work.currentTime}</Text></Text>
                   </View>
                 </TouchableOpacity>
               ))}
@@ -261,6 +418,7 @@ const submitDeleteWork = () => {
           </ScrollView>
 
           <View className="px-4 pb-2">
+          {!findCurrentSession() ? (
         <TouchableOpacity 
           onPress={() => {setIsStartSessionPopupVisible(true)}}
           className="w-full rounded-full overflow-hidden shadow-lg pt-2"
@@ -275,7 +433,39 @@ const submitDeleteWork = () => {
 						<Text className="text-white text-lg font-semibold">Start Session</Text>
 					</LinearGradient>
 					</TouchableOpacity>
+
+            ) : (
+              <TouchableOpacity 
+              onPress={() => {}}
+              className="w-full rounded-full overflow-hidden shadow-lg pt-2"
+            >
+              <LinearGradient
+                colors={['#27272a', '#18181b']}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 1}}
+                className="w-full rounded-full h-14 flex-row justify-between items-center px-4"
+              >
+			<View className="flex-row items-center">
+				<LinearGradient
+						colors={findCurrentSession()[3].colors}
+						start={{x: 0, y: 0}}
+						end={{x: 0, y: 1}}
+						className="w-6 h-6 rounded-full mr-1"
+					>
+				</LinearGradient>
+                <View className="flex-col items-start">
+					<Text className="text-white text-base font-semibold">{findCurrentSession()[2]}</Text>
+					<Text className="text-zinc-400 text-sm font-regular">{findCurrentSession()[3].name}</Text>
 				</View>
+				</View>
+				<View className="flex-row items-center">
+				  <Text className="text-white text-base font-semibold">{timeFromPoints(findCurrentSession()[5]-(currentTime-10))}</Text>
+          <Image source={icons.timerWhite} className="w-4 h-4 ml-1 tint-white" />
+				</View>
+              </LinearGradient>
+              </TouchableOpacity>
+            )}
+          </View>
 			</View>
 
       <BottomPopup
@@ -345,7 +535,7 @@ const submitDeleteWork = () => {
     </View>
     
     <View className="mb-4">
-      <Text className="text-gray-400 text-sm mb-2">Targeted work per week:</Text>
+      <Text className="text-gray-400 text-sm mb-2">Targeted work per day:</Text>
       <View className="flex-row items-center justify-between bg-zinc-800 rounded-xl p-2">
         <TouchableOpacity 
         onPress={() => {
@@ -371,7 +561,7 @@ const submitDeleteWork = () => {
           <Text className="text-white text-xl">+</Text>
         </TouchableOpacity>
       </View>
-      <Text className="text-gray-500 text-sm mt-2 text-center">overall work per week left: 37h 30m</Text>
+      <Text className="text-gray-500 text-sm mt-2 text-center">overall work per day left: 37h 30m</Text>
     </View>
     
     <View className="flex-1" />
@@ -586,7 +776,7 @@ const submitDeleteWork = () => {
     </View>
     
     <View className="mb-4">
-      <Text className="text-gray-400 text-sm mb-2">Targeted work per week:</Text>
+      <Text className="text-gray-400 text-sm mb-2">Targeted work per day:</Text>
       <View className="flex-row items-center justify-between bg-zinc-800 rounded-xl p-2">
         <TouchableOpacity 
         onPress={() => {
@@ -612,7 +802,7 @@ const submitDeleteWork = () => {
           <Text className="text-white text-xl">+</Text>
         </TouchableOpacity>
       </View>
-      <Text className="text-gray-500 text-sm mt-2 text-center">overall work per week left: 37h 30m</Text>
+      <Text className="text-gray-500 text-sm mt-2 text-center">overall work per day left: 37h 30m</Text>
     </View>
     
     <View className="flex-1" />

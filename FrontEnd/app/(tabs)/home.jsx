@@ -49,6 +49,52 @@ const Home = () => {
 		progress: 20, // percentage of progress (0-100)
 	};
 
+	const [currentTime, setCurrentTime] = useState(0);
+  
+	useEffect(() => {
+	  const updateCurrentLine = () => {
+		const currentTime = new Date();
+		const hours24 = currentTime.getHours();
+		const minutes = currentTime.getMinutes();
+  
+		let newCurrentLine = 10 + hours24 * 20 + minutes / 3;
+  
+		setCurrentTime(newCurrentLine);
+	  };
+  
+	  updateCurrentLine();
+	  const intervalId = setInterval(updateCurrentLine, 60000);
+  
+	  return () => clearInterval(intervalId);
+	}, []);
+
+	const workToday = () => {
+		const currentDate = new Date();
+		const dayOfMonth = currentDate.getDate();
+
+		let timeWorked = 0;
+		user.array[dayOfMonth-1].forEach(task => {
+			if(task[5] < currentTime-10){
+				timeWorked += task[5] - task[4]
+			}
+			
+		})
+		timeWorked = Math.round(timeWorked);
+
+		const hours = Math.floor(timeWorked / 20);
+		const minutes = Math.round((timeWorked / 20 - hours) * 60);
+		const time = minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+		return time
+
+	}
+
+	const timeFromPoints = (points) => {
+		const hours = Math.floor(points / 20);
+		const minutes = Math.round((points / 20 - hours) * 60);
+		const time = minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+		return time
+	}
+
 
 	const points = {
 		daily: [
@@ -85,11 +131,10 @@ const Home = () => {
 
 	const [works, setWorks] = useState(user?.work || []);
 
-	useEffect(() => {
-		console.log('Home');
+	useEffect(() => {;
 		const email = user.email;
 
-		axios.post('https://421e-188-2-139-122.ngrok-free.app/getUser', { email })
+		axios.post('https://44ca-188-2-139-122.ngrok-free.app/getUser', { email })
 			.then(res => {
 				setIsLoading(false);
 				setUser(res.data);
@@ -142,6 +187,14 @@ const Home = () => {
 		}
 	};
 
+	const findCurrentSession = () => {
+		const task = user.array[new Date().getDate() - 1].find(task => currentTime-10 > task[4] && currentTime-10 < task[5])
+		return task
+	   }        
+
+
+
+	
 	return (
 		<SafeAreaView className="flex-1 bg-zinc-950" edges={['top']}>
 			<View className="flex-1">
@@ -293,7 +346,7 @@ const Home = () => {
 						<View className="flex-row justify-center items-baseline px-4">
 							<MaskedView
 								maskElement={
-									<Text className="text-white text-4xl font-bold">2h 24m</Text>
+									<Text className="text-white text-4xl font-bold">{workToday()}</Text>
 								}
 							>
 								<LinearGradient
@@ -301,7 +354,7 @@ const Home = () => {
 									start={{x: 0, y: 0}}
 									end={{x: 0, y: 1}}
 								>
-									<Text className="text-white text-4xl font-bold opacity-0">2h 24m</Text>
+									<Text className="text-white text-4xl font-bold opacity-0">{workToday()}</Text>
 								</LinearGradient>
 							</MaskedView>
 							<Text className="text-white text-2xl font-bold mx-1">/</Text>
@@ -325,10 +378,11 @@ const Home = () => {
 
 
 					<View className="flex flex-col">
-						<TouchableOpacity className="flex-row justify-between items-center p-4">
+						{user.array[new Date().getDate() - 1].filter(task => task[5] < currentTime - 10).map((task, index) => (
+						<TouchableOpacity key={index} className="flex-row justify-between items-center p-4">
 							<View className="flex-row justify-center items-center">
 							<LinearGradient
-									colors={['#0EA5E9', '#085D83']}
+									colors={task[3].colors}
 									start={{x: 0, y: 0}}
 									end={{x: 0, y: 1}}
 									className="w-6 h-6 rounded-full"
@@ -336,30 +390,14 @@ const Home = () => {
 								</LinearGradient>
 						
 								<View className="flex-col justify-center items-start pl-2">
-									<Text className="text-white text-base font-semibold">Mobile app</Text>
-									<Text className="text-gray-400 text-sm font-pregular">coding</Text>
+									<Text className="text-white text-base font-semibold">{task[3].name}</Text>
+									<Text className="text-gray-400 text-sm font-pregular">{task[2]}</Text>
 								</View>
 							</View>
-							<Text className="text-white text-base font-psemibold">1h 24m</Text>
+							<Text className="text-white text-base font-psemibold">{timeFromPoints(Math.round(task[5]-task[4]))}</Text>
 						</TouchableOpacity>
+						))}
 
-						<TouchableOpacity className="flex-row justify-between items-center p-4">
-							<View className="flex-row justify-center items-center">
-							<LinearGradient
-									colors={['#DC2626', '#761414']}
-									start={{x: 0, y: 0}}
-									end={{x: 0, y: 1}}
-									className="w-6 h-6 rounded-full"
-								>
-								</LinearGradient>
-						
-								<View className="flex-col justify-center items-start pl-2">
-									<Text className="text-white text-base font-semibold">School</Text>
-									<Text className="text-gray-400 text-sm font-pregular">Homework</Text>
-								</View>
-							</View>
-							<Text className="text-white text-base font-psemibold">1h</Text>
-						</TouchableOpacity>
 					</View>
 				</ScrollView>
 
@@ -367,6 +405,7 @@ const Home = () => {
 				
 				{/* Start Session Button */}
 				<View className="px-4 pb-2">
+            {!findCurrentSession() ? (
         <TouchableOpacity 
           onPress={() => {setIsStartSessionPopupVisible(true)}}
           className="w-full rounded-full overflow-hidden shadow-lg pt-2"
@@ -381,7 +420,39 @@ const Home = () => {
 						<Text className="text-white text-lg font-semibold">Start Session</Text>
 					</LinearGradient>
 					</TouchableOpacity>
+
+            ) : (
+              <TouchableOpacity 
+              onPress={() => {}}
+              className="w-full rounded-full overflow-hidden shadow-lg pt-2"
+            >
+              <LinearGradient
+                colors={['#27272a', '#18181b']}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 1}}
+                className="w-full rounded-full h-14 flex-row justify-between items-center px-4"
+              >
+			<View className="flex-row items-center">
+				<LinearGradient
+						colors={findCurrentSession()[3].colors}
+						start={{x: 0, y: 0}}
+						end={{x: 0, y: 1}}
+						className="w-6 h-6 rounded-full mr-1"
+					>
+				</LinearGradient>
+                <View className="flex-col items-start">
+					<Text className="text-white text-base font-semibold">{findCurrentSession()[2]}</Text>
+					<Text className="text-zinc-400 text-sm font-regular">{findCurrentSession()[3].name}</Text>
 				</View>
+				</View>
+				<View className="flex-row items-center">
+				  <Text className="text-white text-base font-semibold">{timeFromPoints(findCurrentSession()[5]-(currentTime-10))}</Text>
+         		 <Image source={icons.timerWhite} className="w-4 h-4 ml-1 tint-white" />
+				</View>
+              </LinearGradient>
+              </TouchableOpacity>
+            )}
+          </View>
 			</View>
 			
 			<BottomPopup

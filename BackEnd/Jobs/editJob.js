@@ -9,7 +9,7 @@ const EditJob = async (req, res) => {
             user.work[index] = editWork;
         }
         await user.save();
-        res.json(user.work);
+        res.json(user);
     } catch (error) {
         console.error('Error occurred:', error); // More detailed error logging
         res.status(400).json({ message: error.message });

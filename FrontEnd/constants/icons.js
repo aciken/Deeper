@@ -26,6 +26,11 @@ import clockGray from "../assets/icons/clock-gray.png";
 import plusGray from "../assets/icons/plus-gray.png";
 import workGray from "../assets/icons/workGray.png";
 import chevronRight from "../assets/icons/chevron-right-gray.png";
+import timerWhite from "../assets/icons/timerWhite.png";
+import alertCircle from "../assets/icons/alertCircle.png";
+import cancel from "../assets/icons/close-custom.png";
+import check from "../assets/icons/check.png";
+import save from "../assets/icons/content-save.png";
 
 export default {
   play,
@@ -56,4 +61,9 @@ export default {
   plusGray,
   workGray,
   chevronRight,
+  timerWhite,
+  alertCircle,
+  cancel,
+  check,
+  save,
 };

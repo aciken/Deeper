@@ -52,6 +52,7 @@ const DownButton = ({buttonText, icon, onPress}) => {
 	)
 }
 
+
 const SchedulePage = () => {
 	const { user, setUser, setSelected } = useGlobalContext();
 	const router = useRouter();
@@ -71,7 +72,7 @@ const SchedulePage = () => {
 	const [showEndPicker, setShowEndPicker] = useState(false);
 	const [index,setIndex] = useState(null)
 
-	console.log(user.array[clicked-1])
+
 
 	const [showWorkPicker, setShowWorkPicker] = useState(false);
 	const [isWorkDropdownVisible, setIsWorkDropdownVisible] = useState(false);
@@ -136,7 +137,7 @@ const SchedulePage = () => {
 
 
 
-		axios.put('https://421e-188-2-139-122.ngrok-free.app/addWork', {
+		axios.put('https://44ca-188-2-139-122.ngrok-free.app/addWork', {
 		  data,
 		  id: user._id,
 		  clicked,
@@ -163,8 +164,7 @@ const SchedulePage = () => {
 
 	
     const deleteFunc = () => {
-		console.log(index)
-        axios.put('https://421e-188-2-139-122.ngrok-free.app/deleteWork', {
+        axios.put('https://44ca-188-2-139-122.ngrok-free.app/deleteWork', {
             id: user._id,
             index,
             clicked,
@@ -182,7 +182,7 @@ const SchedulePage = () => {
 
         const data  = [start,end, name, selectedWork]
 
-        axios.put('https://421e-188-2-139-122.ngrok-free.app/editWork', {
+        axios.put('https://44ca-188-2-139-122.ngrok-free.app/editWork', {
             data,
             id: user._id,
             index,
@@ -214,11 +214,7 @@ const SchedulePage = () => {
 	};
 
 	// Add this function to handle task editing
-	const handleEditTask = (task, index) => {
-		// Implement the logic to edit the task
-		console.log('Editing task:', task, 'at index:', index);
-		// You might want to navigate to an edit task screen or show another popup
-	};
+
 
 	function convertTimeStringToDate(timeString) {
 		const [hours, minutes] = timeString.split(':');
@@ -241,9 +237,55 @@ const SchedulePage = () => {
 	const [selectedDate, setSelectedDate] = useState(null);
 	const [showDatePicker, setShowDatePicker] = useState(false);
 
-	useEffect(() => {
-		console.log(selectedDates)
-	}, [selectedDates])
+
+	
+
+	
+	const [isPresetPopupVisible, setIsPresetPopupVisible] = useState(false);
+	const [presets, setPresets] = useState([
+		{
+			name: "Morning Work",
+			time: "4h",
+			sessions: [
+				['06:00', '08:00', {name: 'mobile app', colors: ['#0EA5E9', '#60A5FA'], currentTime: '2h'}, 120,160],
+				['09:00', '11:00', {name: 'mobile app', colors: ['#0EA5E9', '#60A5FA'], currentTime: '2h'}, 180,220],
+				['12:00', '14:00', {name: 'mobile app', colors: ['#0EA5E9', '#60A5FA'], currentTime: '2h'}, 240,280]
+			]
+		},
+		{
+			name: "Evening Work",
+			time: "5h 30m",
+			sessions: [
+				['15:00', '17:00', {name: 'mobile app', colors: ['#0EA5E9', '#60A5FA'], currentTime: '2h'}, 210,250],
+				['18:00', '20:00', {name: 'mobile app', colors: ['#0EA5E9', '#60A5FA'], currentTime: '2h'}, 270,310],
+				['21:00', '23:00', {name: 'mobile app', colors: ['#0EA5E9', '#60A5FA'], currentTime: '2h'}, 330,370]
+			]
+		},
+		{
+			name: "Noon Work",
+			time: "2h",
+			sessions: [
+				['12:00', '14:00', {name: 'mobile app', colors: ['#0EA5E9', '#60A5FA'], currentTime: '2h'}, 240,280]
+			]
+		}
+	])
+
+	const timeFromPoints = (points) => {
+		const hours = Math.floor(points / 20);
+		const minutes = Math.round((points / 20 - hours) * 60);
+		const time = minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+		return time
+	}
+
+	const workLength = (sessions) => {
+		let total = 0;
+		sessions.forEach(session => {
+			total += session[4] - session[3]
+		})
+		total = Math.round(total)
+		return timeFromPoints(total)
+		
+	}
 	  
 
 	return (
@@ -324,7 +366,7 @@ const SchedulePage = () => {
 				<View className="flex-row justify-center pb-4 ">
 						<DownButton buttonText="Add Task" icon={icons.plusGray} onPress={() => setIsPopupVisible(true)} />
 						<DownButton buttonText="Task List" icon={icons.listBlue} onPress={() => setIsTaskListVisible(!isTaskListVisible)} />
-						<DownButton buttonText="Presets" icon={icons.presets} onPress={() => {}} />
+						<DownButton buttonText="Presets" icon={icons.presets} onPress={() => {setIsPresetPopupVisible(true)}} />
 				</View>
 
 				<BottomPopup
@@ -806,7 +848,7 @@ const SchedulePage = () => {
 								.map(({ task, index }) => (
 									<TouchableOpacity
 										key={index}
-										className="w-full flex-row items-center justify-between p-2 bg-zinc-800 rounded-xl border border-zinc-700 mb-4"
+										className="w-full flex-row items-center justify-between p-2 bg-zinc-800 rounded-xl  mb-4"
 										onPress={() => {
 											setIsTaskListVisible(false);
 											changeEditData(
@@ -831,7 +873,7 @@ const SchedulePage = () => {
 											/>
 											<View className="flex-col items-start">
 												<Text className="text-zinc-200 text-base font-psemibold">{task[2]}</Text>
-												<Text className="text-zinc-600 text-sm font-pmedium">{task[3].name}</Text>
+												<Text className="text-zinc-500 text-sm font-pmedium">{task[3].name}</Text>
 											</View>
 										</View>
 										<Text className="text-zinc-200 text-lg font-psemibold">{task[0]}-{task[1]}</Text>
@@ -843,28 +885,96 @@ const SchedulePage = () => {
 							</View>
 						)}
 					</ScrollView>
-					<TouchableOpacity
+					<TouchableOpacity 
 						onPress={() => {
 							setIsTaskListVisible(false);
 							setTimeout(() => {
 								setIsPopupVisible(true);
 							}, 250);
 						}}
-						className="mt-4 w-full bg-blue-600 h-12 rounded-xl justify-center items-center"
+						className="w-full rounded-full overflow-hidden shadow-lg pt-2 mb-4"
 					>
-						<LinearGradient
-							colors={['#38bdf8', '#818cf8']}
-							start={{x: 0, y: 0}}
-							end={{x: 1, y: 1}}
-							className="w-full h-full rounded-xl justify-center items-center"
-						>
-							<Text className="text-white font-bold text-lg">Add New Task</Text>
-						</LinearGradient>
+          <LinearGradient
+            colors={['#0ea5e9', '#60a5fa']}
+            start={{x: 0, y: 0}}
+            end={{x: 1, y: 1}}
+            className="w-full rounded-full h-14 flex-row justify-center items-center"
+          >
+						<Text className="text-white text-lg font-semibold">Add New Session</Text>
+					</LinearGradient>
 					</TouchableOpacity>
 				</BottomPopup>
+				<BottomPopup
+					visible={isPresetPopupVisible}
+					onClose={() => setIsPresetPopupVisible(false)}
+					height={0.65}
+				>
+					<ScrollView className="flex-grow">
+					<MaskedView
+              maskElement={
+				<Text className="text-3xl font-bold text-white mb-6 text-center">Presets</Text>
+                  }
+                >
+                <LinearGradient
+                  colors={['#D4D4D8', '#71717A']}
+                  start={{x: 0, y: 0}}
+                  end={{x: 0, y: 1}}
+                >
+					<Text className="text-3xl font-bold text-white mb-6 text-center opacity-0">Presets</Text>
+                </LinearGradient>
+					</MaskedView>
+				  <View className="flex-col justify-center items-center">
+					{user.preset.map((preset, index) => (
+						<TouchableOpacity 
+							onPress={() => {
+								console.log(preset)
+								router.push({
+									pathname: 'log/addPreset', 
+									params: { preset: JSON.stringify(preset) }
+								});
+								setTimeout(() => {
+									setIsPresetPopupVisible(false);
+								}, 200);
+							}}
+						key={index} className="w-full flex-row items-center justify-between p-2 bg-zinc-800 rounded-xl  mb-4">
+							<Text className="text-zinc-200 text-base font-psemibold">{preset.name}</Text>
+							<View className="flex-row items-center justify-center rounded-2xl p-2 bg-zinc-900">
+								<Image source={icons.clockGray} className="w-3 h-3 mr-1" />
+								<Text className="text-zinc-400 text-sm font-pregular">{workLength(preset.sessions)} of work</Text>
+							</View>
+						</TouchableOpacity>
+					))}
+				  </View>
+					</ScrollView>
+
+					<View className="flex-col justify-center items-start w-full">
+					<View className="flex-row items-center justify-start">
+						<Image source={icons.alertCircle} className="w-5 h-5 mr-2" />
+						<Text className="text-blue-500 text-xs font-pregular">Added presets will delete overlapping sessions</Text>
+					</View>
+						<TouchableOpacity 
+								  onPress={() => {}}
+								  className="w-full rounded-full overflow-hidden shadow-lg pt-2 mb-4"
+								>
+									
+								  <LinearGradient
+									colors={['#0ea5e9', '#60a5fa']}
+									start={{x: 0, y: 0}}
+									end={{x: 1, y: 1}}
+									className="w-full rounded-full h-14 flex-row justify-center items-center"
+								  >
+							<Text className="text-white text-lg font-semibold">Create New Preset</Text>
+						</LinearGradient>
+						</TouchableOpacity>
+					</View>
+				</BottomPopup>
+
+
 			</View>
 		</SafeAreaView>
 	);
 };
+
+
 
 export default SchedulePage;

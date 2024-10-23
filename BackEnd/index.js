@@ -15,6 +15,7 @@ const addJob = require('./Jobs/addJob');
 const getJob = require('./GetData/getJob');
 const deleteJob = require('./Jobs/deleteJob');
 const editJob = require('./Jobs/editJob');
+const updateWeeklyWork = require('./Jobs/updateWeeklyWork');
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
@@ -30,7 +31,7 @@ app.put('/addJob', addJob);
 app.post('/getJob', getJob);
 app.put('/deleteJob', deleteJob);
 app.put('/editJob', editJob);
-
+app.put('/updateWeeklyWork', updateWeeklyWork);
 
 
 app.listen(port, () => {

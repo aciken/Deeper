@@ -42,11 +42,9 @@ const HourTable = ({ user, clicked, todayDateNumber, all, changeEditVisible, cha
     return date;
   }
 
-  console.log(user.array[clicked-1])
 
   const renderTasks = useMemo(() => {
     return user.array[clicked-1] && user.array[clicked-1].map((task, index) => {
-      console.log(task,index)
       const [startHour, startMinute] = task[0].split(':');
       const [endHour, endMinute] = task[1].split(':');
 
@@ -59,9 +57,9 @@ const HourTable = ({ user, clicked, todayDateNumber, all, changeEditVisible, cha
           key={index} 
           style={{ top: start * 4, height: dif * 4 }} 
           className={`absolute z-20 left-20 flex-row justify-start items-end rounded-lg overflow-hidden ${
-            currentLine > start && currentLine < end ? 'border border-sky-200' : 'border border-zinc-700'
+            currentLine > start && currentLine < end ? 'border border-zinc-200' : 'border border-zinc-700'
           } w-[70%] ${
-            task[4] < (currentLine-10) && clicked === todayDateNumber ? 'opacity-60' : ''
+            task[5] < (currentLine-10) && clicked === todayDateNumber ? 'opacity-60' : ''
           }`}
           activeOpacity={0.8}
           onPress={() => router.push({pathname: 'log/timer', params: {clicked, index, task, currentLine, all}})}
@@ -69,7 +67,6 @@ const HourTable = ({ user, clicked, todayDateNumber, all, changeEditVisible, cha
             Vibration.vibrate(100);
             changeEditVisible()
             setIndex(index)
-            console.log(index)
             changeEditData(
               convertTimeStringToDate(task[0]),
               convertTimeStringToDate(task[1]),
@@ -79,7 +76,7 @@ const HourTable = ({ user, clicked, todayDateNumber, all, changeEditVisible, cha
           }}
         >
           <LinearGradient 
-							colors={['#38bdf8', '#818cf8']}
+							colors={task[3].colors}
 							start={{x: 0, y: 0}}
 							end={{x: 1, y: 1}}
 							className="w-full h-full rounded-lg justify-center items-center">
