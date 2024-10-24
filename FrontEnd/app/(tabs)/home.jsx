@@ -27,6 +27,10 @@ const Home = () => {
 	const [duration, setDuration] = useState({ hours: 0, minutes: 0 });
 	const [showTimePicker, setShowTimePicker] = useState(false);
 
+	const findTaskById = (id) => {
+		return user.work.find(work => work._id === id)
+	}
+
 	// Sample data for the last week (hours worked each day)
 	const weekData = [
 		{ day: 'Mon', hours: 6 },
@@ -134,7 +138,7 @@ const Home = () => {
 	useEffect(() => {;
 		const email = user.email;
 
-		axios.post('https://44ca-188-2-139-122.ngrok-free.app/getUser', { email })
+		axios.post('https://2727-188-2-139-122.ngrok-free.app/getUser', { email })
 			.then(res => {
 				setIsLoading(false);
 				setUser(res.data);
@@ -382,7 +386,7 @@ const Home = () => {
 						<TouchableOpacity key={index} className="flex-row justify-between items-center p-4">
 							<View className="flex-row justify-center items-center">
 							<LinearGradient
-									colors={task[3].colors}
+									colors={findTaskById(task[3]).colors}
 									start={{x: 0, y: 0}}
 									end={{x: 0, y: 1}}
 									className="w-6 h-6 rounded-full"
@@ -390,7 +394,7 @@ const Home = () => {
 								</LinearGradient>
 						
 								<View className="flex-col justify-center items-start pl-2">
-									<Text className="text-white text-base font-semibold">{task[3].name}</Text>
+									<Text className="text-white text-base font-semibold">{findTaskById(task[3]).name}</Text>
 									<Text className="text-gray-400 text-sm font-pregular">{task[2]}</Text>
 								</View>
 							</View>
@@ -434,7 +438,7 @@ const Home = () => {
               >
 			<View className="flex-row items-center">
 				<LinearGradient
-						colors={findCurrentSession()[3].colors}
+						colors={findTaskById(findCurrentSession()[3]).colors}
 						start={{x: 0, y: 0}}
 						end={{x: 0, y: 1}}
 						className="w-6 h-6 rounded-full mr-1"
@@ -442,7 +446,7 @@ const Home = () => {
 				</LinearGradient>
                 <View className="flex-col items-start">
 					<Text className="text-white text-base font-semibold">{findCurrentSession()[2]}</Text>
-					<Text className="text-zinc-400 text-sm font-regular">{findCurrentSession()[3].name}</Text>
+					<Text className="text-zinc-400 text-sm font-regular">{findTaskById(findCurrentSession()[3]).name}</Text>
 				</View>
 				</View>
 				<View className="flex-row items-center">

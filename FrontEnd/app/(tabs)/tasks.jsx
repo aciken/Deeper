@@ -52,31 +52,31 @@ const Tasks = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  useEffect(() => {
-    const currentDate = new Date();
-    const dayOfMonth = currentDate.getDate();
+  // useEffect(() => {
+  //   const currentDate = new Date();
+  //   const dayOfMonth = currentDate.getDate();
 
 
 
-    works.forEach(work => {
-      let timeWorked = 0;
-    user.array[dayOfMonth-1].forEach(task => {
-      console.log(task[5], task[4])
-      if(task[3].name === work.name && task[5] <= currentTime-10){
-        timeWorked += task[5] - task[4]
-      }
-    })
-    // Round timeWorked to the nearest integer
-    timeWorked = Math.round(timeWorked);
-    axios.put('https://44ca-188-2-139-122.ngrok-free.app/updateWeeklyWork', {
-      work,
-      timeWorked,
-      id: user._id,
-    }).then(res => {
-      setWorks(res.data)
-      })
-    })
-  }, [currentTime])
+  //   works.forEach(work => {
+  //     let timeWorked = 0;
+  //   user.array[dayOfMonth-1].forEach(task => {
+  //     console.log(task[5], task[4])
+  //     if(task[3].name === work.name && task[5] <= currentTime-10){
+  //       timeWorked += task[5] - task[4]
+  //     }
+  //   })
+  //   // Round timeWorked to the nearest integer
+  //   timeWorked = Math.round(timeWorked);
+  //   axios.put('https://44ca-188-2-139-122.ngrok-free.app/updateWeeklyWork', {
+  //     work,
+  //     timeWorked,
+  //     id: user._id,
+  //   }).then(res => {
+  //     setWorks(res.data)
+  //     })
+  //   })
+  // }, [currentTime])
 
     // console.log(currentTime-10)
     // const hours = Math.floor(timeWorked / 20);
@@ -155,8 +155,6 @@ const [newWork, setNewWork] = useState({
   name: '',
   colors: ['', ''],
   currentTime: '1h',
-  weeklyWork: 0,
-  updatedAt: new Date(),
 })
 const [editIndex, setEditIndex] = useState(null)
 
@@ -164,8 +162,6 @@ const [editWork, setEditWork] = useState({
   name: '',
   colors: ['', ''],
   currentTime: '1h',
-  weeklyWork: 0,
-  updatedAt: new Date(),
 })
 
 
@@ -173,18 +169,16 @@ const [initialEditWork, setInitialEditWork] = useState({
   name: '',
   colors: ['', ''],
   currentTime: '1h',
-  weeklyWork: 0,
-  updatedAt: new Date(),
 })
 
-useEffect(() => {
-    axios.put('https://44ca-188-2-139-122.ngrok-free.app/restartNumber', {
-      id: user._id,
-    }).then(res => {
-      setUser(res.data)
-      setWorks(res.data.work)
-    })
-}, [])
+// useEffect(() => {
+//     axios.put('https://2727-188-2-139-122.ngrok-free.app/restartNumber', {
+//       id: user._id,
+//     }).then(res => {
+//       setUser(res.data)
+//       setWorks(res.data.work)
+//     })
+// }, [])
 
 
 const openEditWork = (work, index) => {
@@ -204,10 +198,30 @@ const onTimeChange = (event, selectedTime) => {
   }
 };
 
+const workToday = (job) => {
+  const currentDate = new Date();
+  const dayOfMonth = currentDate.getDate();
+
+  let timeWorked = 0;
+  user.array[dayOfMonth-1].forEach(task => {
+    if(task[5] < currentTime-10 && findTaskById(task[3]).name === job.name){
+      timeWorked += task[5] - task[4]
+    }
+    
+  })
+  timeWorked = Math.round(timeWorked);
+
+  const hours = Math.floor(timeWorked / 20);
+  const minutes = Math.round((timeWorked / 20 - hours) * 60);
+  const time = minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+  return time
+
+}
+
 
 
 const submitNewWork = () => {
-  axios.put('https://44ca-188-2-139-122.ngrok-free.app/addJob', {
+  axios.put('https://2727-188-2-139-122.ngrok-free.app/addJob', {
     newWork,
     id: user._id,
   }).then(res => {
@@ -218,14 +232,12 @@ const submitNewWork = () => {
       name: '',
       colors: ['', ''],
       currentTime: '1h',
-      weeklyWork: 0,
-      updatedAt: new Date(),
     })
   })
 }
 
 const submitEditWork = () => {
- axios.put('https://44ca-188-2-139-122.ngrok-free.app/editJob', {
+ axios.put('https://2727-188-2-139-122.ngrok-free.app/editJob', {
   editWork,
   index: editIndex,
   id: user._id,
@@ -237,8 +249,6 @@ const submitEditWork = () => {
     name: '',
     colors: ['', ''],
     currentTime: '1h',
-    weeklyWork: 0,
-    updatedAt: new Date(),
   })
   setEditIndex(null)
  })
@@ -247,7 +257,7 @@ const submitEditWork = () => {
 
 
 const submitDeleteWork = () => {
-  axios.put('https://44ca-188-2-139-122.ngrok-free.app/deleteJob', {
+  axios.put('https://2727-188-2-139-122.ngrok-free.app/deleteJob', {
     index: editIndex,
     id: user._id,
   }).then(res => {
@@ -257,8 +267,6 @@ const submitDeleteWork = () => {
       name: '',
       colors: ['', ''],
       currentTime: '1h',
-      weeklyWork: 0,
-      updatedAt: new Date(),
     })
     setEditIndex(null)
   })
@@ -299,6 +307,17 @@ const findCurrentSession = () => {
  }
 
 
+ useEffect(() => {
+  works.forEach(work => {
+    console.log(work._id)
+  })
+ }, [works])
+
+ const findTaskById = (id) => {
+  return user.work.find(work => work._id === id)
+}
+
+
 
   return(
       <SafeAreaView className="flex-1 h-full bg-zinc-950" edges={['top']}>
@@ -313,7 +332,7 @@ const findCurrentSession = () => {
 							<View className="flex-row justify-center items-center">
 							<LinearGradient
 									colors={
-                  findFirstNextSession()[3].colors
+                  findTaskById(findFirstNextSession()[3]).colors
                   }
 									start={{x: 0, y: 0}}
 									end={{x: 0, y: 1}}
@@ -322,7 +341,7 @@ const findCurrentSession = () => {
 								</LinearGradient>
 						
 								<View className="flex-col justify-center items-start pl-2">
-									<Text className="text-white text-base font-semibold">{findFirstNextSession()[3].name}</Text>
+									<Text className="text-white text-base font-semibold">{findTaskById(findFirstNextSession()[3]).name}</Text>
 									<Text className="text-gray-400 text-sm font-pregular">{findFirstNextSession()[2]}</Text>
 								</View>
 							</View>
@@ -409,7 +428,7 @@ const findCurrentSession = () => {
                   <Text className="text-white text-base font-psemibold pl-2">{work.name}</Text>
                   </View>
                   <View className="flex-row justify-center items-center">
-                    <Text className={` text-base font-psemibold ${isItDone(work.currentTime, getWorkTime(work.name)) ? 'text-sky-400' : 'text-white'}`}>{getWorkTime(work.name)} <Text className={`${isItDone(work.currentTime, getWorkTime(work.name)) ? 'text-sky-400' : 'text-gray-400'}`}>/ {work.currentTime}</Text></Text>
+                    <Text className={` text-base font-psemibold ${isItDone(work.currentTime, workToday(work)) ? 'text-sky-400' : 'text-white'}`}>{workToday(work)} <Text className={`${isItDone(work.currentTime, workToday(work)) ? 'text-sky-400' : 'text-gray-400'}`}>/ {work.currentTime}</Text></Text>
                   </View>
                 </TouchableOpacity>
               ))}
@@ -447,7 +466,7 @@ const findCurrentSession = () => {
               >
 			<View className="flex-row items-center">
 				<LinearGradient
-						colors={findCurrentSession()[3].colors}
+						colors={findTaskById(findCurrentSession()[3]).colors}
 						start={{x: 0, y: 0}}
 						end={{x: 0, y: 1}}
 						className="w-6 h-6 rounded-full mr-1"
@@ -455,7 +474,7 @@ const findCurrentSession = () => {
 				</LinearGradient>
                 <View className="flex-col items-start">
 					<Text className="text-white text-base font-semibold">{findCurrentSession()[2]}</Text>
-					<Text className="text-zinc-400 text-sm font-regular">{findCurrentSession()[3].name}</Text>
+					<Text className="text-zinc-400 text-sm font-regular">{findTaskById(findCurrentSession()[3]).name}</Text>
 				</View>
 				</View>
 				<View className="flex-row items-center">

@@ -137,7 +137,7 @@ const SchedulePage = () => {
 
 
 
-		axios.put('https://44ca-188-2-139-122.ngrok-free.app/addWork', {
+		axios.put('https://2727-188-2-139-122.ngrok-free.app/addWork', {
 		  data,
 		  id: user._id,
 		  clicked,
@@ -164,7 +164,7 @@ const SchedulePage = () => {
 
 	
     const deleteFunc = () => {
-        axios.put('https://44ca-188-2-139-122.ngrok-free.app/deleteWork', {
+        axios.put('https://2727-188-2-139-122.ngrok-free.app/deleteWork', {
             id: user._id,
             index,
             clicked,
@@ -182,7 +182,7 @@ const SchedulePage = () => {
 
         const data  = [start,end, name, selectedWork]
 
-        axios.put('https://44ca-188-2-139-122.ngrok-free.app/editWork', {
+        axios.put('https://2727-188-2-139-122.ngrok-free.app/editWork', {
             data,
             id: user._id,
             index,
@@ -280,11 +280,15 @@ const SchedulePage = () => {
 	const workLength = (sessions) => {
 		let total = 0;
 		sessions.forEach(session => {
-			total += session[4] - session[3]
+			total += session[5] - session[4]
 		})
 		total = Math.round(total)
 		return timeFromPoints(total)
 		
+	}
+
+	const findTaskById = (id) => {
+		return user.work.find(work => work._id === id)
 	}
 	  
 
@@ -866,14 +870,14 @@ const SchedulePage = () => {
 									>
 										<View className="flex-row items-center">
 											<LinearGradient
-												colors={task[3].colors}
+												colors={findTaskById(task[3]).colors}
 												start={{x: 0, y: 0}}
 												end={{x: 1, y: 1}}
 												className="w-6 h-6 rounded-full mr-1"
 											/>
 											<View className="flex-col items-start">
 												<Text className="text-zinc-200 text-base font-psemibold">{task[2]}</Text>
-												<Text className="text-zinc-500 text-sm font-pmedium">{task[3].name}</Text>
+												<Text className="text-zinc-500 text-sm font-pmedium">{findTaskById(task[3]).name}</Text>
 											</View>
 										</View>
 										<Text className="text-zinc-200 text-lg font-psemibold">{task[0]}-{task[1]}</Text>

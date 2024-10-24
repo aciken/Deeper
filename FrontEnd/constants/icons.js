@@ -31,6 +31,7 @@ import alertCircle from "../assets/icons/alertCircle.png";
 import cancel from "../assets/icons/close-custom.png";
 import check from "../assets/icons/check.png";
 import save from "../assets/icons/content-save.png";
+import restart from "../assets/icons/restart.png";
 
 export default {
   play,
@@ -66,4 +67,5 @@ export default {
   cancel,
   check,
   save,
+  restart,
 };

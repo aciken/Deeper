@@ -10,6 +10,7 @@ import { useLocalSearchParams } from 'expo-router';
 import PresetsTable from '../components/PresetsTable';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import BottomPopup from '../components/BottomPopup';
+import axios from 'axios';
 
 
 
@@ -17,9 +18,9 @@ import BottomPopup from '../components/BottomPopup';
 
 
 
-const DownButton = ({buttonText, icon, onPress}) => {
+const DownButton = ({buttonText, icon, onPress, backgorundColor, textColor}) => {
 	return(
-		<TouchableOpacity onPress={onPress}  className="w-28 h-16 rounded-2xl shadow-lg justify-center items-center m-1 bg-zinc-900 border border-zinc-700">
+		<TouchableOpacity onPress={onPress}  className={`w-28 h-16 rounded-2xl shadow-lg justify-center items-center m-1 ${backgorundColor} border border-zinc-700`}>
 			<View className="items-center">
 			<MaskedView
 				maskElement={
@@ -27,7 +28,7 @@ const DownButton = ({buttonText, icon, onPress}) => {
 				}
 				>
 				<LinearGradient
-					colors={['#d4d4d8', '#52525b']}
+					colors={textColor}
 					start={{x: 0, y: 0}}
 					end={{x: 0, y: 1}}
 				>
@@ -41,7 +42,7 @@ const DownButton = ({buttonText, icon, onPress}) => {
 				}
 				>
 				<LinearGradient
-					colors={['#d4d4d8', '#52525b']}
+					colors={textColor}
 					start={{x: 0, y: 0}}
 					end={{x: 0, y: 1}}
 				>
@@ -58,6 +59,7 @@ const AddPreset = () => {
 	const { user, setUser, setSelected } = useGlobalContext();
 	const { preset: presetString } = useLocalSearchParams();
 	const preset = JSON.parse(presetString);
+	const [newPreset, setNewPreset] = useState(JSON.parse(presetString));
 	const router = useRouter();
 
 
@@ -90,6 +92,16 @@ const AddPreset = () => {
     const [showStartPicker, setShowStartPicker] = useState(false);
     const [showEndPicker, setShowEndPicker] = useState(false);
 
+	const [saveTrue, setSaveTrue] = useState(false);
+
+	useEffect(() => {
+		for(let i = 0; i < newPreset.sessions.length; i++){
+			if(newPreset.sessions[i][4] !== preset.sessions[i][4] || newPreset.sessions[i][5] !== preset.sessions[i][5] || newPreset.sessions[i][2] !== preset.sessions[i][2]){
+				setSaveTrue(true);
+			}
+		}
+	}, [newPreset])
+
 
 
     const formatTime = (time) => {
@@ -118,7 +130,104 @@ const AddPreset = () => {
 
 
 
+	const editFunc = (start, end, name, work) => {
 
+        // const data  = [start,end, name, work._id]
+
+        // axios.put('https://2727-188-2-139-122.ngrok-free.app/editPreset', {
+        //     data,
+        //     id: user._id,
+        //     index,
+        //     clicked,
+        // }).then(res => {
+        //     if(res.data === 'Time overlap'){
+        //         alert('Works are overlapping')
+        //     } else {
+        //         setUser(res.data);
+        //         setIsEditVisible(!isEditVisible)
+        //     }
+        // }).catch((e) => {
+        //     console.error(e);
+        // })
+		const startHour = parseInt(start.split(':')[0]);
+		const startMinute = parseInt(start.split(':')[1]);
+		const endHour = parseInt(end.split(':')[0]);
+		const endMinute = parseInt(end.split(':')[1]);
+
+		const startPoints = startHour * 20 + startMinute / 3;
+		const endPoints = endHour * 20 + endMinute / 3;
+
+		const data = [start, end, name, work._id, startPoints, endPoints];
+
+
+		
+
+
+		let counter = 0;
+
+		for(let i = 0; i < newPreset.sessions.length; i++){
+			console.log(startPoints, endPoints)
+			console.log(newPreset.sessions[i])
+			if(i == index){
+				counter++;       
+			}
+			if((startPoints > newPreset.sessions[i][4] && startPoints >= newPreset.sessions[i][5]) || (endPoints <= newPreset.sessions[i][4] && endPoints < newPreset.sessions[i][5])){
+
+				counter++;
+			}
+		}
+		console.log(counter, newPreset.sessions.length)
+		if(counter == newPreset.sessions.length || counter > newPreset.sessions.length){
+
+		setNewPreset(prev => {
+			const updatedSessions = [...prev.sessions];
+			updatedSessions[index] = data;
+			return {...prev, sessions: updatedSessions};
+		});
+	}
+		setIsEditVisible(false);
+
+
+		console.log(data)
+
+
+    }
+
+
+
+
+
+
+const saveEdit = () => {
+	const presetIndex = user.preset.findIndex(pre=> pre.name == newPreset.name)
+	axios.put('https://2727-188-2-139-122.ngrok-free.app/editPreset', {
+		preset: newPreset,
+		id: user._id,
+		presetIndex,
+	}).then(res => {
+		setUser(res.data);
+		setSaveTrue(false);
+	})
+	.catch((e) => {
+		console.error(e);
+	})
+}
+
+const addToSchedule = () => {
+	console.log(clickedDates)
+	axios.put('https://2727-188-2-139-122.ngrok-free.app/addToSchedule', {
+		preset: newPreset,
+		id: user._id,
+		clickedDates,
+	})
+	.then(res => {
+		setUser(res.data);
+		router.back();
+	})
+	.catch((e) => {
+		console.error(e);
+	})
+}
 
 
 
@@ -169,7 +278,7 @@ const AddPreset = () => {
 					</TouchableOpacity>
 
                     <TouchableOpacity 
-						onPress={() => router.back()}
+						onPress={() => {addToSchedule()}}
 						className="flex-row items-center"
 					>
 						<MaskedView
@@ -252,19 +361,26 @@ const AddPreset = () => {
 
 				<View className="h-[70%]"> 
                     <PresetsTable 
-                    preset={preset} 
+                    preset={newPreset} 
                     changeEditVisible={() => setIsEditVisible(true)} 
                     changeEditData={changeEditData} 
-                    setIndex={setIndex} />
+                    setIndex={setIndex} 
+                    work={user.work}
+                    />
 				</View>
 
 				<View className="flex-row justify-center items-center mt-4">
 				</View>
 
 				<View className="flex-row justify-center pb-4 ">
-						<DownButton buttonText="Add Task" icon={icons.plusGray} onPress={() => {}} />
-						<DownButton buttonText="Save Changes" icon={icons.save} onPress={() => {}} />
-						<DownButton buttonText="Delete" icon={icons.trash} onPress={() => {}} />
+						<DownButton buttonText="Add Task" icon={icons.plusGray} onPress={() => {}} backgorundColor={'bg-zinc-900'} textColor={['#d4d4d8', '#52525b']} />
+						<DownButton buttonText="Save Changes" icon={icons.save} onPress={() => {if(saveTrue)saveEdit()}} backgorundColor={saveTrue ?'bg-sky-500' : 'bg-zinc-900'} textColor={saveTrue ? ['#e0f2fe', '#bfdbfe'] : ['#d4d4d8', '#52525b']} />
+							{preset.name == 'Morning Work' || preset.name == 'Evening Work' || preset.name == 'Noon Work' ? 
+							<DownButton buttonText="Restart" icon={icons.restart} onPress={() => {}} backgorundColor={'bg-red-500'} textColor={['#fee2e2', '#fecdd3']} />
+							: 
+							<DownButton buttonText="Delete" icon={icons.trash} onPress={() => {}} backgorundColor={'bg-red-500'} textColor={['#fecaca', '#ffffff']} />
+							}
+
 				</View>
 
                 <BottomPopup
@@ -440,7 +556,7 @@ const AddPreset = () => {
 
 						<View className="flex-row justify-between mb-4">
 							<TouchableOpacity
-								onPress={() => editFunc(formatTime(startTime), formatTime(endTime), sessionName)}
+								onPress={() => editFunc(formatTime(startTime), formatTime(endTime), sessionName, selectedWork)}
 								className="flex-1 mr-2 h-14 rounded-full overflow-hidden"
 							>
 								<LinearGradient

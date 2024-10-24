@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, Vibration } from 'react-nativ
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 
-const PresetsTable = ({ preset, changeEditVisible, changeEditData, setIndex }) => {
+const PresetsTable = ({ preset, changeEditVisible, changeEditData, setIndex, work }) => {
   const router = useRouter();
   const hours = useMemo(() => Array.from({ length: 25 }, (_, index) => index), []);
 
@@ -21,7 +21,7 @@ const PresetsTable = ({ preset, changeEditVisible, changeEditData, setIndex }) =
 
   const renderTasks = useMemo(() => {
     return preset.sessions.map((session, index) => {
-      const [startTime, endTime, workObject, startPoint, endPoint] = session;
+      const [startTime, endTime, name, presetId, startPoint, endPoint] = session;
       const [startHour, startMinute] = startTime.split(':');
       const [endHour, endMinute] = endTime.split(':');
 
@@ -42,18 +42,18 @@ const PresetsTable = ({ preset, changeEditVisible, changeEditData, setIndex }) =
             changeEditData(
               convertTimeStringToDate(startTime),
               convertTimeStringToDate(endTime),
-              workObject.name,
-              workObject
+              name,
+              work.find(w => w._id === presetId)
             );
           }}
         >
           <LinearGradient 
-            colors={workObject.colors}
+            colors={work.find(w => w._id === presetId)?.colors}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 1}}
             className="w-full h-full rounded-lg justify-center items-center">
             <View className="p-2 z-10">
-              <Text className="text-white font-semibold text-lg">{workObject.name}</Text>
+              <Text className="text-white font-semibold text-lg">{name}</Text>
             </View>
           </LinearGradient>
         </TouchableOpacity>

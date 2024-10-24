@@ -16,6 +16,9 @@ const getJob = require('./GetData/getJob');
 const deleteJob = require('./Jobs/deleteJob');
 const editJob = require('./Jobs/editJob');
 const updateWeeklyWork = require('./Jobs/updateWeeklyWork');
+const editPreset = require('./Presets/editPreset');
+const addToSchedule = require('./Presets/addToSchedule');
+
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
@@ -32,6 +35,8 @@ app.post('/getJob', getJob);
 app.put('/deleteJob', deleteJob);
 app.put('/editJob', editJob);
 app.put('/updateWeeklyWork', updateWeeklyWork);
+app.put('/editPreset', editPreset);
+app.put('/addToSchedule', addToSchedule);
 
 
 app.listen(port, () => {

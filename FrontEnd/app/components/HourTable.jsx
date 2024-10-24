@@ -42,6 +42,10 @@ const HourTable = ({ user, clicked, todayDateNumber, all, changeEditVisible, cha
     return date;
   }
 
+  const findTaskById = (id) => {
+		return user.work.find(work => work._id === id)
+	}
+
 
   const renderTasks = useMemo(() => {
     return user.array[clicked-1] && user.array[clicked-1].map((task, index) => {
@@ -76,7 +80,7 @@ const HourTable = ({ user, clicked, todayDateNumber, all, changeEditVisible, cha
           }}
         >
           <LinearGradient 
-							colors={task[3].colors}
+							colors={findTaskById(task[3]).colors}
 							start={{x: 0, y: 0}}
 							end={{x: 1, y: 1}}
 							className="w-full h-full rounded-lg justify-center items-center">
