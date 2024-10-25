@@ -28,6 +28,11 @@ const addWork = async (req, res) => {
         if(user){
             console.log('data', data)
 
+            if(data[2] == ''){
+                res.json('No Name');
+                return;
+            }
+
             let isOverlap = false;
 
             for (let dayIndex of dayIndices) {

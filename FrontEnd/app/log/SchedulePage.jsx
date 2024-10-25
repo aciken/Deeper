@@ -13,6 +13,7 @@ import axios from 'axios';
 import { useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import MaskedView from '@react-native-masked-view/masked-view';
+import AlertPopup from '../components/AlertPopup';
 
 
 const DownButton = ({buttonText, icon, onPress}) => {
@@ -128,6 +129,10 @@ const SchedulePage = () => {
 
 	const [sessionName, setSessionName] = useState('');
 
+	const [alertPopupVisible, setAlertPopupVisible] = useState(false);
+	const [alertPopupMessage, setAlertPopupMessage] = useState('');
+	const [alertPopupType, setAlertPopupType] = useState('info');
+
 	const submitWork = (start, end, name,dates) => {
 		const dayIndices = dates.map(date => new Date(date).getDate() - 1);
 
@@ -137,7 +142,7 @@ const SchedulePage = () => {
 
 
 
-		axios.put('https://2727-188-2-139-122.ngrok-free.app/addWork', {
+		axios.put('https://bf9f-188-2-139-122.ngrok-free.app/addWork', {
 		  data,
 		  id: user._id,
 		  clicked,
@@ -146,8 +151,14 @@ const SchedulePage = () => {
 			console.log('data', res.data)
 		  if(res.data == 'Time overlap'){
 			console.log('works are overlapping')
-			alert('Works are overlapping')
-		  } else {
+			setAlertPopupVisible(true);
+			setAlertPopupMessage("Sessions can't overlap");
+			setAlertPopupType('error')
+		  } else if(res.data == 'No Name'){
+			setAlertPopupVisible(true);
+			setAlertPopupMessage("You need to enter a session name");
+			setAlertPopupType('error')
+		  }else{
 			setUser(res.data);
 			setIsPopupVisible(false);
 		  }
@@ -164,7 +175,7 @@ const SchedulePage = () => {
 
 	
     const deleteFunc = () => {
-        axios.put('https://2727-188-2-139-122.ngrok-free.app/deleteWork', {
+        axios.put('https://bf9f-188-2-139-122.ngrok-free.app/deleteWork', {
             id: user._id,
             index,
             clicked,
@@ -182,14 +193,16 @@ const SchedulePage = () => {
 
         const data  = [start,end, name, selectedWork]
 
-        axios.put('https://2727-188-2-139-122.ngrok-free.app/editWork', {
+        axios.put('https://bf9f-188-2-139-122.ngrok-free.app/editWork', {
             data,
             id: user._id,
             index,
             clicked,
         }).then(res => {
             if(res.data === 'Time overlap'){
-                alert('Works are overlapping')
+				setAlertPopupVisible(true);
+				setAlertPopupMessage("Sessions can't overlap");
+				setAlertPopupType('error')
             } else {
                 setUser(res.data);
                 setIsEditVisible(!isEditVisible)
@@ -229,11 +242,8 @@ const SchedulePage = () => {
 	  }
 
 	  
-	const [selectedWork, setSelectedWork] = useState({
-		name: '',
-		colors: ['', ''],
-		currentTime: ''
-	});
+	const [selectedWork, setSelectedWork] = useState(user.work[0]._id)
+
 	const [selectedDate, setSelectedDate] = useState(null);
 	const [showDatePicker, setShowDatePicker] = useState(false);
 
@@ -288,13 +298,23 @@ const SchedulePage = () => {
 	}
 
 	const findTaskById = (id) => {
-		return user.work.find(work => work._id === id)
+		const task = user.work.find(work => work._id === id)
+		console.log('id', id)
+		console.log('user.work', user.work)
+		console.log('task', task)
+		return task
 	}
 	  
 
 	return (
 		<SafeAreaView className="flex-1 bg-zinc-950" edges={['top']}>
 			<View className="flex-1 p-4">
+				<AlertPopup
+					visible={alertPopupVisible}
+					message={alertPopupMessage}
+					type={alertPopupType}
+					onHide={() => setAlertPopupVisible(false)}
+				/>
 				<View className="flex-row items-center justify-between mb-4 underline ">
 					<TouchableOpacity 
 						onPress={() => navigation.goBack()}
@@ -412,7 +432,7 @@ const SchedulePage = () => {
 								<View className="flex-row items-center">
 									{selectedWork ? (
 										<LinearGradient
-											colors={selectedWork.colors}
+											colors={findTaskById(selectedWork).colors}
 											start={{x: 0, y: 0}}
 											end={{x: 1, y: 1}}
 											className="w-4 h-4 rounded-full mr-2"
@@ -421,7 +441,7 @@ const SchedulePage = () => {
 										<Image source={icons.workGray} className="w-4 h-4 mr-2 tint-gray-400" />
 									)}
 									<Text className={`text-base ${selectedWork ? 'text-white' : 'text-zinc-400'}`}>
-										{selectedWork ? selectedWork.name : "Select a work"}
+										{selectedWork ? findTaskById(selectedWork).name : "Select a work"}
 									</Text>
 								</View>
 								<Image 
@@ -666,9 +686,9 @@ const SchedulePage = () => {
 								>
 
 									<View className="flex-row items-center">
-										{selectedWork.colors[0] !== '' ? (
+										{findTaskById(selectedWork).colors[0] !== '' ? (
 											<LinearGradient
-												colors={selectedWork.colors}
+												colors={findTaskById(selectedWork).colors}
 												start={{x: 0, y: 0}}
 												end={{x: 1, y: 1}}
 												className="w-4 h-4 rounded-full mr-2"
@@ -677,7 +697,7 @@ const SchedulePage = () => {
 										) : (
 											<Image source={icons.workGray} className="w-4 h-4 mr-2 tint-gray-400" />
 										)}
-										<Text className={`text-base ${selectedWork.colors[0] ? 'text-white' : 'text-zinc-400'}`}>{selectedWork.name || "Select a work"}</Text>
+										<Text className={`text-base ${findTaskById(selectedWork).colors[0] ? 'text-white' : 'text-zinc-400'}`}>{findTaskById(selectedWork).name || "Select a work"}</Text>
 									</View>
 									<Image 
 										source={icons.chevronRight} 

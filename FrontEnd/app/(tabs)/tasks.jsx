@@ -9,6 +9,7 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import AlertPopup from '../components/AlertPopup';
 
 
 
@@ -108,6 +109,10 @@ const Tasks = () => {
 
       return currentMinutes >= totalMinutes;
     }
+
+    const [alertPopupVisible, setAlertPopupVisible] = useState(false);
+    const [alertPopupMessage, setAlertPopupMessage] = useState('');
+    const [alertPopupType, setAlertPopupType] = useState('info');
 
 
 
@@ -221,7 +226,7 @@ const workToday = (job) => {
 
 
 const submitNewWork = () => {
-  axios.put('https://2727-188-2-139-122.ngrok-free.app/addJob', {
+  axios.put('https://bf9f-188-2-139-122.ngrok-free.app/addJob', {
     newWork,
     id: user._id,
   }).then(res => {
@@ -237,7 +242,7 @@ const submitNewWork = () => {
 }
 
 const submitEditWork = () => {
- axios.put('https://2727-188-2-139-122.ngrok-free.app/editJob', {
+ axios.put('https://bf9f-188-2-139-122.ngrok-free.app/editJob', {
   editWork,
   index: editIndex,
   id: user._id,
@@ -257,7 +262,8 @@ const submitEditWork = () => {
 
 
 const submitDeleteWork = () => {
-  axios.put('https://2727-188-2-139-122.ngrok-free.app/deleteJob', {
+  if(user.work.length !== 1){
+    axios.put('https://bf9f-188-2-139-122.ngrok-free.app/deleteJob', {
     index: editIndex,
     id: user._id,
   }).then(res => {
@@ -270,6 +276,12 @@ const submitDeleteWork = () => {
     })
     setEditIndex(null)
   })
+} else {
+  setAlertPopupMessage('You need to have at least one work');
+  setAlertPopupType('error');
+  setAlertPopupVisible(true);
+}
+
 }
 
 const timeFromPoints = (points) => {
@@ -486,6 +498,13 @@ const findCurrentSession = () => {
             )}
           </View>
 			</View>
+
+      <AlertPopup
+        visible={alertPopupVisible}
+        message={alertPopupMessage}
+        type={alertPopupType}
+        onHide={() => setAlertPopupVisible(false)}
+      />
 
       <BottomPopup
   visible={isWorkVisible}
@@ -857,6 +876,8 @@ const findCurrentSession = () => {
     </View>
   </View> 
       </BottomPopup>
+
+
 
       </SafeAreaView>
   )

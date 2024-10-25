@@ -11,6 +11,7 @@ import PresetsTable from '../components/PresetsTable';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import BottomPopup from '../components/BottomPopup';
 import axios from 'axios';
+import AlertPopup from '../components/AlertPopup';
 
 
 
@@ -91,6 +92,11 @@ const AddPreset = () => {
     const [selectedWork, setSelectedWork] = useState(null);
     const [showStartPicker, setShowStartPicker] = useState(false);
     const [showEndPicker, setShowEndPicker] = useState(false);
+
+
+	const [alertPopupVisible, setAlertPopupVisible] = useState(false);
+	const [alertPopupMessage, setAlertPopupMessage] = useState('');
+	const [alertPopupType, setAlertPopupType] = useState('info');
 
 	const [saveTrue, setSaveTrue] = useState(false);
 
@@ -184,6 +190,10 @@ const AddPreset = () => {
 			updatedSessions[index] = data;
 			return {...prev, sessions: updatedSessions};
 		});
+	} else {
+		setAlertPopupVisible(true);
+		setAlertPopupMessage('Sessions are overlapping');
+		setAlertPopupType('error');
 	}
 		setIsEditVisible(false);
 
@@ -200,7 +210,7 @@ const AddPreset = () => {
 
 const saveEdit = () => {
 	const presetIndex = user.preset.findIndex(pre=> pre.name == newPreset.name)
-	axios.put('https://2727-188-2-139-122.ngrok-free.app/editPreset', {
+	axios.put('https://bf9f-188-2-139-122.ngrok-free.app/editPreset', {
 		preset: newPreset,
 		id: user._id,
 		presetIndex,
@@ -214,8 +224,12 @@ const saveEdit = () => {
 }
 
 const addToSchedule = () => {
-	console.log(clickedDates)
-	axios.put('https://2727-188-2-139-122.ngrok-free.app/addToSchedule', {
+	if(clickedDates.length == 0){
+		setAlertPopupVisible(true);
+		setAlertPopupMessage('You need to select at least one date');
+		setAlertPopupType('info')
+	} else {
+	axios.put('https://bf9f-188-2-139-122.ngrok-free.app/addToSchedule', {	
 		preset: newPreset,
 		id: user._id,
 		clickedDates,
@@ -227,6 +241,11 @@ const addToSchedule = () => {
 	.catch((e) => {
 		console.error(e);
 	})
+}
+}
+
+const deleteFunc = () => {
+	
 }
 
 
@@ -240,6 +259,14 @@ const addToSchedule = () => {
     return (
 <SafeAreaView className="flex-1 bg-zinc-950" edges={['top']}>
 			<View className="flex-1 p-4">
+
+				<AlertPopup
+					visible={alertPopupVisible}
+					message={alertPopupMessage}
+					type={alertPopupType}
+					onHide={() => setAlertPopupVisible(false)}
+				/>
+
 				<View className="flex-row items-center justify-between mb-4 underline ">
 					<TouchableOpacity 
 						onPress={() => router.back()}

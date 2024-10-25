@@ -26,9 +26,9 @@ const AddJob = async (req, res) => {
                       {
                         name: 'Evening Work',
                         sessions: [
-                          ['15:00', '17:00','Evening Session 1', newWork._id, 210,250],
-                          ['18:00', '20:00','Evening Session 2', newWork._id, 270,310],
-                          ['21:00', '23:00','Evening Session 3', newWork._id, 330,370]
+                          ['15:00', '17:00','Evening Session 1', newWork._id, 300,340],
+                          ['18:00', '20:00','Evening Session 2', newWork._id, 360,400],
+                          ['21:00', '23:00','Evening Session 3', newWork._id, 420,460]
                         ]
                       },
                       {
