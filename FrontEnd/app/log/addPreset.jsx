@@ -278,7 +278,7 @@ const AddPreset = () => {
 
 const saveEdit = () => {
 	const presetIndex = user.preset.findIndex(pre=> pre.name == newPreset.name)
-	axios.put('https://4e7d-188-2-139-122.ngrok-free.app/editPreset', {
+	axios.put('https://3f89-188-2-139-122.ngrok-free.app/editPreset', {
 		preset: editedPreset.sessions.length > 0 ? editedPreset : newPreset,
 		id: user._id,
 		presetIndex,
@@ -297,7 +297,7 @@ const addToSchedule = () => {
 		setAlertPopupMessage('You need to select at least one date');
 		setAlertPopupType('info')
 	} else {
-	axios.put('https://4e7d-188-2-139-122.ngrok-free.app/addToSchedule', {	
+	axios.put('https://3f89-188-2-139-122.ngrok-free.app/addToSchedule', {	
 		preset: editedPreset.sessions.length > 0 ? editedPreset : newPreset,
 		id: user._id,
 		clickedDates: selectedDates,
@@ -327,6 +327,43 @@ const deleteFunc = () => {
         }
         setIsEditVisible(false);
     }
+}
+
+const deletePreset = () => {
+	const presetIndex = user.preset.findIndex(pre=> pre.name == newPreset.name)
+	console.log(presetIndex)
+	axios.put('https://3f89-188-2-139-122.ngrok-free.app/deletePreset', {
+		id: user._id,
+		presetIndex,
+	})
+	.then(res => {
+		setUser(res.data);
+		setAlertPopupVisible(true);
+		setAlertPopupMessage('Preset deleted');
+		setAlertPopupType('success');
+		router.back();
+	})
+	.catch((e) => {
+		console.error(e);
+	})
+}
+
+const restorePreset = () => {
+	const presetIndex = user.preset.findIndex(pre=> pre.name == newPreset.name)
+	axios.put('https://3f89-188-2-139-122.ngrok-free.app/restorePreset', {
+		id: user._id,
+		presetIndex,
+	})
+	.then(res => {
+		setUser(res.data);
+		setEditedPreset(res.data.preset[presetIndex])
+		setAlertPopupVisible(true);
+		setAlertPopupMessage('Preset restored');
+		setAlertPopupType('success');
+	})
+	.catch((e) => {
+		console.error(e);
+	})
 }
 
 
@@ -493,9 +530,9 @@ const deleteFunc = () => {
 						<DownButton buttonText="Add Task" icon={icons.plusGray} onPress={() => {setIsPopupVisible(true)}} backgorundColor={'bg-zinc-900'} textColor={['#d4d4d8', '#52525b']} />
 						<DownButton buttonText="Save Changes" icon={icons.save} onPress={() => {if(saveTrue)saveEdit()}} backgorundColor={saveTrue ?'bg-sky-500' : 'bg-zinc-900'} textColor={saveTrue ? ['#e0f2fe', '#bfdbfe'] : ['#d4d4d8', '#52525b']} />
 							{preset.name == 'Morning Work' || preset.name == 'Evening Work' || preset.name == 'Noon Work' ? 
-							<DownButton buttonText="Restart" icon={icons.restart} onPress={() => {}} backgorundColor={'bg-red-500'} textColor={['#fee2e2', '#fecdd3']} />
+							<DownButton buttonText="Restart" icon={icons.restart} onPress={() => {restorePreset()}} backgorundColor={'bg-red-500'} textColor={['#fee2e2', '#fecdd3']} />
 							: 
-							<DownButton buttonText="Delete" icon={icons.trash} onPress={() => {}} backgorundColor={'bg-red-500'} textColor={['#fecaca', '#ffffff']} />
+							<DownButton buttonText="Delete" icon={icons.trash} onPress={() => {deletePreset()}} backgorundColor={'bg-red-500'} textColor={['#fecaca', '#ffffff']} />
 							}
 
 				</View>

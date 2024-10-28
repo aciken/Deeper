@@ -73,7 +73,7 @@ const EditTask = () => {
         const end = `${selcetedHourEnd}:${selectedMinuteEnd} ${selectedPartEnd}`;
         const data  = [start,end, workName]
 
-        axios.put('https://70ae-188-2-139-122.ngrok-free.app/editWork', {
+        axios.put('https://3f89-188-2-139-122.ngrok-free.app/editWork', {
             data,
             email: user.email,
             index,

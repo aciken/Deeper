@@ -19,7 +19,8 @@ const updateWeeklyWork = require('./Jobs/updateWeeklyWork');
 const editPreset = require('./Presets/editPreset');
 const addToSchedule = require('./Presets/addToSchedule');
 const createNewPreset = require('./Presets/createNewPreset');
-
+const deletePreset = require('./Presets/deletePreset');
+const restorePreset = require('./Presets/restorePreset');
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
@@ -39,6 +40,8 @@ app.put('/updateWeeklyWork', updateWeeklyWork);
 app.put('/editPreset', editPreset);
 app.put('/addToSchedule', addToSchedule);
 app.put('/createNewPreset', createNewPreset);
+app.put('/deletePreset', deletePreset);
+app.put('/restorePreset', restorePreset);
 
 app.listen(port, () => {
     console.log(`App listening at http://localhost:${port}`);

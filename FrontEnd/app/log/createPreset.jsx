@@ -205,7 +205,7 @@ const CreatePreset = () => {
 		if(counter == newPreset.sessions.length || counter > newPreset.sessions.length){
 
 		setEditedPreset(prev => {
-			if (prev.sessions.length === 0) {
+			if (prev.sessions.length === 0 && prev.name === '') {
 				// If editedPreset is empty, copy everything from newPreset
 				const updatedSessions = [...newPreset.sessions];
 				updatedSessions[index] = data;
@@ -256,7 +256,7 @@ const CreatePreset = () => {
 		if(counter == newPreset.sessions.length || counter > newPreset.sessions.length){
 
 			setEditedPreset(prev => {
-				if (prev.sessions.length === 0) {
+				if (prev.sessions.length === 0 && prev.name === '') {
 					// If editedPreset is empty, copy everything from newPreset and add data
 					return {name: newPreset.name, sessions: [...newPreset.sessions, data]};
 				} else {
@@ -281,7 +281,7 @@ const CreatePreset = () => {
 
 const saveEdit = () => {
 	const presetIndex = user.preset.findIndex(pre=> pre.name == newPreset.name)
-	axios.put('https://4e7d-188-2-139-122.ngrok-free.app/editPreset', {
+	axios.put('https://3f89-188-2-139-122.ngrok-free.app/editPreset', {
 		preset: editedPreset.sessions.length > 0 ? editedPreset : newPreset,
 		id: user._id,
 		presetIndex,
@@ -300,7 +300,7 @@ const addToSchedule = () => {
 		setAlertPopupMessage('You need to select at least one date');
 		setAlertPopupType('info')
 	} else {
-	axios.put('https://4e7d-188-2-139-122.ngrok-free.app/addToSchedule', {	
+	axios.put('https://3f89-188-2-139-122.ngrok-free.app/addToSchedule', {	
 		preset: editedPreset.sessions.length > 0 ? editedPreset : newPreset,
 		id: user._id,
 		clickedDates: selectedDates,
@@ -334,7 +334,7 @@ const deleteFunc = () => {
 
 
 const createPreset = () => {
-    axios.put('https://4e7d-188-2-139-122.ngrok-free.app/createNewPreset', {
+    axios.put('https://3f89-188-2-139-122.ngrok-free.app/createNewPreset', {
         preset: editedPreset,
         id: user._id,
     }).then(res => {

@@ -14,6 +14,7 @@ import { useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import MaskedView from '@react-native-masked-view/masked-view';
 import AlertPopup from '../components/AlertPopup';
+import { useLocalSearchParams } from 'expo-router';
 
 
 const DownButton = ({buttonText, icon, onPress}) => {
@@ -56,6 +57,7 @@ const DownButton = ({buttonText, icon, onPress}) => {
 
 const SchedulePage = () => {
 	const { user, setUser, setSelected } = useGlobalContext();
+	const { message, status } = useLocalSearchParams();
 	const router = useRouter();
 	const navigation = useNavigation();
 	const todayDateNumber = new Date().getDate();
@@ -73,6 +75,14 @@ const SchedulePage = () => {
 	const [showEndPicker, setShowEndPicker] = useState(false);
 	const [index,setIndex] = useState(null)
 
+
+	useEffect(() => {
+		if(message && status){
+			setAlertPopupVisible(true);
+			setAlertPopupMessage(message);
+			setAlertPopupType(status);
+		}
+	}, [message, status])
 
 
 	const [showWorkPicker, setShowWorkPicker] = useState(false);
@@ -142,7 +152,7 @@ const SchedulePage = () => {
 
 
 
-		axios.put('https://4e7d-188-2-139-122.ngrok-free.app/addWork', {
+		axios.put('https://3f89-188-2-139-122.ngrok-free.app/addWork', {
 		  data,
 		  id: user._id,
 		  clicked,
@@ -175,7 +185,7 @@ const SchedulePage = () => {
 
 	
     const deleteFunc = () => {
-        axios.put('https://4e7d-188-2-139-122.ngrok-free.app/deleteWork', {
+        axios.put('https://3f89-188-2-139-122.ngrok-free.app/deleteWork', {
             id: user._id,
             index,
             clicked,
@@ -193,7 +203,7 @@ const SchedulePage = () => {
 
         const data  = [start,end, name, selectedWork]
 
-        axios.put('https://4e7d-188-2-139-122.ngrok-free.app/editWork', {
+        axios.put('https://3f89-188-2-139-122.ngrok-free.app/editWork', {
             data,
             id: user._id,
             index,
@@ -976,6 +986,9 @@ const SchedulePage = () => {
 									router.push({
 										pathname: 'log/createPreset', 
 									})
+									setTimeout(() => {
+										setIsPresetPopupVisible(false);
+									}, 200);
 								  }}
 								  className="w-full rounded-full overflow-hidden shadow-lg pt-2 mb-4"
 								>
