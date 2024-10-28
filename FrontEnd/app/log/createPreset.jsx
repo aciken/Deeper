@@ -56,11 +56,13 @@ const DownButton = ({buttonText, icon, onPress, backgorundColor, textColor}) => 
 	)
 }
 
-const AddPreset = () => {
+const CreatePreset = () => {
 	const { user, setUser, setSelected } = useGlobalContext();
-	const { preset: presetString } = useLocalSearchParams();
-	const preset = JSON.parse(presetString);
-	const [newPreset, setNewPreset] = useState(JSON.parse(presetString));
+	const [newPreset, setNewPreset] = useState({
+        name: '',
+        sessions: [],
+    }
+	);
 	const [editedPreset, setEditedPreset] = useState({
 		name: '',
 		sessions: [],
@@ -97,6 +99,7 @@ const AddPreset = () => {
     const [selectedWork, setSelectedWork] = useState(user.work[0]);
     const [showStartPicker, setShowStartPicker] = useState(false);
     const [showEndPicker, setShowEndPicker] = useState(false);
+    const [presetName, setPresetName] = useState('');
 
 
 	const [alertPopupVisible, setAlertPopupVisible] = useState(false);
@@ -330,6 +333,20 @@ const deleteFunc = () => {
 }
 
 
+const createPreset = () => {
+    axios.put('https://4e7d-188-2-139-122.ngrok-free.app/createNewPreset', {
+        preset: editedPreset,
+        id: user._id,
+    }).then(res => {
+        setUser(res.data);
+        router.back();
+    })
+    .catch((e) => {
+        console.error(e);
+    })
+}
+
+
 
 
 
@@ -386,7 +403,7 @@ const deleteFunc = () => {
 					</TouchableOpacity>
 
                     <TouchableOpacity 
-						onPress={() => {addToSchedule()}}
+						onPress={() => {createPreset()}}
 						className="flex-row items-center"
 					>
 						<MaskedView
@@ -408,7 +425,7 @@ const deleteFunc = () => {
 
 						<MaskedView
 							maskElement={
-								<Text className="text-white text-lg font-medium ml-2">Add to Schedule</Text>
+								<Text className="text-white text-lg font-medium ml-2">Create Preset</Text>
 							}
 						>
 							<LinearGradient
@@ -416,7 +433,7 @@ const deleteFunc = () => {
 								start={{x: 0, y: 0}}
 								end={{x: 1, y: 1}}
 							>
-								<Text className="text-white text-lg font-medium ml-2 opacity-0">Add to Schedule</Text>
+								<Text className="text-white text-lg font-medium ml-2 opacity-0">Create Preset</Text>
 							</LinearGradient>
 						</MaskedView>
 					</TouchableOpacity>
@@ -424,61 +441,19 @@ const deleteFunc = () => {
 
 				</View>
 
-				<ScrollView
-					horizontal
-					showsHorizontalScrollIndicator={false}
-					className="mb-4"
-				>
-					{[...Array(14)].map((_, index) => {
-						const date = new Date();
-						date.setDate(date.getDate() + index);
-						const isToday = index === 0;
-						const isSelected = selectedDates.includes(date.getDate());
+                <TextInput
+                    placeholder="Enter preset name"
+                    placeholderTextColor="#52525b"
+                    className="bg-zinc-800 text-base text-white py-3 px-4 rounded-xl mb-4"
+                    onChangeText={(text) => setEditedPreset({...editedPreset, name: text})}
+                    value={editedPreset.name}
+                />
 
-						return (
-							<TouchableOpacity
-								key={index}
-								onPress={() => handleDateClick(date.getDate())}
-								className={`w-12 h-16 justify-center items-center rounded-lg mr-2`}
-							>
-								<LinearGradient
-									colors={isSelected ? ['#0EA5E9', '#7dd3fc'] : ['#18181B', '#27272A']}
-									start={{x: 0, y: 0}}
-									end={{x: 1, y: 1}}
-									className="w-full h-full rounded-lg justify-center items-center border border-zinc-700"
-								>
-									<Text className={`text-xs mb-0.5 ${
-										isSelected ? 'text-zinc-100' : 'text-zinc-400'
-									}`}>{date.toLocaleDateString('en-US', { weekday: 'short' })}</Text>
-									<Text className={`text-base font-bold ${
-										isSelected ? 'text-zinc-100' : 'text-zinc-400'
-									}`}>{date.getDate()}</Text>
-									{isToday && (
-										<View className="absolute bottom-0.5 w-1 h-1 bg-sky-500 rounded-full" />
-									)}
-								</LinearGradient>
-							</TouchableOpacity>
-						);
-					})}
-				</ScrollView>
+
 
 				<View className="h-[70%]"> 
-				<MaskedView
-							maskElement={
-								<Text className="text-zinc-400 text-lg font-medium w-full text-center mb-2">{newPreset.name}</Text>
-							}
-						>
-							<LinearGradient
-								colors={['#a1a1aa', '#7dd3fc']}
-								start={{x: 0, y: 0}}
-								end={{x: 1, y: 1}}
-							>
-								<Text className="text-zinc-400 text-lg font-medium w-full text-center mb-2 opacity-0">{newPreset.name}</Text>
-							</LinearGradient>
-						</MaskedView>
-					
                     <PresetsTable 
-                    preset={editedPreset.sessions.length > 0 ? editedPreset : newPreset} 
+                    preset={editedPreset} 
                     changeEditVisible={() => setIsEditVisible(true)} 
                     changeEditData={changeEditData} 
                     setIndex={setIndex} 
@@ -491,13 +466,6 @@ const deleteFunc = () => {
 
 				<View className="flex-row justify-center pb-4 ">
 						<DownButton buttonText="Add Task" icon={icons.plusGray} onPress={() => {setIsPopupVisible(true)}} backgorundColor={'bg-zinc-900'} textColor={['#d4d4d8', '#52525b']} />
-						<DownButton buttonText="Save Changes" icon={icons.save} onPress={() => {if(saveTrue)saveEdit()}} backgorundColor={saveTrue ?'bg-sky-500' : 'bg-zinc-900'} textColor={saveTrue ? ['#e0f2fe', '#bfdbfe'] : ['#d4d4d8', '#52525b']} />
-							{preset.name == 'Morning Work' || preset.name == 'Evening Work' || preset.name == 'Noon Work' ? 
-							<DownButton buttonText="Restart" icon={icons.restart} onPress={() => {}} backgorundColor={'bg-red-500'} textColor={['#fee2e2', '#fecdd3']} />
-							: 
-							<DownButton buttonText="Delete" icon={icons.trash} onPress={() => {}} backgorundColor={'bg-red-500'} textColor={['#fecaca', '#ffffff']} />
-							}
-
 				</View>
 
                 <BottomPopup
@@ -881,4 +849,4 @@ const deleteFunc = () => {
     )
 }
 
-export default AddPreset;
+export default CreatePreset;

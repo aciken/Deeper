@@ -226,7 +226,7 @@ const workToday = (job) => {
 
 
 const submitNewWork = () => {
-  axios.put('https://bf9f-188-2-139-122.ngrok-free.app/addJob', {
+  axios.put('https://4e7d-188-2-139-122.ngrok-free.app/addJob', {
     newWork,
     id: user._id,
   }).then(res => {
@@ -242,7 +242,7 @@ const submitNewWork = () => {
 }
 
 const submitEditWork = () => {
- axios.put('https://bf9f-188-2-139-122.ngrok-free.app/editJob', {
+ axios.put('https://4e7d-188-2-139-122.ngrok-free.app/editJob', {
   editWork,
   index: editIndex,
   id: user._id,
@@ -263,7 +263,7 @@ const submitEditWork = () => {
 
 const submitDeleteWork = () => {
   if(user.work.length !== 1){
-    axios.put('https://bf9f-188-2-139-122.ngrok-free.app/deleteJob', {
+    axios.put('https://4e7d-188-2-139-122.ngrok-free.app/deleteJob', {
     index: editIndex,
     id: user._id,
   }).then(res => {

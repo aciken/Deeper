@@ -18,6 +18,7 @@ const editJob = require('./Jobs/editJob');
 const updateWeeklyWork = require('./Jobs/updateWeeklyWork');
 const editPreset = require('./Presets/editPreset');
 const addToSchedule = require('./Presets/addToSchedule');
+const createNewPreset = require('./Presets/createNewPreset');
 
 
 app.get('/', (req, res) => {
@@ -37,7 +38,7 @@ app.put('/editJob', editJob);
 app.put('/updateWeeklyWork', updateWeeklyWork);
 app.put('/editPreset', editPreset);
 app.put('/addToSchedule', addToSchedule);
-
+app.put('/createNewPreset', createNewPreset);
 
 app.listen(port, () => {
     console.log(`App listening at http://localhost:${port}`);

@@ -20,6 +20,7 @@ const PresetsTable = ({ preset, changeEditVisible, changeEditData, setIndex, wor
   }
 
   const renderTasks = useMemo(() => {
+    console.log('sessiosnsssssss',preset.sessions)
     return preset.sessions.map((session, index) => {
       const [startTime, endTime, name, presetId, startPoint, endPoint] = session;
       const [startHour, startMinute] = startTime.split(':');
@@ -62,7 +63,7 @@ const PresetsTable = ({ preset, changeEditVisible, changeEditData, setIndex, wor
   }, [preset.sessions]);
 
   return (
-    <View className="relative flex-1 h-[75%] w-full mt-6 border border-zinc-700 bg-zinc-900 rounded-md overflow-hidden">
+    <View className="relative flex-1 h-[75%] w-full border border-zinc-700 bg-zinc-900 rounded-md overflow-hidden">
       <ScrollView
         vertical={true} 
         showsVerticalScrollIndicator={false}

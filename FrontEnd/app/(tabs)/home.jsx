@@ -138,7 +138,7 @@ const Home = () => {
 	useEffect(() => {;
 		const email = user.email;
 
-		axios.post('https://bf9f-188-2-139-122.ngrok-free.app/getUser', { email })
+		axios.post('https://3ed6-188-2-139-122.ngrok-free.app/getUser', { email })
 			.then(res => {
 				setIsLoading(false);
 				setUser(res.data);

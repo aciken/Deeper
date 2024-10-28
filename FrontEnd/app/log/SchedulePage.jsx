@@ -142,7 +142,7 @@ const SchedulePage = () => {
 
 
 
-		axios.put('https://bf9f-188-2-139-122.ngrok-free.app/addWork', {
+		axios.put('https://4e7d-188-2-139-122.ngrok-free.app/addWork', {
 		  data,
 		  id: user._id,
 		  clicked,
@@ -175,7 +175,7 @@ const SchedulePage = () => {
 
 	
     const deleteFunc = () => {
-        axios.put('https://bf9f-188-2-139-122.ngrok-free.app/deleteWork', {
+        axios.put('https://4e7d-188-2-139-122.ngrok-free.app/deleteWork', {
             id: user._id,
             index,
             clicked,
@@ -193,7 +193,7 @@ const SchedulePage = () => {
 
         const data  = [start,end, name, selectedWork]
 
-        axios.put('https://bf9f-188-2-139-122.ngrok-free.app/editWork', {
+        axios.put('https://4e7d-188-2-139-122.ngrok-free.app/editWork', {
             data,
             id: user._id,
             index,
@@ -332,44 +332,39 @@ const SchedulePage = () => {
 				<ScrollView
 					horizontal
 					showsHorizontalScrollIndicator={false}
-					className=""
+					className="mb-4"
 				>
-					{user.array && user.array.map((_, index) =>{
-						if (index + 1 > todayDateNumber - 1 && index < todayDateNumber + 6){
-							const currentDate = index + 1;
-							return(
-								<TouchableOpacity
-									key={currentDate}
-									onPress={() => handleDateClick(currentDate)}
-									className={`w-12 h-16 justify-center items-center rounded-xl mr-2`}
-									>
-										{currentDate === clicked ?
-										<LinearGradient
-											colors={['#0EA5E9', '#60A5FA']}
-											start={{x: 0, y: 0}}
-											end={{x: 0, y: 1}}
-											className="w-full h-full rounded-xl justify-center items-center"
-										>
-											<Text className="text-white text-xs mb-1">{getDayName(currentDate)}</Text>
-											<Text className="text-white text-lg font-bold">{currentDate}</Text>
-										</LinearGradient>
-										:
-										<LinearGradient
-											colors={['#18181B', '#27272A']}
-											start={{x: 0, y: 0}}
-											end={{x: 0, y: 1}}
-											className="w-full h-full rounded-xl justify-center items-center"
-										>
-											<Text className="text-zinc-400 text-xs mb-1">{getDayName(currentDate)}</Text>
-											<Text className="text-zinc-400 text-lg font-bold">{currentDate}</Text>
-										</LinearGradient>
-										}
-									</TouchableOpacity>
-									
-							)
-						}
-					})}
+					{[...Array(14)].map((_, index) => {
+						const date = new Date();
+						date.setDate(date.getDate() + index);
+						const isToday = index === 0;
+						const isSelected = date.getDate() === clicked;
 
+						return (
+							<TouchableOpacity
+								key={index}
+								onPress={() => handleDateClick(date.getDate())}
+								className={`w-12 h-16 justify-center items-center rounded-lg mr-2`}
+							>
+								<LinearGradient
+									colors={isSelected ? ['#0EA5E9', '#7dd3fc'] : ['#18181B', '#27272A']}
+									start={{x: 0, y: 0}}
+									end={{x: 1, y: 1}}
+									className="w-full h-full rounded-lg justify-center items-center border border-zinc-700"
+								>
+									<Text className={`text-xs mb-0.5 ${
+										isSelected ? 'text-zinc-100' : 'text-zinc-400'
+									}`}>{date.toLocaleDateString('en-US', { weekday: 'short' })}</Text>
+									<Text className={`text-base font-bold ${
+										isSelected ? 'text-zinc-100' : 'text-zinc-400'
+									}`}>{date.getDate()}</Text>
+									{isToday && (
+										<View className="absolute bottom-0.5 w-1 h-1 bg-sky-500 rounded-full" />
+									)}
+								</LinearGradient>
+							</TouchableOpacity>
+						);
+					})}
 				</ScrollView>
 
 				<View className="h-[70%]"> 
@@ -621,7 +616,7 @@ const SchedulePage = () => {
 								showsHorizontalScrollIndicator={false}
 								className="mb-4"
 							>
-								{[...Array(7)].map((_, index) => {
+								{[...Array(14)].map((_, index) => {
 									const date = new Date();
 									date.setDate(date.getDate() + index);
 									const isClickedDate = date.getDate() === clicked;
@@ -977,7 +972,11 @@ const SchedulePage = () => {
 						<Text className="text-blue-500 text-xs font-pregular">Added presets will delete overlapping sessions</Text>
 					</View>
 						<TouchableOpacity 
-								  onPress={() => {}}
+								  onPress={() => {
+									router.push({
+										pathname: 'log/createPreset', 
+									})
+								  }}
 								  className="w-full rounded-full overflow-hidden shadow-lg pt-2 mb-4"
 								>
 									
