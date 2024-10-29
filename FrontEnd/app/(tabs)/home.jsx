@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, BackHandler, Dimensions, TouchableOpacity, Image, Platform, TextInput } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, ScrollView, BackHandler, Dimensions, TouchableOpacity, Image, Platform, TextInput, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useIsFocused } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -26,6 +26,8 @@ const Home = () => {
 	const [selectedWork, setSelectedWork] = useState(null);
 	const [duration, setDuration] = useState({ hours: 0, minutes: 0 });
 	const [showTimePicker, setShowTimePicker] = useState(false);
+
+	const [isSessionPageVisible, setIsSessionPageVisible] = useState(false);
 
 	const findTaskById = (id) => {
 		return user.work.find(work => work._id === id)
@@ -92,6 +94,147 @@ const Home = () => {
 
 	}
 
+	const today = new Date(); 
+	const dayOfMonth = today.getDate();
+	
+	const findCurrentSession = () => {
+		const task = user.array[new Date().getDate() - 1].find(task => currentTime-10 > task[4] && currentTime-10 < task[5])
+		return task
+	   } 
+	
+	// TIMER
+	
+	
+	const [currentLine, setCurrentLine] = useState();
+	
+		const [timeNow, setTimeNow] = useState(new Date());
+	const [h, setH] = useState(timeNow.getHours());
+	const [m, setM] = useState(timeNow.getMinutes());
+	const [s, setS] = useState(timeNow.getSeconds());
+	
+		const session = findCurrentSession();
+
+		const [timeInSeconds, setTimeInSeconds] = useState(0);
+
+		useEffect(() => {
+			if (!session) return;
+
+			const updateTimer = () => {
+				const currentTime = new Date();
+				const currentHours = currentTime.getHours();
+				const currentMinutes = currentTime.getMinutes();
+				const currentSeconds = currentTime.getSeconds();
+
+				// Convert session end time (in points) to seconds
+				const sessionEndInSeconds = (session[5] / 20) * 3600;  // Convert points to seconds
+
+				// Convert current time to seconds since start of day
+				const currentTimeInSeconds = currentHours * 3600 + currentMinutes * 60 + currentSeconds;
+
+				// Calculate remaining time
+				const remainingSeconds = Math.round(sessionEndInSeconds - currentTimeInSeconds);
+				setTimeInSeconds(remainingSeconds);
+			};
+
+			// Initial update
+			updateTimer();
+
+			// Update every second
+			const intervalId = setInterval(updateTimer, 1000);
+
+			return () => clearInterval(intervalId);
+		}, [session]);
+
+		// Function to format seconds into HH:MM:SS
+		const formatTime = (seconds) => {
+			if (seconds < 0) return "00:00:00";
+			
+			const hours = Math.floor(seconds / 3600);
+			const minutes = Math.floor((seconds % 3600) / 60);
+			const secs = seconds % 60;
+
+			return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+		};
+
+		// In your JSX where you display the time:
+
+
+		// 	useEffect(() => {
+	// 	if(currentLine-600 < session[3] && (clicked == dayOfMonth)) {
+	// 		setTimeInSeconds(Math.round(((session[3] / 20) * 3600) - realTime));
+	// 		} else if(clicked > dayOfMonth) {
+	// 			setTimeInSeconds(Math.round(((session[3] / 20) * 3600)) -realTime + 86400 * (clicked - dayOfMonth));
+	// 			console.log(timeInSeconds)
+	// 	}
+	// 	}, [] )
+	
+	
+	// 	console.log(`${timeInSeconds} - time, ${realTime} - current time`)
+	
+		
+	
+	// 	useEffect(() => {
+	
+	// 	  if (timeInSeconds === 0) return;
+	  
+	
+	// 	  const intervalId = setInterval(() => {
+	
+	// 		const rightTime = new Date()
+	
+	// 		const inH = rightTime.getHours()
+	// 		const inM = rightTime.getMinutes()
+	// 		const inS = rightTime.getSeconds()
+	
+			
+	
+	
+	// 			const inRealTime = ((inH * 20 + inM / 3) / 20 * 3600 + inS);
+	
+	// 			console.log(Math.round(((session[4] / 20) * 3600)), inRealTime)
+	
+	// 		setTimeInSeconds(Math.round(((session[4] / 20) * 3600) - inRealTime));
+	
+	
+	// 		  if(currentLine - 600 < session[3] && (clicked == dayOfMonth)) {
+	// 			  setTimeInSeconds(Math.round(((session[3] / 20) * 3600) - inRealTime));
+	// 			  } else if(clicked > dayOfMonth) {
+	// 				  setTimeInSeconds(Math.round(((session[3] / 20) * 3600)) -inRealTime + 86400 * (clicked - dayOfMonth));
+	// 				  console.log(timeInSeconds)
+	// 		  }
+	
+	// 	  }, 1000);
+	  
+	
+	// 	  return () => clearInterval(intervalId);
+	
+	// 	}, [timeInSeconds]);
+	  
+	
+	// 	const hours = Math.floor(timeInSeconds / 3600);
+	// 	const minutes = Math.floor((timeInSeconds % 3600) / 60);
+	// 	const seconds = timeInSeconds % 60;
+	  
+	
+	// 	const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes
+	// 	  .toString()
+	// 	  .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+	
+	// 	  console.log(session[4], session[3], currentLine, clicked, dayOfMonth)
+	
+	//   useEffect(() => {
+	// 	const logInterval = setInterval(() => {
+	// 	  console.log(`Current line: ${currentLine}, Task start: ${taskArray[3]}`);
+	// 	}, 3000);
+	
+	// 	return () => clearInterval(logInterval);
+	//   }, []);
+
+
+
+		// TIMER END
+
+
 	const timeFromPoints = (points) => {
 		const hours = Math.floor(points / 20);
 		const minutes = Math.round((points / 20 - hours) * 60);
@@ -138,7 +281,7 @@ const Home = () => {
 	useEffect(() => {;
 		const email = user.email;
 
-		axios.post('https://3f89-188-2-139-122.ngrok-free.app/getUser', { email })
+		axios.post('https://080d-188-2-139-122.ngrok-free.app/getUser', { email })
 			.then(res => {
 				setIsLoading(false);
 				setUser(res.data);
@@ -191,12 +334,89 @@ const Home = () => {
 		}
 	};
 
-	const findCurrentSession = () => {
-		const task = user.array[new Date().getDate() - 1].find(task => currentTime-10 > task[4] && currentTime-10 < task[5])
-		return task
-	   }        
+       
 
+	const buttonAnim = useRef(new Animated.Value(0)).current;
 
+	const handleSessionPress = () => {
+		// Animate button down with more aggressive parameters
+		Animated.spring(buttonAnim, {
+			toValue: 105,  // Increased from 5 to 15 for more movement
+			useNativeDriver: true,
+			tension: 100,  // Increased from 50 to 100 for faster movement
+			friction: 4,   // Reduced from 7 to 4 for more bounce
+			velocity: 3    // Added initial velocity for more aggressive start
+		}).start();
+
+		setIsSessionPageVisible(true);
+	};
+
+	const handleSessionClose = () => {
+		// Animate button back up with same aggressive parameters
+		Animated.spring(buttonAnim, {
+			toValue: 0,
+			useNativeDriver: true,
+			tension: 100,
+			friction: 7,
+			velocity: 2
+		}).start();
+
+		setIsSessionPageVisible(false);
+	};
+
+	const slideAnim = useRef(new Animated.Value(-300)).current;  // Start from -400 (left)
+	const opacityAnim = useRef(new Animated.Value(0)).current;  // Start fully transparent
+
+	useEffect(() => {
+		if (isSessionPageVisible) {
+			// Animate when popup becomes visible
+			Animated.parallel([
+				Animated.spring(slideAnim, {
+					toValue: 0,
+					useNativeDriver: true,
+					tension: 30,
+					friction: 7,
+					velocity: 2
+				}),
+				Animated.timing(opacityAnim, {
+					toValue: 1,
+					duration: 300,
+					useNativeDriver: true
+				})
+			]).start();
+		} else {
+			// Reset animations when popup closes
+			slideAnim.setValue(-300);  // Reset to -400 to start from left again
+			opacityAnim.setValue(0);
+		}
+	}, [isSessionPageVisible]);
+
+	const timerSlideAnim = useRef(new Animated.Value(400)).current;  // Start from right side
+	const timerOpacityAnim = useRef(new Animated.Value(0)).current;
+
+	useEffect(() => {
+		if (isSessionPageVisible) {
+			// Animate when popup becomes visible
+			Animated.parallel([
+				Animated.spring(timerSlideAnim, {
+					toValue: 0,
+					useNativeDriver: true,
+					tension: 30,
+					friction: 7,
+					velocity: 2
+				}),
+				Animated.timing(timerOpacityAnim, {
+					toValue: 1,
+					duration: 300,
+					useNativeDriver: true
+				})
+			]).start();
+		} else {
+			// Reset animations when popup closes
+			timerSlideAnim.setValue(400);  // Reset to right side
+			timerOpacityAnim.setValue(0);
+		}
+	}, [isSessionPageVisible]);
 
 	
 	return (
@@ -426,35 +646,37 @@ const Home = () => {
 					</TouchableOpacity>
 
             ) : (
-              <TouchableOpacity 
-              onPress={() => {}}
-              className="w-full rounded-full overflow-hidden shadow-lg pt-2"
-            >
-              <LinearGradient
-                colors={['#27272a', '#18181b']}
-                start={{x: 0, y: 0}}
-                end={{x: 1, y: 1}}
-                className="w-full rounded-full h-14 flex-row justify-between items-center px-4"
-              >
-			<View className="flex-row items-center">
-				<LinearGradient
-						colors={findTaskById(findCurrentSession()[3]).colors}
-						start={{x: 0, y: 0}}
-						end={{x: 0, y: 1}}
-						className="w-6 h-6 rounded-full mr-1"
-					>
-				</LinearGradient>
-                <View className="flex-col items-start">
-					<Text className="text-white text-base font-semibold">{findCurrentSession()[2]}</Text>
-					<Text className="text-zinc-400 text-sm font-regular">{findTaskById(findCurrentSession()[3]).name}</Text>
-				</View>
-				</View>
-				<View className="flex-row items-center">
-				  <Text className="text-white text-base font-semibold">{timeFromPoints(findCurrentSession()[5]-(currentTime-10))}</Text>
-         		 <Image source={icons.timerWhite} className="w-4 h-4 ml-1 tint-white" />
-				</View>
-              </LinearGradient>
-              </TouchableOpacity>
+              <Animated.View style={{ transform: [{ translateY: buttonAnim }] }}>
+                <TouchableOpacity 
+                  onPress={handleSessionPress}
+                  className="w-full rounded-full overflow-hidden shadow-lg pt-2"
+                >
+                  <LinearGradient
+                    colors={['#27272a', '#18181b']}
+                    start={{x: 0, y: 0}}
+                    end={{x: 1, y: 1}}
+                    className="w-full rounded-full h-14 flex-row justify-between items-center px-4"
+                  >
+                    <View className="flex-row items-center">
+                      <LinearGradient
+                        colors={findTaskById(findCurrentSession()[3]).colors}
+                        start={{x: 0, y: 0}}
+                        end={{x: 0, y: 1}}
+                        className="w-6 h-6 rounded-full mr-1"
+                      >
+                      </LinearGradient>
+                      <View className="flex-col items-start">
+                        <Text className="text-white text-base font-semibold">{findCurrentSession()[2]}</Text>
+                        <Text className="text-zinc-400 text-sm font-regular">{findTaskById(findCurrentSession()[3]).name}</Text>
+                      </View>
+                    </View>
+                    <View className="flex-row items-center">
+                      <Text className="text-white text-base font-semibold">{timeFromPoints(findCurrentSession()[5]-(currentTime-10))}</Text>
+                      <Image source={icons.timerWhite} className="w-4 h-4 ml-1 tint-white" />
+                    </View>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </Animated.View>
             )}
           </View>
 			</View>
@@ -473,7 +695,7 @@ const Home = () => {
 							<LinearGradient
 								colors={['#D4D4D8', '#71717A']}
 								start={{x: 0, y: 0}}
-								end={{x: 0, y: 1}}
+								end={{x: 1, y: 1}}
 							>
 							<Text className="text-white text-3xl font-bold mb-6 text-center opacity-0">Work Depth</Text>
 							</LinearGradient>
@@ -706,6 +928,83 @@ const Home = () => {
 					</TouchableOpacity>
 				</View>
 			</BottomPopup>
+			<BottomPopup
+				visible={isSessionPageVisible}
+				onClose={handleSessionClose}
+				height={0.9}
+			>
+				<View className="flex-1">
+					{findCurrentSession() && (
+						<>
+							<View className="bg-zinc-900 rounded-t-3xl p-2">
+								<Animated.View
+									style={{
+										transform: [{ translateX: slideAnim }],
+										opacity: opacityAnim
+									}}
+									className="flex-row items-center justify-center"
+								>								
+								<MaskedView
+								maskElement={
+									<View className="flex-col justify-center items-center">
+										<Text className="text-white text-2xl font-semibold text-center">
+											{findCurrentSession()[2]}
+										</Text>
+										<Text className="text-zinc-200 text-lg font-regular text-center">
+											{findTaskById(findCurrentSession()[3]).name}
+										</Text>
+									</View>
+								}
+							>
+								<LinearGradient
+									colors={['#D4D4D8', findTaskById(findCurrentSession()[3]).colors[0]]}
+									start={{x: 0, y: 0}}
+									end={{x: 0, y: 1}}
+								>
+									<View className="flex-col items-center justify-center opacity-0">
+										<Text className="text-white text-2xl font-semibold text-center">
+											{findCurrentSession()[2]}
+										</Text>
+										<Text className="text-zinc-200 text-lg font-regular text-center">
+											{findTaskById(findCurrentSession()[3]).name}
+										</Text>
+									</View>
+								</LinearGradient>
+							</MaskedView>
+								</Animated.View>
+							</View>
+						
+							<Animated.View 
+								style={{
+									transform: [{ translateX: timerSlideAnim }],
+									opacity: timerOpacityAnim
+								}} 
+								className="justify-start items-center mt-12"
+							>
+								<MaskedView
+									maskElement={
+										<Text className="text-white text-6xl font-semibold">
+											{formatTime(timeInSeconds)}
+										</Text>
+									}
+								>
+									<LinearGradient
+										colors={['#52525b', findTaskById(findCurrentSession()[3]).colors[0]]}
+										start={{x: 0, y: 0}}
+										end={{x: 2, y: 2}}
+									>
+										<Text className="text-white text-6xl font-semibold opacity-0">
+											{formatTime(timeInSeconds)}
+										</Text>
+									</LinearGradient>
+								</MaskedView>
+							</Animated.View>
+						</>
+					)}
+				</View>
+			</BottomPopup>
+
+
 
 			
 		</SafeAreaView>

@@ -281,7 +281,7 @@ const CreatePreset = () => {
 
 const saveEdit = () => {
 	const presetIndex = user.preset.findIndex(pre=> pre.name == newPreset.name)
-	axios.put('https://3f89-188-2-139-122.ngrok-free.app/editPreset', {
+	axios.put('https://080d-188-2-139-122.ngrok-free.app/editPreset', {
 		preset: editedPreset.sessions.length > 0 ? editedPreset : newPreset,
 		id: user._id,
 		presetIndex,
@@ -300,7 +300,7 @@ const addToSchedule = () => {
 		setAlertPopupMessage('You need to select at least one date');
 		setAlertPopupType('info')
 	} else {
-	axios.put('https://3f89-188-2-139-122.ngrok-free.app/addToSchedule', {	
+	axios.put('https://080d-188-2-139-122.ngrok-free.app/addToSchedule', {	
 		preset: editedPreset.sessions.length > 0 ? editedPreset : newPreset,
 		id: user._id,
 		clickedDates: selectedDates,
@@ -316,7 +316,8 @@ const addToSchedule = () => {
 }
 
 const deleteFunc = () => {
-    if (index !== null && index >= 0 && index < newPreset.sessions.length) {
+	console.log(index)
+
 		if(editedPreset.sessions.length > 0){
 			setEditedPreset(prev => ({
 				...prev,
@@ -330,11 +331,21 @@ const deleteFunc = () => {
         }
         setIsEditVisible(false);
     }
-}
+
 
 
 const createPreset = () => {
-    axios.put('https://3f89-188-2-139-122.ngrok-free.app/createNewPreset', {
+	if(editedPreset.name == ''){
+		setAlertPopupVisible(true);
+		setAlertPopupMessage('Preset name is required');
+		setAlertPopupType('info')
+	} else if(editedPreset.sessions.length == 0){
+		setAlertPopupVisible(true);
+		setAlertPopupMessage('You need to add at least one session');
+		setAlertPopupType('info')
+	} else { 
+		
+    axios.put('https://080d-188-2-139-122.ngrok-free.app/createNewPreset', {
         preset: editedPreset,
         id: user._id,
     }).then(res => {
@@ -343,7 +354,8 @@ const createPreset = () => {
     })
     .catch((e) => {
         console.error(e);
-    })
+		})
+	}
 }
 
 
