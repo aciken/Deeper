@@ -11,7 +11,7 @@ import iceberg from '../../assets/images/iceberg.png';
 import BottomPopup from '../components/BottomPopup';
 import MaskedView from '@react-native-masked-view/masked-view';
 import DateTimePicker from '@react-native-community/datetimepicker';
-
+import AlertPopup from '../components/AlertPopup';
 
 const Home = () => {
 	const { setUser, user, setIsLoading } = useGlobalContext();
@@ -24,8 +24,13 @@ const Home = () => {
 	const [isWorkDropdownVisible, setIsWorkDropdownVisible] = useState(false);
 	const [isDurationDropdownVisible, setIsDurationDropdownVisible] = useState(false);
 	const [selectedWork, setSelectedWork] = useState(null);
+	const [sessionName, setSessionName] = useState('');
 	const [duration, setDuration] = useState({ hours: 0, minutes: 0 });
 	const [showTimePicker, setShowTimePicker] = useState(false);
+
+	const [alertPopupVisible, setAlertPopupVisible] = useState(false);
+	const [alertPopupMessage, setAlertPopupMessage] = useState('');
+	const [alertPopupType, setAlertPopupType] = useState('info');
 
 	const [isSessionPageVisible, setIsSessionPageVisible] = useState(false);
 
@@ -278,10 +283,17 @@ const Home = () => {
 
 	const [works, setWorks] = useState(user?.work || []);
 
+	useEffect(() => {
+		setWorks(user.work)
+		setUser(user)
+	}, [user])
+
+	
+
 	useEffect(() => {;
 		const email = user.email;
 
-		axios.post('https://080d-188-2-139-122.ngrok-free.app/getUser', { email })
+		axios.post('https://eb98-188-2-139-122.ngrok-free.app/getUser', { email })
 			.then(res => {
 				setIsLoading(false);
 				setUser(res.data);
@@ -333,6 +345,46 @@ const Home = () => {
 			});
 		}
 	};
+
+
+	const startSession = () => {
+		if(sessionName === ''){
+			setAlertPopupVisible(true);
+			setAlertPopupMessage('Please enter a session name');
+			setAlertPopupType('info');
+		} else if(!selectedWork) {
+			setAlertPopupVisible(true);
+			setAlertPopupMessage('Please select a work');
+			setAlertPopupType('info');
+		} else if(duration.hours === 0 && duration.minutes === 0) {
+			setAlertPopupVisible(true);
+			setAlertPopupMessage('Please select a duration');
+			setAlertPopupType('info');
+		} else {
+			axios.put('https://eb98-188-2-139-122.ngrok-free.app/startCurrentSession', {
+				sessionName,
+				selectedWork,
+				duration,
+				id: user._id
+			})
+			.then(res => {
+				if(res.data === 'Time overlap'){
+					setAlertPopupVisible(true);
+					setAlertPopupMessage('New Session overlaps with existing session');
+					setAlertPopupType('error');
+				} else {
+					setAlertPopupVisible(true);
+					setAlertPopupMessage('Session started');
+					setAlertPopupType('success');
+					setUser(res.data)
+					setIsStartSessionPopupVisible(false)
+				}
+			})
+			.catch((e) => {
+				console.error('Error starting session:', e);
+			})
+		}
+	}
 
        
 
@@ -423,6 +475,12 @@ const Home = () => {
 		<SafeAreaView className="flex-1 bg-zinc-950" edges={['top']}>
 			<View className="flex-1">
 				<ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
+				<AlertPopup
+					visible={alertPopupVisible}
+					message={alertPopupMessage}
+					type={alertPopupType}
+					onHide={() => setAlertPopupVisible(false)}
+				/>
 					{/* Logo and Welcome Section */}
 					<View className="flex-row items-center justify-start mt-2 mb-4 ml-4">
 							<Text className="text-white text-4xl font-bold">deeper</Text>
@@ -831,6 +889,8 @@ const Home = () => {
 							placeholder="Work Session Name"
 							placeholderTextColor="#71717A"
 							style={{ fontSize: 16 }}
+							value={sessionName}
+							onChangeText={setSessionName}
 						/>
 					</View>
 					
@@ -915,7 +975,7 @@ const Home = () => {
 				</ScrollView>
 				
 				<View className="bg-zinc-900 p-6">
-					<TouchableOpacity onPress={() => {/* Handle start session */}}>
+					<TouchableOpacity onPress={() => {startSession()}}>
 						<LinearGradient
 							colors={['#0ea5e9', '#60a5fa']}
 							start={{x: 0, y: 0}}
