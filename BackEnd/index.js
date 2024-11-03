@@ -22,6 +22,9 @@ const createNewPreset = require('./Presets/createNewPreset');
 const deletePreset = require('./Presets/deletePreset');
 const restorePreset = require('./Presets/restorePreset');
 const startCurrentSession = require('./Work/startCurrentSession');
+const changeDaily = require('./Tracker/changeDaily');
+
+
 app.get('/', (req, res) => {
     res.send('Hello World!');
   });
@@ -43,7 +46,7 @@ app.put('/createNewPreset', createNewPreset);
 app.put('/deletePreset', deletePreset);
 app.put('/restorePreset', restorePreset);
 app.put('/startCurrentSession', startCurrentSession);
-
+app.put('/updateTracker', changeDaily);
 app.listen(port, () => {
     console.log(`App listening at http://localhost:${port}`);
   });

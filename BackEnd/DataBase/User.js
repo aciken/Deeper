@@ -35,6 +35,32 @@ const UserSchema = new mongoose.Schema({
   preset: {
     type: Array,
     default: []
+  },
+  tracker: {
+    type: Object,
+    default: {
+      daily: {
+        daily: 0,
+        morning: 0,
+        afternoon: 0,
+        project: 0
+      },
+      general: {
+        general: 0,
+        morning: 0,
+        afternoon: 0,
+        project: 0
+      }
+    }
+  },
+  points: {
+    type: Object,
+    default: {
+      current: 0,
+      currentDaily: [0,1],
+      currentGeneral: [0],
+      currentGeneralPlus: [0],
+    }
   }
 });
 

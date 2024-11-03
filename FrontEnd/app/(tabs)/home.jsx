@@ -79,6 +79,35 @@ const Home = () => {
 	  return () => clearInterval(intervalId);
 	}, []);
 
+
+	useEffect(() =>{
+		const currentDate = new Date();
+		const dayOfMonth = currentDate.getDate();
+
+		let timeWorked = 0;
+		user.array[dayOfMonth-1].forEach(task => {
+			if(task[5] < currentTime-10){
+				timeWorked += task[5] - task[4]
+			}
+			
+		})
+		timeWorked = Math.round(timeWorked);
+		console.log('timeWorked', timeWorked)
+		if(user.tracker.daily !== timeWorked){
+			axios.put('https://1ab7-188-2-139-122.ngrok-free.app/updateTracker', {
+			change: timeWorked,
+			id: user._id
+			})
+			.then(res => {
+				setUser(res.data)
+			})
+			.catch(e => {
+				console.error('Error updating tracker:', e);
+			})
+		}
+	}, [user])
+
+
 	const workToday = () => {
 		const currentDate = new Date();
 		const dayOfMonth = currentDate.getDate();
@@ -96,7 +125,6 @@ const Home = () => {
 		const minutes = Math.round((timeWorked / 20 - hours) * 60);
 		const time = minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
 		return time
-
 	}
 
 	const today = new Date(); 
@@ -161,83 +189,7 @@ const Home = () => {
 			return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 		};
 
-		// In your JSX where you display the time:
 
-
-		// 	useEffect(() => {
-	// 	if(currentLine-600 < session[3] && (clicked == dayOfMonth)) {
-	// 		setTimeInSeconds(Math.round(((session[3] / 20) * 3600) - realTime));
-	// 		} else if(clicked > dayOfMonth) {
-	// 			setTimeInSeconds(Math.round(((session[3] / 20) * 3600)) -realTime + 86400 * (clicked - dayOfMonth));
-	// 			console.log(timeInSeconds)
-	// 	}
-	// 	}, [] )
-	
-	
-	// 	console.log(`${timeInSeconds} - time, ${realTime} - current time`)
-	
-		
-	
-	// 	useEffect(() => {
-	
-	// 	  if (timeInSeconds === 0) return;
-	  
-	
-	// 	  const intervalId = setInterval(() => {
-	
-	// 		const rightTime = new Date()
-	
-	// 		const inH = rightTime.getHours()
-	// 		const inM = rightTime.getMinutes()
-	// 		const inS = rightTime.getSeconds()
-	
-			
-	
-	
-	// 			const inRealTime = ((inH * 20 + inM / 3) / 20 * 3600 + inS);
-	
-	// 			console.log(Math.round(((session[4] / 20) * 3600)), inRealTime)
-	
-	// 		setTimeInSeconds(Math.round(((session[4] / 20) * 3600) - inRealTime));
-	
-	
-	// 		  if(currentLine - 600 < session[3] && (clicked == dayOfMonth)) {
-	// 			  setTimeInSeconds(Math.round(((session[3] / 20) * 3600) - inRealTime));
-	// 			  } else if(clicked > dayOfMonth) {
-	// 				  setTimeInSeconds(Math.round(((session[3] / 20) * 3600)) -inRealTime + 86400 * (clicked - dayOfMonth));
-	// 				  console.log(timeInSeconds)
-	// 		  }
-	
-	// 	  }, 1000);
-	  
-	
-	// 	  return () => clearInterval(intervalId);
-	
-	// 	}, [timeInSeconds]);
-	  
-	
-	// 	const hours = Math.floor(timeInSeconds / 3600);
-	// 	const minutes = Math.floor((timeInSeconds % 3600) / 60);
-	// 	const seconds = timeInSeconds % 60;
-	  
-	
-	// 	const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes
-	// 	  .toString()
-	// 	  .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-	
-	// 	  console.log(session[4], session[3], currentLine, clicked, dayOfMonth)
-	
-	//   useEffect(() => {
-	// 	const logInterval = setInterval(() => {
-	// 	  console.log(`Current line: ${currentLine}, Task start: ${taskArray[3]}`);
-	// 	}, 3000);
-	
-	// 	return () => clearInterval(logInterval);
-	//   }, []);
-
-
-
-		// TIMER END
 
 
 	const timeFromPoints = (points) => {
@@ -248,36 +200,158 @@ const Home = () => {
 	}
 
 
+
 	const points = {
 		daily: [
 			{
 				points: 1,
-				description: 'Work 8 hours today',
-				current: '2h 24m',
-				done: false,
+				description: "Work 4 hours today",
+				goal: 4,
+				type: 'daily',
 			},
 			{
 				points: 1,
-				description: 'Work 2 hours on morning',
-				current: '2h 24m',
-				done: true,
+				description: "Work 2 hours on today's morning",
+				goal: 2,
+				type: 'morning',
+			},
+			{
+				points: 1,
+				description: "Work 2 hours on today's afternoon",
+				goal: 2,
+				type: 'afternoon',
+			},
+			{
+				points: 1,
+				description: "Work 2 hours on one project",
+				goal: 2,
+				type: 'project',
 			}
 		],
 		general: [
 			{
+				points: 3,
+				description: "Work 50 hours",
+				goal: 50,
+				type: 'general',
+			},
+			{
 				points: 5,
-				description: 'Work 100 hours on one project',
-				current: '25h',
-				done: false,
+				description: "Work 100 hours",
+				goal: 100,
+				type: 'general',
+			},
+			{
+				points: 15,
+				description: "Work 200 hours",
+				goal: 200,
+				type: 'general',
+			},
+			{
+				points: 20,
+				description: "Work 500 hours",
+				goal: 500,
+				type: 'general',
+			},
+			{
+				points: 25,
+				description: "Work 400 hours",
+				goal: 400,
+				type: 'general',
+			}
+		],
+		generalPlus: [
+			{
+				points: 3,
+				description: "Work 25 hours on morning",
+				goal: 25,
+				type: 'morning',
+			},
+			{
+				points: 3,
+				description: "Work 25 hours on afternoon",
+				goal: 25,
+				type: 'afternoon',
+			},
+			{
+				points: 5,
+				description: "Work 50 hours on one project",
+				goal: 50,
+				type: 'project',
 			},
 			{
 				points: 10,
-				description: 'Work 300 hours',
-				current: '120h',
-				done: false,
+				description: "Work 200 hours on one project",
+				goal: 200,
+				type: 'project',
 			}
 		]
 	}
+
+
+	const currentPoints = {
+		daily: [
+			{
+				points: points.daily[user.points.currentDaily[0]].points,
+				description: points.daily[user.points.currentDaily[0]].description,
+				goal: points.daily[user.points.currentDaily[0]].goal,
+				type: points.daily[user.points.currentDaily[0]].type,
+			},
+			{
+				points: points.daily[user.points.currentDaily[1]].points,
+				description: points.daily[user.points.currentDaily[1]].description,
+				goal: points.daily[user.points.currentDaily[1]].goal,
+				type: points.daily[user.points.currentDaily[1]].type,
+			}
+		],
+		general: [
+			{
+				points: points.general[user.points.currentGeneral[0]].points,
+				description: points.general[user.points.currentGeneral[0]].description,
+				goal: points.general[user.points.currentGeneral[0]].goal,
+				type: points.general[user.points.currentGeneral[0]].type,
+			},
+			{
+				points: points.generalPlus[user.points.currentGeneralPlus[0]].points,
+				description: points.generalPlus[user.points.currentGeneralPlus[0]].description,
+				goal: points.generalPlus[user.points.currentGeneralPlus[0]].goal,
+				type: points.generalPlus[user.points.currentGeneralPlus[0]].type,
+			}
+		]
+	}
+
+
+
+	// const points = {
+	// 	daily: [
+	// 		{
+	// 			points: 1,
+	// 			description: 'Work 8 hours today',
+	// 			current: '2h 24m',
+	// 			done: false,
+	// 		},
+	// 		{
+	// 			points: 1,
+	// 			description: 'Work 2 hours on morning',
+	// 			current: '2h 24m',
+	// 			done: true,
+	// 		}
+	// 	],
+	// 	general: [
+	// 		{
+	// 			points: 5,
+	// 			description: 'Work 100 hours on one project',
+	// 			current: '25h',
+	// 			done: false,
+	// 		},
+	// 		{
+	// 			points: 10,
+	// 			description: 'Work 300 hours',
+	// 			current: '120h',
+	// 			done: false,
+	// 		}
+	// 	]
+	// }
 
 
 
@@ -293,7 +367,7 @@ const Home = () => {
 	useEffect(() => {;
 		const email = user.email;
 
-		axios.post('https://eb98-188-2-139-122.ngrok-free.app/getUser', { email })
+		axios.post('https://1ab7-188-2-139-122.ngrok-free.app/getUser', { email })
 			.then(res => {
 				setIsLoading(false);
 				setUser(res.data);
@@ -361,7 +435,7 @@ const Home = () => {
 			setAlertPopupMessage('Please select a duration');
 			setAlertPopupType('info');
 		} else {
-			axios.put('https://eb98-188-2-139-122.ngrok-free.app/startCurrentSession', {
+			axios.put('https://1ab7-188-2-139-122.ngrok-free.app/startCurrentSession', {
 				sessionName,
 				selectedWork,
 				duration,
@@ -511,7 +585,7 @@ const Home = () => {
 													bottom: 0,
 													left: 0,
 													right: 0,
-													height: `${100 - currentLevel.progress}%`,
+													height: `${100 - user.points.current}%`,
 												}}
 												start={{ x: 0, y: 0 }}
 												end={{ x: 0, y: 1 }}
@@ -521,7 +595,7 @@ const Home = () => {
 												top: 0,
 												left: 0,
 												right: 0,
-												bottom: `${100 - currentLevel.progress}%`,
+												bottom: `${100 - user.points.current}%`,
 												backgroundColor: 'transparent',
 											}} />
 									</View>
@@ -536,7 +610,7 @@ const Home = () => {
 									}}>
 									<MaskedView
 										maskElement={
-											<Text className="text-white text-3xl font-bold z-10">{currentLevel.progress}%</Text>
+											<Text className="text-white text-3xl font-bold z-10">{user.points.current}%</Text>
 										}
 									>
 										<LinearGradient
@@ -544,7 +618,7 @@ const Home = () => {
 											start={{x: 0, y: 0}}
 											end={{x: 0, y: 1}}
 										>
-										<Text className="text-white text-3xl font-bold z-10 opacity-0">{currentLevel.progress}%</Text>
+										<Text className="text-white text-3xl font-bold z-10 opacity-0">{user.points.current}%</Text>
 										</LinearGradient>
 									</MaskedView>
 										
@@ -762,7 +836,7 @@ const Home = () => {
 					
 					<View className="mb-6">
 						<View className="flex-row justify-between items-center mb-2">
-							<Text className="text-sky-400 text-lg font-semibold">20%</Text>
+							<Text className="text-sky-400 text-lg font-semibold">{user.points.current}%</Text>
 						</View>
 						<View className="bg-zinc-800 h-2 rounded-full">
 							<LinearGradient
@@ -770,22 +844,22 @@ const Home = () => {
 								start={{x: 0, y: 0}}
 								end={{x: 1, y: 0}}
 								className="h-2 rounded-full"
-								style={{ width: '20%' }}
+								style={{ width: `${user.points.current}%` }}
 							>
-								<View className="bg-sky-400 h-2 rounded-full" style={{ width: '20%' }} />
+								<View className="bg-sky-400 h-2 rounded-full" style={{ width: `${user.points.current}%` }} />
 							</LinearGradient>
 						</View>
 					</View>
 
 					<View className="mb-6">
 						<Text className="text-white text-xl font-semibold mb-4">Daily Points</Text>
-						{points.daily.map((point, index) => (
-							point.done ? (
+						{currentPoints.daily.map((point, index) => (
+							point.goal * 20 <= user.tracker.daily[point.type] ? (
 
 							<View key={index} className="mb-3 flex flex-row justify-between items-center">
 							<MaskedView
 								maskElement={
-									<Text className="text-zinc-400 font-pmedium">{point.description} <Text className="text-zinc-200">/ {point.current}</Text></Text>
+									<Text className="text-zinc-400 font-pmedium">{point.description} <Text className="text-zinc-200">/ {timeFromPoints(user.tracker.daily[point.type])}</Text></Text>
 								}
 							>
 							<LinearGradient
@@ -793,7 +867,7 @@ const Home = () => {
 								start={{x: 0, y: 0}}
 								end={{x: 1, y: 0}}
 							>
-								<Text className="text-zinc-400 font-pmedium opacity-0">{point.description} <Text className="text-zinc-200">/ {point.current}</Text></Text>
+								<Text className="text-zinc-400 font-pmedium opacity-0">{point.description} <Text className="text-zinc-200">/ {timeFromPoints(user.tracker.daily[point.type])}</Text></Text>
 							</LinearGradient>
 						</MaskedView>
 						<TouchableOpacity className="rounded-full self-start overflow-hidden">
@@ -810,7 +884,7 @@ const Home = () => {
 							) : 
 							(
 							<View key={index} className="mb-3 flex flex-row justify-between items-center">
-								<Text className="text-zinc-400">{point.description} <Text className="text-zinc-200">/ {point.current}</Text></Text>
+								<Text className="text-zinc-400">{point.description} <Text className="text-zinc-200">/ {timeFromPoints(user.tracker.daily[point.type])}</Text></Text>
 							<TouchableOpacity className="bg-zinc-800 py-2 px-4 rounded-full self-start">
 								<Text className="text-zinc-400">collect {point.points}%</Text>
 							</TouchableOpacity>
@@ -821,12 +895,12 @@ const Home = () => {
 
 					<View>
 						<Text className="text-white text-xl font-semibold mb-4">General Points</Text>
-						{points.general.map((point, index) => (
-							point.done ? (
+						{currentPoints.general.map((point, index) => (
+							point.goal * 20 <= timeFromPoints(user.tracker.general[point.type]) ? (
 							<View key={index} className="mb-3 flex flex-row justify-between items-center">
 							<MaskedView
 								maskElement={
-									<Text className="text-zinc-400 font-pmedium">{point.description} <Text className="text-zinc-200">/ {point.current}</Text></Text>
+									<Text className="text-zinc-400 font-pmedium">{point.description} <Text className="text-zinc-200">/ {timeFromPoints(user.tracker.general[point.type])}</Text></Text>
 								}
 							>
 							<LinearGradient
@@ -834,7 +908,7 @@ const Home = () => {
 								start={{x: 0, y: 0}}
 								end={{x: 1, y: 0}}
 							>
-								<Text className="text-zinc-400 font-pmedium opacity-0">{point.description} <Text className="text-zinc-200">/ {point.current}</Text></Text>
+								<Text className="text-zinc-400 font-pmedium opacity-0">{point.description} <Text className="text-zinc-200">/ {timeFromPoints(user.tracker.general[point.type])}</Text></Text>
 							</LinearGradient>
 						</MaskedView>
 						<TouchableOpacity className="rounded-full self-start overflow-hidden">
@@ -851,7 +925,7 @@ const Home = () => {
 							) :
 						(
 						<View key={index} className="mb-3 flex flex-row justify-between items-center">
-							<Text className="text-zinc-400">{point.description} <Text className="text-zinc-200">/ {point.current}</Text></Text>
+								<Text className="text-zinc-400">{point.description} <Text className="text-zinc-200">/ {timeFromPoints(user.tracker.general[point.type])}</Text></Text>
 							<TouchableOpacity className="bg-zinc-800 py-2 px-4 rounded-full self-start">
 								<Text className="text-zinc-400">collect {point.points}%</Text>
 							</TouchableOpacity>
