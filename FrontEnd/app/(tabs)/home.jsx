@@ -80,60 +80,99 @@ const Home = () => {
 	}, []);
 
 
-	useEffect(() =>{
-		const currentDate = new Date();
-		const dayOfMonth = currentDate.getDate();
+	// useEffect(() =>{
+	// 	const currentDate = new Date();
+	// 	const dayOfMonth = currentDate.getDate();
 
-		let timeWorked = 0;
-		user.array[dayOfMonth-1].forEach(task => {
-			if(task[5] < currentTime-10){
-				timeWorked += task[5] - task[4]
-			}
+	// 	let timeWorked = 0;
+	// 	user.array[dayOfMonth-1].forEach(task => {
+	// 		if(task[5] < currentTime-10){
+	// 			timeWorked += task[5] - task[4]
+	// 		}
 			
-		})
-		timeWorked = Math.round(timeWorked);
-		console.log('timeWorked', timeWorked)
-		if(user.tracker.daily !== timeWorked){
-			axios.put('https://1ab7-188-2-139-122.ngrok-free.app/updateTracker', {
-			change: timeWorked,
-			id: user._id
-			})
-			.then(res => {
-				setUser(res.data)
-			})
-			.catch(e => {
-				console.error('Error updating tracker:', e);
-			})
-		}
-	}, [user])
+	// 	})
+	// 	timeWorked = Math.round(timeWorked);
+	// 	console.log('timeWorked', timeWorked)
+	// 	if(user.tracker.daily !== timeWorked){
+	// 		axios.put('https://5f6e-188-2-139-122.ngrok-free.app/updateTracker', {
+	// 		change: timeWorked,
+	// 		id: user._id
+	// 		})
+	// 		.then(res => {
+	// 			setUser(res.data)
+	// 		})
+	// 		.catch(e => {
+	// 			console.error('Error updating tracker:', e);
+	// 		})
+	// 	}
+	// }, [user])
 
 
+	// const workToday = () => {
+	// 	const currentDate = new Date();
+	// 	const dayOfMonth = currentDate.getDate();
+
+	// 	let timeWorked = 0;
+	// 	user.array[dayOfMonth-1].forEach(task => {
+	// 		if(task[5] < currentTime-10){
+	// 			timeWorked += task[5] - task[4]
+	// 		}
+			
+	// 	})
+	// 	timeWorked = Math.round(timeWorked);
+
+	// 	const hours = Math.floor(timeWorked / 20);
+	// 	const minutes = Math.round((timeWorked / 20 - hours) * 60);
+	// 	const time = minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+	// 	return time
+	// }
 	const workToday = () => {
-		const currentDate = new Date();
-		const dayOfMonth = currentDate.getDate();
+		const todaysSessions = user.workSessions.filter(session => session.date === `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`);
+		
+		const now = new Date();
+		const currentHours = now.getHours();
+		const currentMinutes = now.getMinutes();
+		const currentTimeInMinutes = currentHours * 60 + currentMinutes;
 
-		let timeWorked = 0;
-		user.array[dayOfMonth-1].forEach(task => {
-			if(task[5] < currentTime-10){
-				timeWorked += task[5] - task[4]
+		let totalMinutes = 0;
+		todaysSessions.forEach(session => {
+			const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+			const endTimeInMinutes = endHours * 60 + endMinutes;
+
+			if (endTimeInMinutes <= currentTimeInMinutes) {
+				const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+				const startInMinutes = startHours * 60 + startMinutes;
+				totalMinutes += endTimeInMinutes - startInMinutes;
 			}
-			
-		})
-		timeWorked = Math.round(timeWorked);
+		});
 
-		const hours = Math.floor(timeWorked / 20);
-		const minutes = Math.round((timeWorked / 20 - hours) * 60);
-		const time = minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
-		return time
+		const hours = Math.floor(totalMinutes / 60);
+		const minutes = totalMinutes % 60;
+		
+		return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
 	}
 
 	const today = new Date(); 
 	const dayOfMonth = today.getDate();
 	
 	const findCurrentSession = () => {
-		const task = user.array[new Date().getDate() - 1].find(task => currentTime-10 > task[4] && currentTime-10 < task[5])
-		return task
-	   } 
+		const currentDate = `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`;
+		const currentTime = new Date();
+		const currentTimeInMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+
+		const session = user.workSessions.find(session => {
+			const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+			const startTimeInMinutes = startHours * 60 + startMinutes;
+			const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+			const endTimeInMinutes = endHours * 60 + endMinutes;
+
+			return session.date === currentDate && currentTimeInMinutes > startTimeInMinutes && currentTimeInMinutes < endTimeInMinutes;
+		});
+
+		console.log(session)
+
+		return session;
+	}
 	
 	// TIMER
 	
@@ -159,7 +198,7 @@ const Home = () => {
 				const currentSeconds = currentTime.getSeconds();
 
 				// Convert session end time (in points) to seconds
-				const sessionEndInSeconds = (session[5] / 20) * 3600;  // Convert points to seconds
+				const sessionEndInSeconds = (pointsFromTime(session.endTime) / 20) * 3600;  // Convert points to seconds
 
 				// Convert current time to seconds since start of day
 				const currentTimeInSeconds = currentHours * 3600 + currentMinutes * 60 + currentSeconds;
@@ -190,6 +229,11 @@ const Home = () => {
 		};
 
 
+		const pointsFromTime = (time) => {
+			const [hours, minutes] = time.split(':').map(Number);
+			return (hours * 20) + Math.round(minutes / 3);
+		}
+
 
 
 	const timeFromPoints = (points) => {
@@ -197,6 +241,16 @@ const Home = () => {
 		const minutes = Math.round((points / 20 - hours) * 60);
 		const time = minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
 		return time
+	}
+
+	const getGoalWork = () => {
+		const totalMinutes = user.work.reduce((acc, workSession) => {
+			const [hours, minutes] = workSession.currentTime.split(' ').map(t => parseInt(t));
+			return acc + (hours * 60) + (isNaN(minutes) ? 0 : minutes);
+		}, 0);
+		const hours = Math.floor(totalMinutes / 60);
+		const minutes = totalMinutes % 60;
+		return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
 	}
 
 
@@ -367,7 +421,7 @@ const Home = () => {
 	useEffect(() => {;
 		const email = user.email;
 
-		axios.post('https://1ab7-188-2-139-122.ngrok-free.app/getUser', { email })
+		axios.post('https://6b09-188-2-139-122.ngrok-free.app/getUser', { email })
 			.then(res => {
 				setIsLoading(false);
 				setUser(res.data);
@@ -435,7 +489,7 @@ const Home = () => {
 			setAlertPopupMessage('Please select a duration');
 			setAlertPopupType('info');
 		} else {
-			axios.put('https://1ab7-188-2-139-122.ngrok-free.app/startCurrentSession', {
+			axios.put('https://6b09-188-2-139-122.ngrok-free.app/startSession', {
 				sessionName,
 				selectedWork,
 				duration,
@@ -714,7 +768,9 @@ const Home = () => {
 								</LinearGradient>
 							</MaskedView>
 							<Text className="text-white text-2xl font-bold mx-1">/</Text>
-							<Text className="text-white text-xl font-bold">8h</Text>
+							<Text className="text-white text-xl font-bold">
+								{getGoalWork()}
+							</Text>
 						</View>
 						<MaskedView
 								maskElement={
@@ -732,27 +788,35 @@ const Home = () => {
 
 					</View>
 
-
+					{/* user.workSessions.filter(session => session.date === `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`) */}
 					<View className="flex flex-col">
-						{user.array[new Date().getDate() - 1].filter(task => task[5] < currentTime - 10).map((task, index) => (
-						<TouchableOpacity key={index} className="flex-row justify-between items-center p-4">
-							<View className="flex-row justify-center items-center">
-							<LinearGradient
-									colors={findTaskById(task[3]).colors}
-									start={{x: 0, y: 0}}
-									end={{x: 0, y: 1}}
-									className="w-6 h-6 rounded-full"
-								>
-								</LinearGradient>
-						
-								<View className="flex-col justify-center items-start pl-2">
-									<Text className="text-white text-base font-semibold">{findTaskById(task[3]).name}</Text>
-									<Text className="text-gray-400 text-sm font-pregular">{task[2]}</Text>
-								</View>
-							</View>
-							<Text className="text-white text-base font-psemibold">{timeFromPoints(Math.round(task[5]-task[4]))}</Text>
-						</TouchableOpacity>
-						))}
+						{user.workSessions
+							.filter(session => {
+								const sessionDate = session.date === `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`;
+								const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+								const endTimeInMinutes = endHours * 60 + endMinutes;
+								const currentTime = new Date();
+								const currentTimeInMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+								return sessionDate && endTimeInMinutes < currentTimeInMinutes;
+							})
+							.map((task, index) => (
+								<TouchableOpacity key={index} className="flex-row justify-between items-center p-4">
+									<View className="flex-row justify-center items-center">
+										<LinearGradient
+											colors={findTaskById(task.workId).colors}
+											start={{x: 0, y: 0}}
+											end={{x: 0, y: 1}}
+											className="w-6 h-6 rounded-full"
+										>
+										</LinearGradient>
+										<View className="flex-col justify-center items-start pl-2">
+											<Text className="text-white text-base font-semibold">{findTaskById(task.workId).name}</Text>
+											<Text className="text-gray-400 text-sm font-pregular">{task.name}</Text>
+										</View>
+									</View>
+									<Text className="text-white text-base font-psemibold">{timeFromPoints(pointsFromTime(task.endTime) - pointsFromTime(task.startTime))}</Text>
+								</TouchableOpacity>
+							))}
 
 					</View>
 				</ScrollView>
@@ -791,19 +855,19 @@ const Home = () => {
                   >
                     <View className="flex-row items-center">
                       <LinearGradient
-                        colors={findTaskById(findCurrentSession()[3]).colors}
+                        colors={findTaskById(findCurrentSession().workId).colors}
                         start={{x: 0, y: 0}}
                         end={{x: 0, y: 1}}
                         className="w-6 h-6 rounded-full mr-1"
                       >
                       </LinearGradient>
                       <View className="flex-col items-start">
-                        <Text className="text-white text-base font-semibold">{findCurrentSession()[2]}</Text>
-                        <Text className="text-zinc-400 text-sm font-regular">{findTaskById(findCurrentSession()[3]).name}</Text>
+                        <Text className="text-white text-base font-semibold">{findCurrentSession().name}</Text>
+                        <Text className="text-zinc-400 text-sm font-regular">{findTaskById(findCurrentSession().workId).name}</Text>
                       </View>
                     </View>
                     <View className="flex-row items-center">
-                      <Text className="text-white text-base font-semibold">{timeFromPoints(findCurrentSession()[5]-(currentTime-10))}</Text>
+                      <Text className="text-white text-base font-semibold">{timeFromPoints(pointsFromTime(findCurrentSession().endTime)-(currentTime-10))}</Text>
                       <Image source={icons.timerWhite} className="w-4 h-4 ml-1 tint-white" />
                     </View>
                   </LinearGradient>
@@ -1082,25 +1146,25 @@ const Home = () => {
 								maskElement={
 									<View className="flex-col justify-center items-center">
 										<Text className="text-white text-2xl font-semibold text-center">
-											{findCurrentSession()[2]}
+											{findCurrentSession().name}
 										</Text>
 										<Text className="text-zinc-200 text-lg font-regular text-center">
-											{findTaskById(findCurrentSession()[3]).name}
+											{findTaskById(findCurrentSession().workId).name}
 										</Text>
 									</View>
 								}
 							>
 								<LinearGradient
-									colors={['#D4D4D8', findTaskById(findCurrentSession()[3]).colors[0]]}
+									colors={['#D4D4D8', findTaskById(findCurrentSession().workId).colors[0]]}
 									start={{x: 0, y: 0}}
 									end={{x: 0, y: 1}}
 								>
 									<View className="flex-col items-center justify-center opacity-0">
 										<Text className="text-white text-2xl font-semibold text-center">
-											{findCurrentSession()[2]}
+											{findCurrentSession().name}
 										</Text>
 										<Text className="text-zinc-200 text-lg font-regular text-center">
-											{findTaskById(findCurrentSession()[3]).name}
+											{findTaskById(findCurrentSession().workId).name}
 										</Text>
 									</View>
 								</LinearGradient>
@@ -1123,7 +1187,7 @@ const Home = () => {
 									}
 								>
 									<LinearGradient
-										colors={['#52525b', findTaskById(findCurrentSession()[3]).colors[0]]}
+										colors={['#52525b', findTaskById(findCurrentSession().workId).colors[0]]}
 										start={{x: 0, y: 0}}
 										end={{x: 2, y: 2}}
 									>

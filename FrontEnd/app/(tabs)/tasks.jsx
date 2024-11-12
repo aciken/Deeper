@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, TextInput, Platform, Animated } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, TextInput, Platform, Animated, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BottomPopup from '../components/BottomPopup';
 import icons from '../../constants/icons';
@@ -10,8 +10,35 @@ import { LinearGradient } from 'expo-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AlertPopup from '../components/AlertPopup';
+import Svg, { 
+  Circle, 
+  Path, 
+  Defs, 
+  LinearGradient as SvgLinearGradient, 
+  Stop,
+  G 
+} from 'react-native-svg';
 
+const createSmoothPath = (points, screenWidth, graphHeight) => {
+  if (points.length < 2) return '';
 
+  const controlPoints = points.map((point, i) => {
+    const x = i * (screenWidth / 6);
+    return { x, y: point.value };
+  });
+
+  let path = `M ${controlPoints[0].x},${controlPoints[0].y}`;
+  
+  for (let i = 0; i < controlPoints.length - 1; i++) {
+    const current = controlPoints[i];
+    const next = controlPoints[i + 1];
+    const midX = (current.x + next.x) / 2;
+    
+    path += ` C ${midX},${current.y} ${midX},${next.y} ${next.x},${next.y}`;
+  }
+
+  return path;
+};
 
 const Tasks = () => {
   const { user, setUser } = useGlobalContext();
@@ -45,6 +72,39 @@ const Tasks = () => {
   const [timeInSeconds, setTimeInSeconds] = useState(0);
 
   const [isSessionPageVisible, setIsSessionPageVisible] = useState(false);
+
+  const [selectedTab, setSelectedTab] = useState('stats');
+
+  const screenWidth = Dimensions.get('window').width;
+  const graphHeight = 200;
+
+  const [points, setPoints] = useState([
+    { day: 'Mon', value: 0 },
+    { day: 'Tue', value: 0 },
+    { day: 'Wed', value: 0 },
+    { day: 'Thu', value: 0 },
+    { day: 'Fri', value: 0 },
+    { day: 'Sat', value: 0 },
+    { day: 'Sun', value: 0 },
+  ]);
+
+  useEffect(() => {
+    const calculateValue = (percentage) => {
+      return graphHeight - (graphHeight * percentage / 100);
+    };
+
+    const newPoints = [
+      { day: 'Mon', value: calculateValue(60) },
+      { day: 'Tue', value: calculateValue(75) },
+      { day: 'Wed', value: calculateValue(45) },
+      { day: 'Thu', value: calculateValue(90) },
+      { day: 'Fri', value: calculateValue(30) },
+      { day: 'Sat', value: calculateValue(20) },
+      { day: 'Sun', value: calculateValue(40) },
+    ];
+
+    setPoints(newPoints);
+  }, [graphHeight]);
 
   useEffect(() => {
     const updateCurrentLine = () => {
@@ -96,6 +156,32 @@ const Tasks = () => {
     
 
 
+
+    const allWorkToday = () =>{
+        const todaysSessions = user.workSessions.filter(session => session.date === `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`);
+        
+        const now = new Date();
+        const currentHours = now.getHours();
+        const currentMinutes = now.getMinutes();
+        const currentTimeInMinutes = currentHours * 60 + currentMinutes;
+    
+        let totalMinutes = 0;
+        todaysSessions.forEach(session => {
+          const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+          const endTimeInMinutes = endHours * 60 + endMinutes;
+    
+          if (endTimeInMinutes <= currentTimeInMinutes) {
+            const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+            const startInMinutes = startHours * 60 + startMinutes;
+            totalMinutes += endTimeInMinutes - startInMinutes;
+          }
+        });
+    
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        
+        return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+    }
 
     // return time
 
@@ -214,29 +300,50 @@ const onTimeChange = (event, selectedTime) => {
 };
 
 const workToday = (job) => {
-  const currentDate = new Date();
-  const dayOfMonth = currentDate.getDate();
+  const todaysSessions = user.workSessions.filter(session => 
+    session.date === `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}` &&
+    session.workId === job._id
+  );
 
-  let timeWorked = 0;
-  user.array[dayOfMonth-1].forEach(task => {
-    if(task[5] < currentTime-10 && findTaskById(task[3]).name === job.name){
-      timeWorked += task[5] - task[4]
+  const now = new Date();
+  const currentHours = now.getHours();
+  const currentMinutes = now.getMinutes();
+  const currentTimeInMinutes = currentHours * 60 + currentMinutes;
+
+  let totalMinutes = 0;
+  todaysSessions.forEach(session => {
+    const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+    const endTimeInMinutes = endHours * 60 + endMinutes;
+
+    if (endTimeInMinutes <= currentTimeInMinutes) {
+      const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+      const startInMinutes = startHours * 60 + startMinutes;
+      totalMinutes += endTimeInMinutes - startInMinutes;
     }
-    
-  })
-  timeWorked = Math.round(timeWorked);
+  });
 
-  const hours = Math.floor(timeWorked / 20);
-  const minutes = Math.round((timeWorked / 20 - hours) * 60);
-  const time = minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
-  return time
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  
+  return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+}
 
+
+
+const getGoalWork = () => {
+  const totalMinutes = user.work.reduce((acc, workSession) => {
+    const [hours, minutes] = workSession.currentTime.split(' ').map(t => parseInt(t));
+    return acc + (hours * 60) + (isNaN(minutes) ? 0 : minutes);
+  }, 0);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
 }
 
 
 
 const submitNewWork = () => {
-  axios.put('https://1ab7-188-2-139-122.ngrok-free.app/addJob', {
+  axios.put('https://6b09-188-2-139-122.ngrok-free.app/addJob', {
     newWork,
     id: user._id,
   }).then(res => {
@@ -252,7 +359,7 @@ const submitNewWork = () => {
 }
 
 const submitEditWork = () => {
-  axios.put('https://1ab7-188-2-139-122.ngrok-free.app/editJob', {
+  axios.put('https://6b09-188-2-139-122.ngrok-free.app/editJob', {
   editWork,
   index: editIndex,
   id: user._id,
@@ -273,7 +380,7 @@ const submitEditWork = () => {
 
 const submitDeleteWork = () => {
   if(user.work.length !== 1){
-    axios.put('https://1ab7-188-2-139-122.ngrok-free.app/deleteJob', {
+    axios.put('https://6b09-188-2-139-122.ngrok-free.app/deleteJob', {
     index: editIndex,
     id: user._id,
   }).then(res => {
@@ -441,79 +548,21 @@ const formatTime = (seconds) => {
       <SafeAreaView className="flex-1 h-full bg-zinc-950" edges={['top']}>
         <View className="flex-1">
           <ScrollView className="flex-1 h-full px-4" contentContainerStyle={{ flexGrow: 1 }}>
-            <View className="flex-row items-start justify-start mt-2 mb-2">
-							<Text className="text-white text-2xl font-bold">Next</Text>
-            </View>
-
-            {findFirstNextSession() ? (
-            <TouchableOpacity className="flex-row justify-between items-center p-4 bg-zinc-900 rounded-xl mb-4">
-							<View className="flex-row justify-center items-center">
-							<LinearGradient
-									colors={
-                  findTaskById(findFirstNextSession()[3]).colors
-                  }
-									start={{x: 0, y: 0}}
-									end={{x: 0, y: 1}}
-									className="w-6 h-6 rounded-full"
-								>
-								</LinearGradient>
-						
-								<View className="flex-col justify-center items-start pl-2">
-									<Text className="text-white text-base font-semibold">{findTaskById(findFirstNextSession()[3]).name}</Text>
-									<Text className="text-gray-400 text-sm font-pregular">{findFirstNextSession()[2]}</Text>
-								</View>
-							</View>
-              <View className="flex-row justify-center items-center bg-zinc-800 rounded-xl px-2 py-1">
-                <Image source={icons.clockGray} className="w-3 h-3 mr-1" />
-                <Text className="text-gray-400 text-xs font-pregular">
-                  starting in {nextIndex !== new Date().getDate() - 1 
-                    ? timeFromPoints(findFirstNextSession()[4] + 
-                        ((nextIndex - (new Date().getDate() - 1)) > 1 
-                          ? (((nextIndex - 1) - (new Date().getDate() - 1)) * 480) 
-                          : 0) + 
-                        (480 - (currentTime-10)))
-                    : timeFromPoints(findFirstNextSession()[4]-(currentTime-10))}
-
-
-                </Text>
+            <View className="flex-row justify-around bg-zinc-900 rounded-xl p-4 border border-zinc-700 mt-6 mb-6">
+              <View className="flex flex-col items-center justify-center">
+                <Text className="text-zinc-400 text-base mb-1">Work Goal</Text>
+                <Text className="text-white text-2xl font-bold">{getGoalWork()}</Text>
               </View>
-						</TouchableOpacity>
-            ) : 
-            (
-              <View className="flex-row justify-center items-center p-4 bg-zinc-900 rounded-xl mb-4">
-                <Text className="text-gray-400 text-sm font-pregular">No Tasks Scheduled</Text>
+
+                <View className="w-[1px] h-[50%] bg-zinc-700 self-center" />
+
+
+              <View className="flex flex-col items-center justify-center">
+                <Text className="text-zinc-400 text-base mb-1">Work Today</Text>
+                <Text className="text-blue-400 text-2xl font-bold">{allWorkToday()}</Text>
               </View>
-            )}
-
-            <TouchableOpacity
-            onPress={() => router.push({pathname: 'log/SchedulePage'})} 
-            className="flex-row justify-center items-center p-4 bg-zinc-900 rounded-xl mb-8 border border-sky-200">
-            <MaskedView
-								maskElement={
-                  <View className="flex-row justify-center items-center">
-                    <Image source={icons.calendar} className="w-7 h-7 mr-2 tint-white" />
-                    <Text className="text-white text-xl font-semibold">Schedule Session</Text>
-                  </View>
-								}
-							>
-							<LinearGradient
-								colors={['#d4d4d8', '#38bdf8']}
-								start={{x: 0, y: 0}}
-								end={{x: 0, y: 1}}
-							>
-                  <View className="flex-row justify-center items-center opacity-0">
-                    <Image source={icons.calendar} className="w-7 h-7 mr-2 tint-white" />
-                    <Text className="text-white text-xl font-semibold">Schedule Session</Text>
-                  </View>
-							</LinearGradient>
-						</MaskedView>
-
-            </TouchableOpacity>
-
-            <View className="flex-row items-start justify-start mt-2 mb-2">
-							<Text className="text-white text-2xl font-bold">Work</Text>
             </View>
-
+           
             <View className="flex-row justify-center items-center w-full mb-4">
               <TouchableOpacity
               onPress={() => {setIsWorkVisible(true)}}
@@ -860,129 +909,180 @@ const formatTime = (seconds) => {
         onClose={() => setIsWorkEditPopupVisible(false)}
         height={0.65}
       >
-  <View className="p-2 bg-zinc-900 rounded-t-3xl flex-1">
-    <MaskedView
-              maskElement={
-                <Text className="text-white text-3xl font-bold mb-6 text-center">Edit Work</Text>
-                  }
-                >
-                <LinearGradient
-                  colors={['#D4D4D8', '#71717A']}
-                  start={{x: 0, y: 0}}
-                  end={{x: 1, y: 1}}
-                >
-                <Text className="text-white text-3xl font-bold mb-6 text-center opacity-0">Edit Work</Text>
-                </LinearGradient>
-              </MaskedView>
+        <ScrollView className="flex-1 bg-zinc-900">
+          <View className="p-4 rounded-t-3xl">
+            <View className="flex-row justify-center items-center mb-4">
+              <LinearGradient
+                colors={editWork.colors}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 1}}
+                className="w-6 h-6 rounded-full mr-3"
+              />
+              <Text className="text-white text-2xl font-bold">{editWork.name}</Text>
+            </View>
 
-    
-    <View className="mb-4">
-      <Text className="text-gray-400 text-sm mb-2">Work Name</Text>
-      <TextInput
-        className="bg-zinc-800 text-white p-3 rounded-xl"
-        placeholder="Work Name"
-        placeholderTextColor="#71717A" 
-        value={editWork.name}
-        onChangeText={(text) => setEditWork({...editWork, name: text})}
-      />
-    </View>
-    
-    <View className="mb-4">
-      <Text className="text-gray-400 text-sm mb-2">Choose color:</Text>
-      <View className="flex-row justify-between">
-        {/* {['#DC2626', '#16A34A', '#2563EB', '#9333EA', '#CA8A04', '#0EA5E9', '#EC4899'].map((color, index) => (
-          <TouchableOpacity
-            key={index}
-            style={{ backgroundColor: color }}
-            className="w-8 h-8 rounded-full"
-          />
-        ))} */}
-        {ballColors.map((color, index) => (
-          <TouchableOpacity
-            key={index}
-            style={{ backgroundColor: color }}
-            className={`w-8 h-8 rounded-full `}
-            onPress={() => {
-              if (!works.some(work => work.colors[0] === color[0] && work.colors[1] === color[1]) || (initialEditWork.colors[0] === color[0] && initialEditWork.colors[1] === color[1])) {
-                setEditWork({...editWork, colors: color});
-              }
-            }}
-          >
-            <LinearGradient
-              colors={color}
-              start={{x: 0, y: 0}}
-              end={{x: 1, y: 1}}
-              className={`w-8 h-8 rounded-full ${works.some(work => work.colors[0] === color[0] && work.colors[1] === color[1]) && (initialEditWork.colors[0] !== color[0] && initialEditWork.colors[1] !== color[1]) ? 'opacity-20' : ''} ${editWork.colors[0] === color[0] && editWork.colors[1] === color[1] ? 'border-2 border-white' : ''}`}
-            >
-            </LinearGradient>
-          </TouchableOpacity>
-        ))}
-      </View>
+            <View className="flex-row justify-start items-center space-x-4 mb-4">
+              <TouchableOpacity onPress={() => setSelectedTab('stats')}>
+                <Text className={`text-zinc-700 text-lg font-medium ${selectedTab === 'stats' ? 'text-white underline' : 'text-zinc-600'}`}>Stats</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setSelectedTab('sessions')}>
+                <Text className={`text-zinc-700 text-lg font-medium ${selectedTab === 'sessions' ? 'text-white underline' : 'text-zinc-600'}`}>Sessions</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setSelectedTab('tasks')}>
+                <Text className={`text-zinc-700 text-lg font-medium ${selectedTab === 'tasks' ? 'text-white underline' : 'text-zinc-600'}`}>Tasks</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setSelectedTab('edit')}>
+                <Text className={`text-zinc-700 text-lg font-medium ${selectedTab === 'edit' ? 'text-white underline' : 'text-zinc-600'}`}>Edit</Text>
+              </TouchableOpacity>
+            </View>
 
-    </View>
-    
-    <View className="mb-4">
-      <Text className="text-gray-400 text-sm mb-2">Targeted work per day:</Text>
-      <View className="flex-row items-center justify-between bg-zinc-800 rounded-xl p-2">
-        <TouchableOpacity 
-        onPress={() => {
-          if (editWork.currentTime.includes('m')) { 
-            setEditWork({...editWork, currentTime: parseInt(editWork.currentTime.replace('h', '')) + 'h'})
-          } else {
-            setEditWork({...editWork, currentTime: parseInt(editWork.currentTime.replace('h', '')) - 1 + 'h 30m'})
-          }
-        }}
-        className="bg-zinc-700 w-10 h-10 rounded-full items-center justify-center">
-          <Text className="text-white text-xl">-</Text>
-        </TouchableOpacity>
-        <Text className="text-white text-2xl font-bold">{editWork.currentTime}</Text>
-        <TouchableOpacity 
-        onPress={() => {
-          if (editWork.currentTime.includes('m')) {
-            setEditWork({...editWork, currentTime: parseInt(editWork.currentTime.replace('h', '')) + 1 + 'h'})
-          } else {
-            setEditWork({...editWork, currentTime: parseInt(editWork.currentTime.replace('h', '')) + 'h 30m'})
-          }
-        }}
-        className="bg-zinc-700 w-10 h-10 rounded-full items-center justify-center">
-          <Text className="text-white text-xl">+</Text>
-        </TouchableOpacity>
-      </View>
-      <Text className="text-gray-500 text-sm mt-2 text-center">overall work per day left: 37h 30m</Text>
-    </View>
-    
-    <View className="flex-1" />
-    
-    <View className="flex-row justify-between">
-      <TouchableOpacity 
-        onPress={submitEditWork}
-        className="flex-1 mr-2"
-      >
-        <LinearGradient
-          colors={['#0ea5e9', '#60a5fa']}
-          start={{x: 0, y: 0}}
-          end={{x: 1, y: 1}}
-          className="rounded-full py-4 items-center"
-        >
-          <Text className="text-white text-lg font-semibold">Edit Work</Text>
-        </LinearGradient>
-      </TouchableOpacity>
-      <TouchableOpacity 
-        onPress={submitDeleteWork}
+            {selectedTab === 'stats' && (
+              <View className="mb-6">
+                <View className="h-72 mb-4 relative bg-zinc-800/30 rounded-xl p-4">
+                  {/* Vertical grid lines */}
+                  {[...Array(7)].map((_, i) => (
+                    <View 
+                      key={i}
+                      className="absolute h-full border-l border-zinc-800/50"
+                      style={{ left: `${(i * 100) / 6}%` }}
+                    />
+                  ))}
+                  
+                  {/* Horizontal grid lines */}
+                  {[...Array(5)].map((_, i) => (
+                    <View 
+                      key={i}
+                      className="absolute w-full border-t border-zinc-800/50"
+                      style={{ top: `${(i * 100) / 4}%` }}
+                    />
+                  ))}
 
-        className=" w-14 h-14 rounded-full items-center justify-center"
-      >
-        <LinearGradient
-          colors={['#DC2626', '#761414']}
-          start={{x: 0, y: 0}}
-          end={{x: 1, y: 1}}
-          className="w-14 h-14 rounded-full items-center justify-center"
-        >
-          <Image source={icons.trash} className="w-6 h-6 tint-white" />
-        </LinearGradient>
-      </TouchableOpacity>
-    </View>
-  </View> 
+                  {/* Background gradient */}
+                  <LinearGradient
+                    colors={['rgba(96, 165, 250, 0.1)', 'rgba(96, 165, 250, 0)']}
+                    start={{x: 0, y: 0}}
+                    end={{x: 0, y: 1}}
+                    style={{
+                      position: 'absolute',
+                      top: '10%',
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      borderRadius: 12,
+                    }}
+                  />
+
+                  {/* Limit line and text - moved higher */}
+                  <View 
+                    className="absolute w-full flex-row items-center px-4" 
+                    style={{ top: '10%' }}
+                  >
+                    <View className="flex-1 border-t-2 border-red-400/20 border-dashed" />
+                    <View className="bg-red-400/10 rounded-full px-2 py-1 ml-2">
+                      <Text className="text-red-400/80 text-xs font-medium">Weekly Goal: 40h</Text>
+                    </View>
+                  </View>
+
+                  {/* Graph */}
+                  <Svg height="100%" width="100%" style={{ position: 'absolute' }}>
+                    <Defs>
+                      <SvgLinearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                        <Stop offset="0" stopColor="#60A5FA" stopOpacity="0.2" />
+                        <Stop offset="1" stopColor="#60A5FA" stopOpacity="0.05" />
+                      </SvgLinearGradient>
+                    </Defs>
+
+                    {points && points.length > 0 && (
+                      <>
+                        {/* Area under curve */}
+                        <Path
+                          d={`
+                            ${createSmoothPath(points, screenWidth - 32, graphHeight)}
+                            L ${screenWidth - 32},${graphHeight}
+                            L 0,${graphHeight}
+                            Z
+                          `}
+                          fill="url(#areaGradient)"
+                        />
+
+                        {/* Line */}
+                        <Path
+                          d={createSmoothPath(points, screenWidth - 32, graphHeight)}
+                          stroke="#60A5FA"
+                          strokeWidth="2.5"
+                          fill="none"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+
+                        {/* Points */}
+                        {points.map((point, index) => (
+                          <G key={index}>
+                            <Circle
+                              cx={index * ((screenWidth - 32) / 6)}
+                              cy={point.value}
+                              r="4"
+                              fill="#60A5FA"
+                            />
+                            <Circle
+                              cx={index * ((screenWidth - 32) / 6)}
+                              cy={point.value}
+                              r="2"
+                              fill="#fff"
+                            />
+                          </G>
+                        ))}
+                      </>
+                    )}
+                  </Svg>
+
+                  {/* Time labels */}
+                  <View className="absolute bottom-2 w-full flex-row justify-between px-4">
+                    {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => (
+                      <View key={i} className="items-center">
+                        <Text className="text-zinc-400 text-xs font-medium">
+                          {day}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+
+                {/* Weekly stats summary */}
+                <View className="flex-row justify-between bg-zinc-800/30 rounded-xl p-4">
+                  <View className="items-center">
+                    <Text className="text-zinc-400 text-sm mb-1">Weekly Total</Text>
+                    <Text className="text-white text-xl font-bold">32.5h</Text>
+                    <Text className="text-sky-400 text-xs">+12%</Text>
+                  </View>
+                  <View className="items-center">
+                    <Text className="text-zinc-400 text-sm mb-1">Daily Avg</Text>
+                    <Text className="text-white text-xl font-bold">4.6h</Text>
+                    <Text className="text-emerald-400 text-xs">+5%</Text>
+                  </View>
+                  <View className="items-center">
+                    <Text className="text-zinc-400 text-sm mb-1">Best Day</Text>
+                    <Text className="text-white text-xl font-bold">Thu</Text>
+                    <Text className="text-sky-400 text-xs">7.5h</Text>
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {selectedTab === 'sessions' && (
+              <View>
+                {user.workSessions.filter(session => session.workId === user.work[editIndex]._id && session.date === `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`).map((session, index) => (
+                  <View key={index} className="bg-zinc-800/50 rounded-xl p-2 mb-2 flex flex-row justify-between items-center border border-zinc-700/50">
+                    <Text className="text-zinc-200 text-lg font-pregular">{session.name}</Text>
+                    <Text className="text-zinc-600 text-lg font-pregular">{session.startTime} - {session.endTime}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+
+
+          </View>
+        </ScrollView>
       </BottomPopup>
 
       <BottomPopup

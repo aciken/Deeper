@@ -58,7 +58,7 @@ const signin = () => {
       console.log('Submitting')
     setIsSubmiting(true)
     
-    axios.post('https://1ab7-188-2-139-122.ngrok-free.app/login', {
+    axios.post('https://6b09-188-2-139-122.ngrok-free.app/login', {
       email,
       password
     }).then(res => {
@@ -67,6 +67,7 @@ const signin = () => {
         setUpdateUser(res.data)
         setIsLogged(true)
         setLoginSuccess(true)
+
 
         
       } else {

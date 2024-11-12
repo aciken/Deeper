@@ -143,49 +143,67 @@ const SchedulePage = () => {
 	const [alertPopupMessage, setAlertPopupMessage] = useState('');
 	const [alertPopupType, setAlertPopupType] = useState('info');
 
-	const submitWork = (start, end, name,dates) => {
+	const SubmitWork = (start, end, name, dates) => {
+
 		const dayIndices = dates.map(date => new Date(date).getDate() - 1);
+
+		const session = {
+			startTime: start,
+			endTime: end,
+			name: name,
+			workId: selectedWork._id,
+		};
+
+		axios.put('/api/addWorkSession', {
+			userId: user._id,
+			session: session,
+			dayIndices: dayIndices,
+		});
+	};
+
+	// const submitWork = (start, end, name,dates) => {
+	// 	const dayIndices = dates.map(date => new Date(date).getDate() - 1);
 
 		
 	
-		const data  = [start,end, name, selectedWork]
+	// 	const data  = [start,end, name, selectedWork]
 
 
 
-		axios.put('https://1ab7-188-2-139-122.ngrok-free.app/addWork', {
-		  data,
-		  id: user._id,
-		  clicked,
-		  dayIndices,
-		}).then(res => {
-			console.log('data', res.data)
-		  if(res.data == 'Time overlap'){
-			console.log('works are overlapping')
-			setAlertPopupVisible(true);
-			setAlertPopupMessage("Sessions can't overlap");
-			setAlertPopupType('error')
-		  } else if(res.data == 'No Name'){
-			setAlertPopupVisible(true);
-			setAlertPopupMessage("You need to enter a session name");
-			setAlertPopupType('error')
-		  }else{
-			setUser(res.data);
-			setIsPopupVisible(false);
-		  }
-		}).catch(err => {
-		  if (err.response) {
-			console.log('Error response:', err.response.data);
-		  } else if (err.request) {
-			console.log('Error request:', err.request);
-		  } else {
-			console.log('Error:', err.message);
-		  }
-		})
-	}
+	// 	axios.put('https://cf79-188-2-139-122.ngrok-free.app/addWork', {
+	// 	  data,
+	// 	  id: user._id,
+	// 	  clicked,
+	// 	  dayIndices,
+	// 	}).then(res => {
+	// 		console.log('data', res.data)
+	// 	  if(res.data == 'Time overlap'){
+	// 		console.log('works are overlapping')
+	// 		setAlertPopupVisible(true);
+	// 		setAlertPopupMessage("Sessions can't overlap");
+	// 		setAlertPopupType('error')
+	// 	  } else if(res.data == 'No Name'){
+	// 		setAlertPopupVisible(true);
+	// 		setAlertPopupMessage("You need to enter a session name");
+	// 		setAlertPopupType('error')
+	// 	  }else{
+	// 		setUser(res.data);
+	// 		setIsPopupVisible(false);
+	// 	  }
+	// 	}).catch(err => {
+	// 	  if (err.response) {
+	// 		console.log('Error response:', err.response.data);
+	// 	  } else if (err.request) {
+	// 		console.log('Error request:', err.request);
+	// 	  } else {
+	// 		console.log('Error:', err.message);
+	// 	  }
+	// 	})
+	// }
 
 	
     const deleteFunc = () => {
-        axios.put('https://1ab7-188-2-139-122.ngrok-free.app/deleteWork', {
+        axios.put('https://cf79-188-2-139-122.ngrok-free.app/deleteWork', {
             id: user._id,
             index,
             clicked,
@@ -203,7 +221,7 @@ const SchedulePage = () => {
 
         const data  = [start,end, name, selectedWork]
 
-        axios.put('https://1ab7-188-2-139-122.ngrok-free.app/editWork', {
+        axios.put('https://cf79-188-2-139-122.ngrok-free.app/editWork', {
             data,
             id: user._id,
             index,
