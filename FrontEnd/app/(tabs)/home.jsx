@@ -32,7 +32,13 @@ const Home = () => {
 	const [alertPopupMessage, setAlertPopupMessage] = useState('');
 	const [alertPopupType, setAlertPopupType] = useState('info');
 
+	const [currentSession, setCurrentSession] = useState(null);
+
 	const [isSessionPageVisible, setIsSessionPageVisible] = useState(false);
+
+	const [sessionTasks, setSessionTasks] = useState([]);
+	const [isAddTaskVisible, setIsAddTaskVisible] = useState(false);
+	const [newTaskText, setNewTaskText] = useState('');
 
 	const findTaskById = (id) => {
 		return user.work.find(work => work._id === id)
@@ -154,6 +160,10 @@ const Home = () => {
 
 	const today = new Date(); 
 	const dayOfMonth = today.getDate();
+
+	// useEffect(() => {
+	// 	setCurrentSession(findCurrentSession())
+	// }, [user])
 	
 	const findCurrentSession = () => {
 		const currentDate = `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`;
@@ -166,7 +176,7 @@ const Home = () => {
 			const [endHours, endMinutes] = session.endTime.split(':').map(Number);
 			const endTimeInMinutes = endHours * 60 + endMinutes;
 
-			return session.date === currentDate && currentTimeInMinutes > startTimeInMinutes && currentTimeInMinutes < endTimeInMinutes;
+			return session.date === currentDate && currentTimeInMinutes >= startTimeInMinutes && currentTimeInMinutes <= endTimeInMinutes;
 		});
 
 		console.log(session)
@@ -421,7 +431,7 @@ const Home = () => {
 	useEffect(() => {;
 		const email = user.email;
 
-		axios.post('https://6b09-188-2-139-122.ngrok-free.app/getUser', { email })
+		axios.post('https://0f4d-188-2-139-122.ngrok-free.app/getUser', { email })
 			.then(res => {
 				setIsLoading(false);
 				setUser(res.data);
@@ -489,7 +499,7 @@ const Home = () => {
 			setAlertPopupMessage('Please select a duration');
 			setAlertPopupType('info');
 		} else {
-			axios.put('https://6b09-188-2-139-122.ngrok-free.app/startSession', {
+			axios.put('https://0f4d-188-2-139-122.ngrok-free.app/startSession', {
 				sessionName,
 				selectedWork,
 				duration,
@@ -597,6 +607,20 @@ const Home = () => {
 			timerOpacityAnim.setValue(0);
 		}
 	}, [isSessionPageVisible]);
+
+	const toggleTaskCompletion = (index) => {
+		setSessionTasks(prev => prev.map((task, i) => 
+			i === index ? {...task, completed: !task.completed} : task
+		));
+	};
+
+	const handleAddTask = () => {
+		if (newTaskText.trim()) {
+			setSessionTasks(prev => [...prev, { text: newTaskText.trim(), completed: false }]);
+			setNewTaskText('');
+			setIsAddTaskVisible(false);
+		}
+	};
 
 	
 	return (
@@ -867,7 +891,7 @@ const Home = () => {
                       </View>
                     </View>
                     <View className="flex-row items-center">
-                      <Text className="text-white text-base font-semibold">{timeFromPoints(pointsFromTime(findCurrentSession().endTime)-(currentTime-10))}</Text>
+                      <Text className="text-white text-base font-semibold">{timeFromPoints(Math.round(pointsFromTime(findCurrentSession().endTime)-(currentTime-10)))}</Text>
                       <Image source={icons.timerWhite} className="w-4 h-4 ml-1 tint-white" />
                     </View>
                   </LinearGradient>
@@ -1197,14 +1221,90 @@ const Home = () => {
 									</LinearGradient>
 								</MaskedView>
 							</Animated.View>
+
+							{/* New Task List Section */}
+							<View className="flex-1 px-4 mt-12">
+								<View className="flex-row justify-between items-center mb-4">
+									<Text className="text-zinc-400 text-lg font-semibold">Session Tasks</Text>
+									<TouchableOpacity 
+										onPress={() => setIsAddTaskVisible(true)}
+										className="bg-zinc-800 p-2 rounded-full"
+									>
+										<Image source={icons.plus} className="w-5 h-5 tint-white" />
+									</TouchableOpacity>
+								</View>
+
+								<ScrollView className="flex-1">
+									{sessionTasks.map((task, index) => (
+										<TouchableOpacity 
+											key={index}
+											onPress={() => toggleTaskCompletion(index)}
+											className="flex-row items-center bg-zinc-800/50 p-4 rounded-xl mb-2"
+										>
+											<View className={`w-5 h-5 rounded-full border-2 mr-3 
+												${task.completed ? 'bg-sky-500 border-sky-500' : 'border-zinc-600'}`}
+											>
+												{task.completed && (
+													<Image 
+														source={icons.check} 
+														className="w-3 h-3 tint-white m-auto" 
+													/>
+												)}
+											</View>
+											<Text className={`text-base ${task.completed ? 'text-zinc-500 line-through' : 'text-white'}`}>
+												{task.text}
+											</Text>
+										</TouchableOpacity>
+									))}
+								</ScrollView>
+							</View>
 						</>
 					)}
+
+					<TouchableOpacity onPress={handleSessionClose} className="mt-4 mb-4 mx-4">
+						<LinearGradient
+							colors={['#3f3f46', '#27272a']}
+							start={{x: 0, y: 0}}
+							end={{x: 1, y: 1}}
+							className="w-full rounded-full h-14 flex-row justify-center items-center"
+						>
+							<Text className="text-zinc-300 text-lg font-semibold">End Session</Text>
+						</LinearGradient>
+					</TouchableOpacity>
+
 				</View>
 			</BottomPopup>
 
-
-
-			
+			{/* Add Task Popup */}
+			<BottomPopup
+				visible={isAddTaskVisible}
+				onClose={() => setIsAddTaskVisible(false)}
+				height={0.4}
+			>
+				<View className="p-4">
+					<Text className="text-white text-xl font-bold mb-4">Add Task</Text>
+					<TextInput
+						className="bg-zinc-800 text-white p-4 rounded-xl mb-4"
+						placeholder="Enter task..."
+						placeholderTextColor="#71717A"
+						value={newTaskText}
+						onChangeText={setNewTaskText}
+					/>
+					<TouchableOpacity 
+						onPress={handleAddTask}
+						className="w-full rounded-full overflow-hidden"
+					>
+						<LinearGradient
+							colors={['#0ea5e9', '#60a5fa']}
+							start={{x: 0, y: 0}}
+							end={{x: 1, y: 1}}
+							className="w-full h-14 flex-row justify-center items-center"
+						>
+							<Text className="text-white text-lg font-semibold">Add Task</Text>
+						</LinearGradient>
+					</TouchableOpacity>
+				</View>
+			</BottomPopup>
 		</SafeAreaView>
 	);
 };

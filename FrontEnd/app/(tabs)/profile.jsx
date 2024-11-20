@@ -16,8 +16,7 @@ const Profile = () => {
     setIsLogged(false)
     setUser(null)
     setIsLoading(true)
-    
-    
+    router.replace('/')
   }
 
   return (

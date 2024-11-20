@@ -343,7 +343,7 @@ const getGoalWork = () => {
 
 
 const submitNewWork = () => {
-  axios.put('https://6b09-188-2-139-122.ngrok-free.app/addJob', {
+    axios.put('https://0f4d-188-2-139-122.ngrok-free.app/addJob', {
     newWork,
     id: user._id,
   }).then(res => {
@@ -359,7 +359,7 @@ const submitNewWork = () => {
 }
 
 const submitEditWork = () => {
-  axios.put('https://6b09-188-2-139-122.ngrok-free.app/editJob', {
+  axios.put('https://0f4d-188-2-139-122.ngrok-free.app/editJob', {
   editWork,
   index: editIndex,
   id: user._id,
@@ -380,7 +380,7 @@ const submitEditWork = () => {
 
 const submitDeleteWork = () => {
   if(user.work.length !== 1){
-    axios.put('https://6b09-188-2-139-122.ngrok-free.app/deleteJob', {
+    axios.put('https://0f4d-188-2-139-122.ngrok-free.app/deleteJob', {
     index: editIndex,
     id: user._id,
   }).then(res => {
@@ -408,10 +408,29 @@ const timeFromPoints = (points) => {
   return time
 }
 
-const findCurrentSession = () => {
-  const task = user.array[new Date().getDate() - 1].find(task => currentTime-10 > task[4] && currentTime-10 < task[5])
-  return task
- }
+const pointsFromTime = (time) => {
+  const [hours, minutes] = time.split(':').map(Number);
+  return (hours * 20) + Math.round(minutes / 3);
+}
+
+	const findCurrentSession = () => {
+		const currentDate = `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`;
+		const currentTime = new Date();
+		const currentTimeInMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+
+		const session = user.workSessions.find(session => {
+			const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+			const startTimeInMinutes = startHours * 60 + startMinutes;
+			const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+			const endTimeInMinutes = endHours * 60 + endMinutes;
+
+			return session.date === currentDate && currentTimeInMinutes >= startTimeInMinutes && currentTimeInMinutes <= endTimeInMinutes;
+		});
+
+		console.log(session)
+
+		return session;
+	}
 
  let nextIndex = null;
 
@@ -634,19 +653,19 @@ const formatTime = (seconds) => {
                   >
                     <View className="flex-row items-center">
                       <LinearGradient
-                        colors={findTaskById(findCurrentSession()[3]).colors}
+                        colors={findTaskById(findCurrentSession().workId).colors}
                         start={{x: 0, y: 0}}
                         end={{x: 0, y: 1}}
                         className="w-6 h-6 rounded-full mr-1"
                       >
                       </LinearGradient>
                       <View className="flex-col items-start">
-                        <Text className="text-white text-base font-semibold">{findCurrentSession()[2]}</Text>
-                        <Text className="text-zinc-400 text-sm font-regular">{findTaskById(findCurrentSession()[3]).name}</Text>
+                        <Text className="text-white text-base font-semibold">{findCurrentSession().name}</Text>
+                        <Text className="text-zinc-400 text-sm font-regular">{findTaskById(findCurrentSession().workId).name}</Text>
                       </View>
                     </View>
                     <View className="flex-row items-center">
-                      <Text className="text-white text-base font-semibold">{timeFromPoints(findCurrentSession()[5]-(currentTime-10))}</Text>
+                      <Text className="text-white text-base font-semibold">{timeFromPoints(Math.round(pointsFromTime(findCurrentSession().endTime)-(currentTime-10)))}</Text>
                       <Image source={icons.timerWhite} className="w-4 h-4 ml-1 tint-white" />
                     </View>
                   </LinearGradient>
@@ -1073,8 +1092,8 @@ const formatTime = (seconds) => {
               <View>
                 {user.workSessions.filter(session => session.workId === user.work[editIndex]._id && session.date === `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`).map((session, index) => (
                   <View key={index} className="bg-zinc-800/50 rounded-xl p-2 mb-2 flex flex-row justify-between items-center border border-zinc-700/50">
-                    <Text className="text-zinc-200 text-lg font-pregular">{session.name}</Text>
-                    <Text className="text-zinc-600 text-lg font-pregular">{session.startTime} - {session.endTime}</Text>
+                    <Text className="text-zinc-200 text-base font-pregular">{session.name}</Text>
+                    <Text className="text-zinc-600 text-base font-pregular">{session.startTime} - {session.endTime}</Text>
                   </View>
                 ))}
               </View>

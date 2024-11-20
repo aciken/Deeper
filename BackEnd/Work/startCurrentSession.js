@@ -3,6 +3,9 @@ const User = require('../DataBase/User');
 const startCurrentSession = async (req, res) => {
     const { sessionName, selectedWork, duration, id } = req.body;
 
+    console.log('stared adding session');
+
+
     const now = new Date();
     const currentHours = now.getHours();
     const currentMinutes = now.getMinutes();
@@ -25,6 +28,8 @@ const startCurrentSession = async (req, res) => {
         startPoints,
         endPoints
     ]
+
+    console.log(session);
         
     const today = new Date().getDate();
 

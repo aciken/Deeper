@@ -24,6 +24,10 @@ const UserSchema = new mongoose.Schema({
     type: Array,
     default: () => new Array(31).fill([]) 
   },
+  workSessions: {
+    type: Array,
+    default: []
+  },
   allArray: {
     type: Array,
     default: []
