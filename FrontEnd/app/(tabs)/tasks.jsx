@@ -238,6 +238,85 @@ const Tasks = () => {
   // ]
 
 
+  const getWeekDates = () => {
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0 is Sunday, 1 is Monday, etc.
+    const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust when today is Sunday
+    const monday = new Date(today.setDate(diff));
+    
+    const weekDates = {};
+    
+    for(let i = 0; i < 7; i++) {
+      const currentDate = new Date(monday);
+      currentDate.setDate(monday.getDate() + i);
+      
+      const dd = String(currentDate.getDate()).padStart(2, '0');
+      const mm = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const yyyy = currentDate.getFullYear();
+      
+      const dateString = `${dd}:${mm}:${yyyy}`;
+      
+      const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+      weekDates[days[i]] = dateString;
+    }
+
+    return weekDates;
+  }
+
+
+  const workColors = (date) => {
+    // Calculate total target time from user.work
+    let totalTargetMinutes = 0;
+    user.work.forEach(work => {
+      // Extract numbers from string like "1h 30m" or "2h"
+      const timeStr = work.currentTime;
+      let hours = 0;
+      let minutes = 0;
+      
+      if (timeStr.includes('h')) {
+        hours = parseInt(timeStr.split('h')[0]);
+      }
+      if (timeStr.includes('m')) {
+        minutes = parseInt(timeStr.split('m')[0].split(' ').pop());
+      }
+      
+      totalTargetMinutes += (hours * 60) + minutes;
+    });
+    
+    // Get threshold by dividing total target time by 5
+    console.log('minutes', totalTargetMinutes)
+    const threshold = totalTargetMinutes / 4;
+
+    // Calculate total session time for given date
+    let totalSessionMinutes = 0;
+    user.workSessions.filter(session => session.date === date).forEach(session => {
+      const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+      const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+      const startInMinutes = startHours * 60 + startMinutes;
+      const endInMinutes = endHours * 60 + endMinutes;
+      totalSessionMinutes += endInMinutes - startInMinutes;
+      
+    });
+
+    // Return colors based on thresholds
+
+    console.log(totalSessionMinutes, threshold)
+    if (totalSessionMinutes <= threshold) {
+      return ['#27272a', '#27272a'];
+    } else if (totalSessionMinutes <= threshold * 2) {
+      return ['#1d4ed8', '#1e3a8a'];
+    } else if (totalSessionMinutes <= threshold * 3) {
+      return ['#3b82f6', '#1d4ed8'];
+    } else {
+      return ['#60a5fa', '#3b82f6'];
+    }
+  }
+
+
+
+  
+
+
 
   const ballColors = [
     ['#DC2626', '#761414'],
@@ -343,7 +422,7 @@ const getGoalWork = () => {
 
 
 const submitNewWork = () => {
-    axios.put('https://0f4d-188-2-139-122.ngrok-free.app/addJob', {
+    axios.put('https://12a5-109-245-203-91.ngrok-free.app/addJob', {
     newWork,
     id: user._id,
   }).then(res => {
@@ -359,7 +438,7 @@ const submitNewWork = () => {
 }
 
 const submitEditWork = () => {
-  axios.put('https://0f4d-188-2-139-122.ngrok-free.app/editJob', {
+  axios.put('https://12a5-109-245-203-91.ngrok-free.app/editJob', {
   editWork,
   index: editIndex,
   id: user._id,
@@ -380,7 +459,7 @@ const submitEditWork = () => {
 
 const submitDeleteWork = () => {
   if(user.work.length !== 1){
-    axios.put('https://0f4d-188-2-139-122.ngrok-free.app/deleteJob', {
+    axios.put('https://12a5-109-245-203-91.ngrok-free.app/deleteJob', {
     index: editIndex,
     id: user._id,
   }).then(res => {
@@ -427,7 +506,6 @@ const pointsFromTime = (time) => {
 			return session.date === currentDate && currentTimeInMinutes >= startTimeInMinutes && currentTimeInMinutes <= endTimeInMinutes;
 		});
 
-		console.log(session)
 
 		return session;
 	}
@@ -457,7 +535,6 @@ const pointsFromTime = (time) => {
 
  useEffect(() => {
   works.forEach(work => {
-    console.log(work._id)
   })
  }, [works])
 
@@ -533,8 +610,11 @@ useEffect(() => {
   }
 }, [isSessionPageVisible]);
 
+const session = findCurrentSession();
+
+
 useEffect(() => {
-  if (!findCurrentSession()) return;
+  if (!session) return;
 
   const updateTimer = () => {
     const currentTime = new Date();
@@ -542,18 +622,28 @@ useEffect(() => {
     const currentMinutes = currentTime.getMinutes();
     const currentSeconds = currentTime.getSeconds();
 
-    const sessionEndInSeconds = (findCurrentSession()[5] / 20) * 3600;
+    // Convert session end time (in points) to seconds
+    const sessionEndInSeconds = (pointsFromTime(session.endTime) / 20) * 3600;  // Convert points to seconds
+
+    // Convert current time to seconds since start of day
     const currentTimeInSeconds = currentHours * 3600 + currentMinutes * 60 + currentSeconds;
+
+    // Calculate remaining time
     const remainingSeconds = Math.round(sessionEndInSeconds - currentTimeInSeconds);
     setTimeInSeconds(remainingSeconds);
   };
 
+  // Initial update
   updateTimer();
+
+  // Update every second
   const intervalId = setInterval(updateTimer, 1000);
+
   return () => clearInterval(intervalId);
-}, [findCurrentSession()]);
+}, [session]);
 
 const formatTime = (seconds) => {
+  console.log('Tasks',seconds)
   if (seconds < 0) return "00:00:00";
   
   const hours = Math.floor(seconds / 3600);
@@ -567,7 +657,162 @@ const formatTime = (seconds) => {
       <SafeAreaView className="flex-1 h-full bg-zinc-950" edges={['top']}>
         <View className="flex-1">
           <ScrollView className="flex-1 h-full px-4" contentContainerStyle={{ flexGrow: 1 }}>
-            <View className="flex-row justify-around bg-zinc-900 rounded-xl p-4 border border-zinc-700 mt-6 mb-6">
+            <View className="flex flex-col justify-between bg-zinc-900 rounded-xl p-4 border border-zinc-700 mb-6">
+              <View className="flex flex-row justify-between pb-4">
+                <Text className="text-lg text-white font-psemibold">Work Activity</Text>
+
+              </View>
+              <View className="flex flex-row justify-between py-2">
+                <View className="flex flex-col items-center justify-between">
+                  <Text className="text-lg font-psemibold text-white">{user.workSessions.filter(session => 
+                    session.date === getWeekDates().monday || 
+                    session.date === getWeekDates().tuesday ||
+                    session.date === getWeekDates().wednesday ||
+                    session.date === getWeekDates().thursday ||
+                    session.date === getWeekDates().friday ||
+                    session.date === getWeekDates().saturday ||
+                    session.date === getWeekDates().sunday
+                  ).length}</Text>
+                  <Text className="text-base font-pmedium text-zinc-600">Sessions</Text>
+                </View>
+                <View className="flex flex-col items-center justify-between">
+                  <Text className="text-lg font-psemibold text-white">{(() => {
+                    let totalMinutes = 0;
+                    user.workSessions
+                      .filter(session => 
+                        session.date === getWeekDates().monday ||
+                        session.date === getWeekDates().tuesday ||
+                        session.date === getWeekDates().wednesday ||
+                        session.date === getWeekDates().thursday ||
+                        session.date === getWeekDates().friday ||
+                        session.date === getWeekDates().saturday ||
+                        session.date === getWeekDates().sunday
+                      )
+                      .forEach(session => {
+                        const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+                        const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+                        const startInMinutes = startHours * 60 + startMinutes;
+                        const endInMinutes = endHours * 60 + endMinutes;
+                        totalMinutes += endInMinutes - startInMinutes;
+                      });
+                    const hours = Math.floor(totalMinutes / 60);
+                    const minutes = totalMinutes % 60;
+                    return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+                  })()}</Text>
+                  <Text className="text-base font-pmedium text-zinc-600">Work Time</Text>
+                </View>
+                <View className="flex flex-col items-center justify-between">
+                  <Text className="text-lg font-psemibold text-white">{(() => {
+                    // Group sessions by workId and calculate total time for each
+                    const workTimes = {};
+                    user.workSessions.forEach(session => {
+                      if (!workTimes[session.workId]) {
+                        workTimes[session.workId] = 0;
+                      }
+                      const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+                      const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+                      const startInMinutes = startHours * 60 + startMinutes;
+                      const endInMinutes = endHours * 60 + endMinutes;
+                      workTimes[session.workId] += endInMinutes - startInMinutes;
+                    });
+
+                    // Find workId with maximum time
+                    const maxWorkId = Object.entries(workTimes).reduce((a, b) => 
+                      b[1] > a[1] ? b : a
+                    )[0];
+
+                    // Return the name of the work with maximum time
+                    return findTaskById(maxWorkId).name;
+                  })()}</Text>
+                  <Text className="text-base font-pmedium text-zinc-600">Top Project</Text>
+                </View>
+              </View>
+
+              <View className="flex flex-row justify-between pt-2">
+                <TouchableOpacity className="flex flex-col items-center justify-center">
+                  <Text className="font-pmedium text-sm text-white mb-2">M</Text>
+                  <LinearGradient
+            colors={workColors(getWeekDates().monday)}
+            start={{x: 0, y: 0}}
+            end={{x: 1, y: 1}}
+            className="w-8 h-8 rounded-md border border-white flex-row justify-center items-center"
+          >
+                <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().monday).length}</Text>
+                </LinearGradient>
+
+                </TouchableOpacity>
+                <TouchableOpacity className="flex flex-col items-center justify-center">
+                  <Text className="font-pmedium text-sm text-zinc-700 mb-2">T</Text>
+                  <LinearGradient
+            colors={workColors(getWeekDates().tuesday)}
+            start={{x: 0, y: 0}}
+            end={{x: 1, y: 1}}
+            className="w-8 h-8 rounded-md flex-row justify-center items-center"
+          >
+                <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().tuesday).length}</Text>
+                </LinearGradient>
+                </TouchableOpacity>
+                <TouchableOpacity className="flex flex-col items-center justify-center">
+                  <Text className="font-pmedium text-sm text-zinc-700 mb-2">W</Text>
+                  <LinearGradient
+            colors={workColors(getWeekDates().wednesday)}
+            start={{x: 0, y: 0}}
+            end={{x: 1, y: 1}}
+            className="w-8 h-8 rounded-md flex-row justify-center items-center"
+          >
+                <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().wednesday).length}</Text>
+                </LinearGradient>
+                </TouchableOpacity>
+                <TouchableOpacity className="flex flex-col items-center justify-center">
+                  <Text className="font-pmedium text-sm text-zinc-700 mb-2">T</Text>
+                  <LinearGradient
+            colors={workColors(getWeekDates().thursday)}
+            start={{x: 0, y: 0}}
+            end={{x: 1, y: 1}}
+            className="w-8 h-8 rounded-md flex-row justify-center items-center"
+          >
+                <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().thursday).length}</Text>
+                </LinearGradient>
+                </TouchableOpacity>
+                <TouchableOpacity className="flex flex-col items-center justify-center">
+                  <Text className="font-pmedium text-sm text-zinc-700 mb-2">F</Text>
+                  <LinearGradient
+            colors={workColors(getWeekDates().friday)}
+            start={{x: 0, y: 0}}
+            end={{x: 1, y: 1}}
+            className="w-8 h-8 rounded-md flex-row justify-center items-center"
+          >
+                <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().friday).length}</Text>
+                </LinearGradient>
+                </TouchableOpacity>
+                <TouchableOpacity className="flex flex-col items-center justify-center">
+                  <Text className="font-pmedium text-sm text-zinc-700 mb-2">S</Text>
+                  <LinearGradient
+            colors={workColors(getWeekDates().saturday)}
+            start={{x: 0, y: 0}}
+            end={{x: 1, y: 1}}
+            className="w-8 h-8 rounded-md flex-row justify-center items-center"
+          >
+                <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().saturday).length}</Text>
+                </LinearGradient>
+                </TouchableOpacity>
+                <TouchableOpacity className="flex flex-col items-center justify-center">
+                  <Text className="font-pmedium text-sm text-zinc-700 mb-2">S</Text>
+                  <LinearGradient
+            colors={workColors(getWeekDates().sunday)}
+            start={{x: 0, y: 0}}
+            end={{x: 1, y: 1}}
+            className="w-8 h-8 rounded-md flex-row justify-center items-center"
+          >
+                <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().sunday).length}</Text>
+                </LinearGradient>
+                </TouchableOpacity>
+
+              </View>
+              
+
+            </View>
+            {/* <View className="flex-row justify-around bg-zinc-900 rounded-xl p-4 border border-zinc-700 mt-6 mb-6">
               <View className="flex flex-col items-center justify-center">
                 <Text className="text-zinc-400 text-base mb-1">Work Goal</Text>
                 <Text className="text-white text-2xl font-bold">{getGoalWork()}</Text>
@@ -580,7 +825,7 @@ const formatTime = (seconds) => {
                 <Text className="text-zinc-400 text-base mb-1">Work Today</Text>
                 <Text className="text-blue-400 text-2xl font-bold">{allWorkToday()}</Text>
               </View>
-            </View>
+            </View> */}
            
             <View className="flex-row justify-center items-center w-full mb-4">
               <TouchableOpacity
@@ -1124,25 +1369,25 @@ const formatTime = (seconds) => {
                     maskElement={
                       <View className="flex-col justify-center items-center">
                         <Text className="text-white text-2xl font-semibold text-center">
-                          {findCurrentSession()[2]}
+                          {findCurrentSession().name}
                         </Text>
                         <Text className="text-zinc-200 text-lg font-regular text-center">
-                          {findTaskById(findCurrentSession()[3]).name}
+                          {findTaskById(findCurrentSession().workId).name}
                         </Text>
                       </View>
                     }
                   >
                     <LinearGradient
-                      colors={['#D4D4D8', findTaskById(findCurrentSession()[3]).colors[0]]}
+                      colors={['#D4D4D8', findTaskById(findCurrentSession().workId).colors[0]]}
                       start={{x: 0, y: 0}}
                       end={{x: 0, y: 1}}
                     >
                       <View className="flex-col items-center justify-center opacity-0">
                         <Text className="text-white text-2xl font-semibold text-center">
-                          {findCurrentSession()[2]}
+                          {findCurrentSession().name}
                         </Text>
                         <Text className="text-zinc-200 text-lg font-regular text-center">
-                          {findTaskById(findCurrentSession()[3]).name}
+                          {findTaskById(findCurrentSession().workId).name}
                         </Text>
                       </View>
                     </LinearGradient>
@@ -1165,7 +1410,7 @@ const formatTime = (seconds) => {
                   }
                 >
                   <LinearGradient
-                    colors={['#52525b', findTaskById(findCurrentSession()[3]).colors[0]]}
+                    colors={['#52525b', findTaskById(findCurrentSession().workId).colors[0]]}
                     start={{x: 0, y: 0}}
                     end={{x: 2, y: 2}}
                   >

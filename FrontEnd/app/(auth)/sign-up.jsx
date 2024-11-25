@@ -32,15 +32,13 @@ const signup = () => {
   }, [loginSuccess]);
 
   const submit = () => {
-    console.log('Submitting')
     const {name, email, password} = form
       setIsSubmiting(true)
-      axios.put('https://0f4d-188-2-139-122.ngrok-free.app/signup', {
+      axios.put('https://12a5-109-245-203-91.ngrok-free.app/signup', {
       name, 
       email,
       password
     }).then(res => {
-      console.log('reas')
       if(res.data !== 'exist'){
         setForm({email: '', password: '', name: ''})
         setUser(res.data);

@@ -179,7 +179,6 @@ const Home = () => {
 			return session.date === currentDate && currentTimeInMinutes >= startTimeInMinutes && currentTimeInMinutes <= endTimeInMinutes;
 		});
 
-		console.log(session)
 
 		return session;
 	}
@@ -431,7 +430,7 @@ const Home = () => {
 	useEffect(() => {;
 		const email = user.email;
 
-		axios.post('https://0f4d-188-2-139-122.ngrok-free.app/getUser', { email })
+		axios.post('https://12a5-109-245-203-91.ngrok-free.app/getUser', { email })
 			.then(res => {
 				setIsLoading(false);
 				setUser(res.data);
@@ -499,7 +498,7 @@ const Home = () => {
 			setAlertPopupMessage('Please select a duration');
 			setAlertPopupType('info');
 		} else {
-			axios.put('https://0f4d-188-2-139-122.ngrok-free.app/startSession', {
+			axios.put('https://12a5-109-245-203-91.ngrok-free.app/startSession', {
 				sessionName,
 				selectedWork,
 				duration,
@@ -621,6 +620,24 @@ const Home = () => {
 			setIsAddTaskVisible(false);
 		}
 	};
+
+
+	const endSession = () => {
+		axios.put('https://12a5-109-245-203-91.ngrok-free.app/endSession', {
+			id: user._id,
+			sessionId: findCurrentSession().sessionId
+		})
+		.then(res => {
+			setUser(res.data)
+			setIsSessionPageVisible(false)
+			setAlertPopupVisible(true)
+			setAlertPopupMessage('Session ended')
+			setAlertPopupType('success')
+		})
+		.catch((e) => {
+			console.error('Error ending session:', e);
+		})
+	}
 
 	
 	return (
@@ -1261,7 +1278,7 @@ const Home = () => {
 						</>
 					)}
 
-					<TouchableOpacity onPress={handleSessionClose} className="mt-4 mb-4 mx-4">
+					<TouchableOpacity onPress={endSession} className="mt-4 mb-4 mx-4">
 						<LinearGradient
 							colors={['#3f3f46', '#27272a']}
 							start={{x: 0, y: 0}}

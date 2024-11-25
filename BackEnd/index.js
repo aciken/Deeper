@@ -24,6 +24,7 @@ const restorePreset = require('./Presets/restorePreset');
 const startCurrentSession = require('./Work/startCurrentSession');
 const changeDaily = require('./Tracker/changeDaily');
 const startSession = require('./Session/startSession');
+const endSession = require('./Session/endSession');
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
@@ -33,7 +34,7 @@ app.post('/login', Login);
 app.put('/signup', Signup);
 app.post('/getUser', GetUser)
 app.put('/addWork', addWork);
-app.put('/editWork', editWork);
+app.put('/editWork', editWork); 
 app.put('/deleteWork', deleteWork);
 app.put('/addJob', addJob);
 app.post('/getJob', getJob);
@@ -48,6 +49,9 @@ app.put('/restorePreset', restorePreset);
 app.put('/startCurrentSession', startCurrentSession);
 app.put('/updateTracker', changeDaily);
 app.put('/startSession', startSession);
+app.put('/endSession', endSession);
+
+
 app.listen(port, () => {
     console.log(`App listening at http://localhost:${port}`);
   });
