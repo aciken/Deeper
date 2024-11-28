@@ -22,9 +22,11 @@ const createNewPreset = require('./Presets/createNewPreset');
 const deletePreset = require('./Presets/deletePreset');
 const restorePreset = require('./Presets/restorePreset');
 const startCurrentSession = require('./Work/startCurrentSession');
-const changeDaily = require('./Tracker/changeDaily');
 const startSession = require('./Session/startSession');
 const endSession = require('./Session/endSession');
+const changeDaily = require('./Challenges/changeDaily');
+const collectDaily = require('./Challenges/collectDaily')
+const collectGeneral = require('./Challenges/collectGeneral')
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
@@ -47,9 +49,11 @@ app.put('/createNewPreset', createNewPreset);
 app.put('/deletePreset', deletePreset);
 app.put('/restorePreset', restorePreset);
 app.put('/startCurrentSession', startCurrentSession);
-app.put('/updateTracker', changeDaily);
 app.put('/startSession', startSession);
 app.put('/endSession', endSession);
+app.put('/changeDaily', changeDaily);
+app.put('/collectDaily', collectDaily);
+app.put('/collectGeneral', collectGeneral)
 
 
 app.listen(port, () => {

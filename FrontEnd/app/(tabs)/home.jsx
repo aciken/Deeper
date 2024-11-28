@@ -274,13 +274,13 @@ const Home = () => {
 			},
 			{
 				points: 1,
-				description: "Work 2 hours on today's morning",
+				description: "Work 2 hours this morning",
 				goal: 2,
 				type: 'morning',
 			},
 			{
 				points: 1,
-				description: "Work 2 hours on today's afternoon",
+				description: "Work 2 hours this afternoon",
 				goal: 2,
 				type: 'afternoon',
 			},
@@ -294,8 +294,8 @@ const Home = () => {
 		general: [
 			{
 				points: 3,
-				description: "Work 50 hours",
-				goal: 50,
+				description: "Work 20 hours",
+				goal: 20,
 				type: 'general',
 			},
 			{
@@ -318,7 +318,7 @@ const Home = () => {
 			},
 			{
 				points: 25,
-				description: "Work 400 hours",
+				description: "Work 1000 hours",
 				goal: 400,
 				type: 'general',
 			}
@@ -326,25 +326,25 @@ const Home = () => {
 		generalPlus: [
 			{
 				points: 3,
-				description: "Work 25 hours on morning",
-				goal: 25,
+				description: "Work 10 hours on morning",
+				goal: 10,
 				type: 'morning',
 			},
 			{
 				points: 3,
-				description: "Work 25 hours on afternoon",
+				description: "Work 50 hours on afternoon",
 				goal: 25,
 				type: 'afternoon',
 			},
 			{
 				points: 5,
-				description: "Work 50 hours on one project",
+				description: "Work 100 hours on one project",
 				goal: 50,
 				type: 'project',
 			},
 			{
 				points: 10,
-				description: "Work 200 hours on one project",
+				description: "Work 300 hours on one project",
 				goal: 200,
 				type: 'project',
 			}
@@ -352,7 +352,7 @@ const Home = () => {
 	}
 
 
-	const currentPoints = {
+	const [currentPoints, setCurrentPoints] = useState({
 		daily: [
 			{
 				points: points.daily[user.points.currentDaily[0]].points,
@@ -381,7 +381,302 @@ const Home = () => {
 				type: points.generalPlus[user.points.currentGeneralPlus[0]].type,
 			}
 		]
+	});
+
+
+	useEffect(() => {
+		const changeChallanges = () => {
+			if(user.points.pointsDate !== `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`) {
+				const date = `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`
+				axios.put('https://b99d-109-245-203-91.ngrok-free.app/changeDaily', {
+					id: user._id,
+					date
+				})
+				.then(res => {
+					setUser(res.data);
+					setCurrentPoints({
+						daily: [
+							{
+								points: points.daily[res.data.points.currentDaily[0]].points,
+								description: points.daily[res.data.points.currentDaily[0]].description,
+								goal: points.daily[res.data.points.currentDaily[0]].goal,
+								type: points.daily[res.data.points.currentDaily[0]].type,
+							},
+							{
+								points: points.daily[res.data.points.currentDaily[1]].points,
+								description: points.daily[res.data.points.currentDaily[1]].description,
+								goal: points.daily[res.data.points.currentDaily[1]].goal,
+								type: points.daily[res.data.points.currentDaily[1]].type,
+							}
+						],
+						general: [
+							{
+								points: points.general[res.data.points.currentGeneral[0]].points,
+								description: points.general[res.data.points.currentGeneral[0]].description,
+								goal: points.general[res.data.points.currentGeneral[0]].goal,
+								type: points.general[res.data.points.currentGeneral[0]].type,
+							},
+							{
+								points: points.generalPlus[res.data.points.currentGeneralPlus[0]].points,
+								description: points.generalPlus[res.data.points.currentGeneralPlus[0]].description,
+								goal: points.generalPlus[res.data.points.currentGeneralPlus[0]].goal,
+								type: points.generalPlus[res.data.points.currentGeneralPlus[0]].type,
+							}
+						]
+					});
+				})
+				.catch((e) => {
+					console.error(e);
+				})
+				
+		}
 	}
+	changeChallanges()
+	}, [])
+
+
+	const challangeDone = (challange, type) =>{
+		if(type == 'daily'){
+			if(challange.type == 'daily'){
+				const todayDate = `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`;
+				const todaysSessions = user.workSessions.filter(session => session.date === todayDate);
+				const currentTime = new Date();
+				const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+				
+				let totalMinutes = 0;
+				todaysSessions.forEach(session => {
+					const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+					const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+					
+					const startTotalMinutes = startHours * 60 + startMinutes;
+					const endTotalMinutes = endHours * 60 + endMinutes;
+					
+					// If session is ongoing, only count time until now
+					const actualEndMinutes = endTotalMinutes > currentMinutes ? currentMinutes : endTotalMinutes;
+					
+					totalMinutes += actualEndMinutes - startTotalMinutes;
+				});
+				
+				const hours = Math.floor(totalMinutes / 60);
+				const minutes = totalMinutes % 60;
+				return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+			} else if(challange.type == 'morning'){
+				const todayDate = `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`;
+				const todaysSessions = user.workSessions.filter(session => session.date === todayDate);
+				const currentTime = new Date();
+				const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+				
+				let totalMinutes = 0;
+				todaysSessions.forEach(session => {
+					const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+					const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+					
+					// Only count work between 5am and 11am
+					const startTime = Math.max(startHours * 60 + startMinutes, 5 * 60); // Don't start before 5am
+					let endTime = Math.min(endHours * 60 + endMinutes, 11 * 60); // Don't go past 11am
+					
+					// If session is ongoing, only count time until now
+					endTime = endTime > currentMinutes ? currentMinutes : endTime;
+					
+					if(startTime < 11 * 60 && endTime > 5 * 60) { // Only count if session overlaps with morning hours
+						totalMinutes += endTime - startTime;
+					}
+				});
+				
+				const hours = Math.floor(totalMinutes / 60);
+				const minutes = totalMinutes % 60;
+				return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+			} else if(challange.type == 'afternoon'){
+				const todayDate = `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`;
+				const todaysSessions = user.workSessions.filter(session => session.date === todayDate);
+				const currentTime = new Date();
+				const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+				
+				let totalMinutes = 0;
+				todaysSessions.forEach(session => {
+					const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+					const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+					
+					// Only count work between 12pm and 6pm
+					const startTime = Math.max(startHours * 60 + startMinutes, 12 * 60); // Don't start before 12pm
+					let endTime = Math.min(endHours * 60 + endMinutes, 18 * 60); // Don't go past 6pm
+					
+					// If session is ongoing, only count time until now
+					endTime = endTime > currentMinutes ? currentMinutes : endTime;
+					
+					if(startTime < 18 * 60 && endTime > 12 * 60) { // Only count if session overlaps with afternoon hours
+						totalMinutes += endTime - startTime;
+					}
+				});
+				
+				const hours = Math.floor(totalMinutes / 60);
+				const minutes = totalMinutes % 60;
+				return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+			} else if(challange.type == 'project'){
+				const todayDate = `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`;
+				const todaysSessions = user.workSessions.filter(session => session.date === todayDate);
+				const currentTime = new Date();
+				const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+				
+				// Group sessions by workId
+				const sessionsByWork = {};
+				todaysSessions.forEach(session => {
+					if (!sessionsByWork[session.workId]) {
+						sessionsByWork[session.workId] = [];
+					}
+					sessionsByWork[session.workId].push(session);
+				});
+				
+				// Calculate total minutes for each workId
+				let maxMinutes = 0;
+				Object.values(sessionsByWork).forEach(sessions => {
+					let workMinutes = 0;
+					sessions.forEach(session => {
+						const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+						const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+						
+						const startTotalMinutes = startHours * 60 + startMinutes;
+						const endTotalMinutes = endHours * 60 + endMinutes;
+						
+						// If session is ongoing, only count time until now
+						const actualEndMinutes = endTotalMinutes > currentMinutes ? currentMinutes : endTotalMinutes;
+						
+						workMinutes += actualEndMinutes - startTotalMinutes;
+					});
+					maxMinutes = Math.max(maxMinutes, workMinutes);
+				});
+				
+				const hours = Math.floor(maxMinutes / 60);
+				const minutes = maxMinutes % 60;
+				return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+			}
+		} else {
+			if(challange.type == 'general'){
+				const currentTime = new Date();
+				const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+				const todayDate = `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`;
+				
+				let totalMinutes = 0;
+				user.workSessions.forEach(session => {
+					const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+					const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+					
+					const startTotalMinutes = startHours * 60 + startMinutes;
+					const endTotalMinutes = endHours * 60 + endMinutes;
+					
+					// Only adjust end time for ongoing sessions if they're from today
+					const actualEndMinutes = (endTotalMinutes > currentMinutes && session.date === todayDate) 
+						? currentMinutes 
+						: endTotalMinutes;
+					
+					// Ensure we don't get negative minutes by taking max of 0
+					const sessionMinutes = Math.max(0, actualEndMinutes - startTotalMinutes);
+					totalMinutes += sessionMinutes;
+				});
+
+				const hours = Math.floor(totalMinutes / 60);
+				const minutes = totalMinutes % 60;
+				return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+			} else if(challange.type == 'morning'){
+				const currentTime = new Date();
+				const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+				const todayDate = `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`;
+				
+				let totalMinutes = 0;
+				user.workSessions.forEach(session => {
+					const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+					const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+					
+					const startTotalMinutes = startHours * 60 + startMinutes;
+					const endTotalMinutes = endHours * 60 + endMinutes;
+					
+					// Only count time between 6:00 (360 minutes) and 12:00 (720 minutes)
+					if(startTotalMinutes < 720 && endTotalMinutes > 360) {
+						const adjustedStart = Math.max(startTotalMinutes, 360);
+						const adjustedEnd = Math.min(endTotalMinutes, 720);
+						
+						// For ongoing sessions from today, further limit to current time
+						const actualEnd = (endTotalMinutes > currentMinutes && session.date === todayDate)
+							? Math.min(currentMinutes, 720)
+							: adjustedEnd;
+							
+						totalMinutes += actualEnd - adjustedStart;
+					}
+				});
+
+				const hours = Math.floor(totalMinutes / 60);
+				const minutes = totalMinutes % 60;
+				return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+			}
+		}
+		
+		
+	
+
+	}
+
+
+	const collectPoints = (challange, index) => {
+		console.log('colect')
+		axios.put('https://b99d-109-245-203-91.ngrok-free.app/collectDaily', {
+			id: user._id,
+			points: challange.points,
+			index
+		})
+		.then(res => {
+			setUser(res.data);
+		})
+		.catch((err) => {
+			console.error(err);
+		})
+
+	}
+
+
+	const collectGeneralPoints = (challange) => {
+		axios.put('https://b99d-109-245-203-91.ngrok-free.app/collectGeneral', {
+			id: user._id,
+			points: challange.points,
+			type: challange.type
+	})
+	.then(res => {
+		setUser(res.data);
+		setCurrentPoints({
+			daily: [
+				{
+					points: points.daily[res.data.points.currentDaily[0]].points,
+					description: points.daily[res.data.points.currentDaily[0]].description,
+					goal: points.daily[res.data.points.currentDaily[0]].goal,
+					type: points.daily[res.data.points.currentDaily[0]].type,
+				},
+				{
+					points: points.daily[res.data.points.currentDaily[1]].points,
+					description: points.daily[res.data.points.currentDaily[1]].description,
+					goal: points.daily[res.data.points.currentDaily[1]].goal,
+					type: points.daily[res.data.points.currentDaily[1]].type,
+				}
+			],
+			general: [
+				{
+					points: points.general[res.data.points.currentGeneral[0]].points,
+					description: points.general[res.data.points.currentGeneral[0]].description,
+					goal: points.general[res.data.points.currentGeneral[0]].goal,
+					type: points.general[res.data.points.currentGeneral[0]].type,
+				},
+				{
+					points: points.generalPlus[res.data.points.currentGeneralPlus[0]].points,
+					description: points.generalPlus[res.data.points.currentGeneralPlus[0]].description,
+					goal: points.generalPlus[res.data.points.currentGeneralPlus[0]].goal,
+					type: points.generalPlus[res.data.points.currentGeneralPlus[0]].type,
+				}
+			]
+		});
+	})
+	.catch((err) => {
+		console.error(err);
+	})
+}
+
 
 
 
@@ -430,7 +725,7 @@ const Home = () => {
 	useEffect(() => {;
 		const email = user.email;
 
-		axios.post('https://12a5-109-245-203-91.ngrok-free.app/getUser', { email })
+		axios.post('https://b99d-109-245-203-91.ngrok-free.app/getUser', { email })
 			.then(res => {
 				setIsLoading(false);
 				setUser(res.data);
@@ -498,7 +793,7 @@ const Home = () => {
 			setAlertPopupMessage('Please select a duration');
 			setAlertPopupType('info');
 		} else {
-			axios.put('https://12a5-109-245-203-91.ngrok-free.app/startSession', {
+			axios.put('https://b99d-109-245-203-91.ngrok-free.app/startSession', {
 				sessionName,
 				selectedWork,
 				duration,
@@ -623,7 +918,7 @@ const Home = () => {
 
 
 	const endSession = () => {
-		axios.put('https://12a5-109-245-203-91.ngrok-free.app/endSession', {
+		axios.put('https://b99d-109-245-203-91.ngrok-free.app/endSession', {
 			id: user._id,
 			sessionId: findCurrentSession().sessionId
 		})
@@ -671,7 +966,6 @@ const Home = () => {
 									</View>
 								}
 							>
-
 									<View style={{ flex: 1 }}>
 											<LinearGradient
 												colors={['#27272a', '#18181b']}
@@ -701,24 +995,20 @@ const Home = () => {
 										right: 0, 
 										bottom: 0, 
 										justifyContent: 'center', 
-										alignItems: 'center' 
+										alignItems: 'center',
+										backgroundColor: 'transparent'
 									}}>
-									<MaskedView
-										maskElement={
-											<Text className="text-white text-3xl font-bold z-10">{user.points.current}%</Text>
-										}
-									>
-										<LinearGradient
-											colors={['#fafafa', '#3f3f46']}
-											start={{x: 0, y: 0}}
-											end={{x: 0, y: 1}}
-										>
-										<Text className="text-white text-3xl font-bold z-10 opacity-0">{user.points.current}%</Text>
-										</LinearGradient>
-									</MaskedView>
-										
+									<Text style={{
+										color: 'white', 
+										fontSize: 30, 
+										fontWeight: 'bold',
+										textShadowColor: 'rgba(0, 0, 0, 0.75)',
+										textShadowOffset: {width: -1, height: 1},
+										textShadowRadius: 10
+									}}>
+										{user.points.current}%
+									</Text>
 									</View>
-
 							</MaskedView>
 							<View style={{ width: 200, height: 200, position: 'absolute' }}>	
 								<Image
@@ -727,7 +1017,7 @@ const Home = () => {
 									resizeMode="contain"
 								/>
 							</View>
-							</View>
+						</View>
 
 							<View className="flex flex-col justify-center items-center">
 									<MaskedView
@@ -958,54 +1248,74 @@ const Home = () => {
 
 					<View className="mb-6">
 						<Text className="text-white text-xl font-semibold mb-4">Daily Points</Text>
-						{currentPoints.daily.map((point, index) => (
-							point.goal * 20 <= user.tracker.daily[point.type] ? (
-
-							<View key={index} className="mb-3 flex flex-row justify-between items-center">
-							<MaskedView
-								maskElement={
-									<Text className="text-zinc-400 font-pmedium">{point.description} <Text className="text-zinc-200">/ {timeFromPoints(user.tracker.daily[point.type])}</Text></Text>
-								}
-							>
-							<LinearGradient
-								colors={['#0369A1', '#0EA5E9']}
-								start={{x: 0, y: 0}}
-								end={{x: 1, y: 0}}
-							>
-								<Text className="text-zinc-400 font-pmedium opacity-0">{point.description} <Text className="text-zinc-200">/ {timeFromPoints(user.tracker.daily[point.type])}</Text></Text>
-							</LinearGradient>
-						</MaskedView>
-						<TouchableOpacity className="rounded-full self-start overflow-hidden">
-							<LinearGradient
-								colors={['#0369A1', '#0EA5E9']}
-								start={{x: 1, y: 1}}
-								end={{x: 0, y: 0}}
-								className="py-2 px-4"
-							>
-								<Text className="text-white font-semibold">collect {point.points}%</Text>
-							</LinearGradient>
-						</TouchableOpacity>
-					</View>
-							) : 
-							(
-							<View key={index} className="mb-3 flex flex-row justify-between items-center">
-								<Text className="text-zinc-400">{point.description} <Text className="text-zinc-200">/ {timeFromPoints(user.tracker.daily[point.type])}</Text></Text>
-							<TouchableOpacity className="bg-zinc-800 py-2 px-4 rounded-full self-start">
-								<Text className="text-zinc-400">collect {point.points}%</Text>
+						{currentPoints.daily.length === 0 || currentPoints.daily.every((_,index) => user.points.dailyDone.includes(index)) ? (
+							<View className="py-6 px-4 bg-zinc-800/50 rounded-2xl">
+								<MaskedView
+									maskElement={
+										<Text className="text-xl font-semibold text-center">All Challenges Complete!</Text>
+									}
+								>
+									<LinearGradient
+										colors={['#0EA5E9', '#0369A1']}
+										start={{x: 0, y: 0}}
+										end={{x: 1, y: 0}}
+									>
+										<Text className="text-xl font-semibold text-center opacity-0">All Challenges Complete!</Text>
+									</LinearGradient>
+								</MaskedView>
+								<Text className="text-zinc-400 text-center mt-2">Check back tomorrow for new challenges</Text>
+							</View>
+						) : (
+							currentPoints.daily.map((point, index) => (
+								!user.points.dailyDone.includes(index) && parseInt(challangeDone(point, 'daily')?.split('h')[0]) >= point.goal ? (
+								<View key={index} className="mb-3 flex flex-row justify-between items-center">
+								<MaskedView
+									maskElement={
+										<Text className="text-zinc-400 font-pmedium">{point.description} <Text className="text-zinc-200">/ {challangeDone(point, 'daily')}</Text></Text>
+									}
+								>
+								<LinearGradient
+									colors={['#0369A1', '#0EA5E9']}
+									start={{x: 0, y: 0}}
+									end={{x: 1, y: 0}}
+								>
+									<Text className="text-zinc-400 font-pmedium opacity-0">{point.description} <Text className="text-zinc-200">/ {challangeDone(point, 'daily')}</Text></Text>
+								</LinearGradient>
+							</MaskedView>
+							<TouchableOpacity 
+								className="rounded-full self-start overflow-hidden"
+								onPress={() => collectPoints(point, index)}
+								>
+								<LinearGradient
+									colors={['#0369A1', '#0EA5E9']}
+									start={{x: 1, y: 1}}
+									end={{x: 0, y: 0}}
+									className="py-2 px-4"
+								>
+									<Text className="text-white font-semibold">collect {point.points}%</Text>
+								</LinearGradient>
 							</TouchableOpacity>
 						</View>
-							)
-						))}
+								) : !user.points.dailyDone.includes(index) ? (
+								<View key={index} className="mb-3 flex flex-row justify-between items-center">
+									<Text className="text-zinc-400">{point.description} <Text className="text-zinc-200">/ {challangeDone(point, 'daily')}</Text></Text>
+								<TouchableOpacity className="bg-zinc-800 py-2 px-4 rounded-full self-start">
+									<Text className="text-zinc-400">collect {point.points}%</Text>
+								</TouchableOpacity>
+							</View>
+								) : null
+							))
+						)}
 					</View>
 
 					<View>
 						<Text className="text-white text-xl font-semibold mb-4">General Points</Text>
 						{currentPoints.general.map((point, index) => (
-							point.goal * 20 <= timeFromPoints(user.tracker.general[point.type]) ? (
+							parseInt(challangeDone(point, 'general')?.split('h')[0]) >= point.goal ? (
 							<View key={index} className="mb-3 flex flex-row justify-between items-center">
 							<MaskedView
 								maskElement={
-									<Text className="text-zinc-400 font-pmedium">{point.description} <Text className="text-zinc-200">/ {timeFromPoints(user.tracker.general[point.type])}</Text></Text>
+									<Text className="text-zinc-400 font-pmedium">{point.description} <Text className="text-zinc-200">/ {challangeDone(point, 'general')}</Text></Text>
 								}
 							>
 							<LinearGradient
@@ -1013,10 +1323,12 @@ const Home = () => {
 								start={{x: 0, y: 0}}
 								end={{x: 1, y: 0}}
 							>
-								<Text className="text-zinc-400 font-pmedium opacity-0">{point.description} <Text className="text-zinc-200">/ {timeFromPoints(user.tracker.general[point.type])}</Text></Text>
+								<Text className="text-zinc-400 font-pmedium opacity-0">{point.description} <Text className="text-zinc-200">/ {challangeDone(point, 'general')}</Text></Text>
 							</LinearGradient>
 						</MaskedView>
-						<TouchableOpacity className="rounded-full self-start overflow-hidden">
+						<TouchableOpacity className="rounded-full self-start overflow-hidden"
+							onPress={() => collectGeneralPoints(point)}
+						>
 							<LinearGradient
 								colors={['#0369A1', '#0EA5E9']}
 								start={{x: 1, y: 1}}
@@ -1030,7 +1342,7 @@ const Home = () => {
 							) :
 						(
 						<View key={index} className="mb-3 flex flex-row justify-between items-center">
-								<Text className="text-zinc-400">{point.description} <Text className="text-zinc-200">/ {timeFromPoints(user.tracker.general[point.type])}</Text></Text>
+								<Text className="text-zinc-400">{point.description} <Text className="text-zinc-200">/ {challangeDone(point, 'general')}</Text></Text>
 							<TouchableOpacity className="bg-zinc-800 py-2 px-4 rounded-full self-start">
 								<Text className="text-zinc-400">collect {point.points}%</Text>
 							</TouchableOpacity>

@@ -60,8 +60,10 @@ const UserSchema = new mongoose.Schema({
   points: {
     type: Object,
     default: {
+      pointsDate: `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`,
       current: 0,
       currentDaily: [0,1],
+      dailyDone: [],
       currentGeneral: [0],
       currentGeneralPlus: [0],
     }

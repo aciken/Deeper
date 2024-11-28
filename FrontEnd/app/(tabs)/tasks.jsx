@@ -212,6 +212,14 @@ const Tasks = () => {
 
 
 
+    const todayDate = () => {
+      const today = new Date();
+      const dd = String(today.getDate()).padStart(2, '0');
+      const mm = String(today.getMonth() + 1).padStart(2, '0'); 
+      const yyyy = today.getFullYear();
+      return `${dd}:${mm}:${yyyy}`;
+    }
+
 
 
   
@@ -284,7 +292,6 @@ const Tasks = () => {
     });
     
     // Get threshold by dividing total target time by 5
-    console.log('minutes', totalTargetMinutes)
     const threshold = totalTargetMinutes / 4;
 
     // Calculate total session time for given date
@@ -300,7 +307,6 @@ const Tasks = () => {
 
     // Return colors based on thresholds
 
-    console.log(totalSessionMinutes, threshold)
     if (totalSessionMinutes <= threshold) {
       return ['#27272a', '#27272a'];
     } else if (totalSessionMinutes <= threshold * 2) {
@@ -422,7 +428,7 @@ const getGoalWork = () => {
 
 
 const submitNewWork = () => {
-    axios.put('https://12a5-109-245-203-91.ngrok-free.app/addJob', {
+    axios.put('https://b99d-109-245-203-91.ngrok-free.app/addJob', {
     newWork,
     id: user._id,
   }).then(res => {
@@ -438,7 +444,7 @@ const submitNewWork = () => {
 }
 
 const submitEditWork = () => {
-  axios.put('https://12a5-109-245-203-91.ngrok-free.app/editJob', {
+  axios.put('https://b99d-109-245-203-91.ngrok-free.app/editJob', {
   editWork,
   index: editIndex,
   id: user._id,
@@ -459,7 +465,7 @@ const submitEditWork = () => {
 
 const submitDeleteWork = () => {
   if(user.work.length !== 1){
-    axios.put('https://12a5-109-245-203-91.ngrok-free.app/deleteJob', {
+    axios.put('https://b99d-109-245-203-91.ngrok-free.app/deleteJob', {
     index: editIndex,
     id: user._id,
   }).then(res => {
@@ -643,7 +649,6 @@ useEffect(() => {
 }, [session]);
 
 const formatTime = (seconds) => {
-  console.log('Tasks',seconds)
   if (seconds < 0) return "00:00:00";
   
   const hours = Math.floor(seconds / 3600);
@@ -735,9 +740,9 @@ const formatTime = (seconds) => {
             colors={workColors(getWeekDates().monday)}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 1}}
-            className="w-8 h-8 rounded-md border border-white flex-row justify-center items-center"
+            className={`w-8 h-8 rounded-md ${getWeekDates().monday === todayDate() ? 'border border-white' : ''} flex-row justify-center items-center`}
           >
-                <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().monday).length}</Text>
+                <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().monday).length || ''}</Text>
                 </LinearGradient>
 
                 </TouchableOpacity>
@@ -747,9 +752,9 @@ const formatTime = (seconds) => {
             colors={workColors(getWeekDates().tuesday)}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 1}}
-            className="w-8 h-8 rounded-md flex-row justify-center items-center"
+            className={`w-8 h-8 rounded-md ${getWeekDates().tuesday === todayDate() ? 'border border-white' : ''} flex-row justify-center items-center`}
           >
-                <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().tuesday).length}</Text>
+                <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().tuesday).length || ''}</Text>
                 </LinearGradient>
                 </TouchableOpacity>
                 <TouchableOpacity className="flex flex-col items-center justify-center">
@@ -758,9 +763,9 @@ const formatTime = (seconds) => {
             colors={workColors(getWeekDates().wednesday)}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 1}}
-            className="w-8 h-8 rounded-md flex-row justify-center items-center"
+            className={`w-8 h-8 rounded-md ${getWeekDates().wednesday === todayDate() ? 'border border-white' : ''} flex-row justify-center items-center`}
           >
-                <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().wednesday).length}</Text>
+                <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().wednesday).length || ''}</Text>
                 </LinearGradient>
                 </TouchableOpacity>
                 <TouchableOpacity className="flex flex-col items-center justify-center">
@@ -769,9 +774,9 @@ const formatTime = (seconds) => {
             colors={workColors(getWeekDates().thursday)}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 1}}
-            className="w-8 h-8 rounded-md flex-row justify-center items-center"
+            className={`w-8 h-8 rounded-md ${getWeekDates().thursday === todayDate() ? 'border border-white' : ''} flex-row justify-center items-center`}
           >
-                <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().thursday).length}</Text>
+                <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().thursday).length || ''}</Text>
                 </LinearGradient>
                 </TouchableOpacity>
                 <TouchableOpacity className="flex flex-col items-center justify-center">
@@ -780,9 +785,9 @@ const formatTime = (seconds) => {
             colors={workColors(getWeekDates().friday)}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 1}}
-            className="w-8 h-8 rounded-md flex-row justify-center items-center"
+            className={`w-8 h-8 rounded-md ${getWeekDates().friday === todayDate() ? 'border border-white' : ''} flex-row justify-center items-center`}
           >
-                <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().friday).length}</Text>
+                <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().friday).length || ''}</Text>
                 </LinearGradient>
                 </TouchableOpacity>
                 <TouchableOpacity className="flex flex-col items-center justify-center">
@@ -791,9 +796,9 @@ const formatTime = (seconds) => {
             colors={workColors(getWeekDates().saturday)}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 1}}
-            className="w-8 h-8 rounded-md flex-row justify-center items-center"
+            className={`w-8 h-8 rounded-md ${getWeekDates().saturday === todayDate() ? 'border border-white' : ''} flex-row justify-center items-center`}
           >
-                <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().saturday).length}</Text>
+                <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().saturday).length || ''}</Text>
                 </LinearGradient>
                 </TouchableOpacity>
                 <TouchableOpacity className="flex flex-col items-center justify-center">
@@ -802,9 +807,9 @@ const formatTime = (seconds) => {
             colors={workColors(getWeekDates().sunday)}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 1}}
-            className="w-8 h-8 rounded-md flex-row justify-center items-center"
+            className={`w-8 h-8 rounded-md ${getWeekDates().sunday === todayDate() ? 'border border-white' : ''} flex-row justify-center items-center`}
           >
-                <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().sunday).length}</Text>
+                <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().sunday).length || ''}</Text>
                 </LinearGradient>
                 </TouchableOpacity>
 
