@@ -951,7 +951,7 @@ const Home = () => {
 					</View>
 
 					{/* New Iceberg Level Design Section */}
-					<TouchableOpacity onPress={() => setIsChallengePopupVisible(true)} className="mx-4 mb-8 bg-zinc-900 p-6 rounded-2xl border border-zinc-800">
+					<TouchableOpacity onPress={() => setIsChallengePopupVisible(true)} className="mx-4 mb-8 bg-zinc-900/50 p-6 rounded-2xl border border-zinc-700/50">
 						<Text className="text-zinc-300 text-xl font-bold mb-4">Work Depth</Text>
 						<View className="items-center">
 							<MaskedView

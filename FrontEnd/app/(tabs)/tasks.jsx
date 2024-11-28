@@ -662,7 +662,7 @@ const formatTime = (seconds) => {
       <SafeAreaView className="flex-1 h-full bg-zinc-950" edges={['top']}>
         <View className="flex-1">
           <ScrollView className="flex-1 h-full px-4" contentContainerStyle={{ flexGrow: 1 }}>
-            <View className="flex flex-col justify-between bg-zinc-900 rounded-xl p-4 border border-zinc-700 mb-6">
+            <View className="flex flex-col justify-between bg-zinc-900/50 rounded-xl p-4 border border-zinc-700/50 mb-6">
               <View className="flex flex-row justify-between pb-4">
                 <Text className="text-lg text-white font-psemibold">Work Activity</Text>
 
