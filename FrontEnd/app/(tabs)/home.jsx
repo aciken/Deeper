@@ -12,6 +12,7 @@ import BottomPopup from '../components/BottomPopup';
 import MaskedView from '@react-native-masked-view/masked-view';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AlertPopup from '../components/AlertPopup';
+import { Vibration } from 'react-native';
 
 const Home = () => {
 	const { setUser, user, setIsLoading } = useGlobalContext();
@@ -388,7 +389,7 @@ const Home = () => {
 		const changeChallanges = () => {
 			if(user.points.pointsDate !== `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`) {
 				const date = `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`
-				axios.put('https://b99d-109-245-203-91.ngrok-free.app/changeDaily', {
+				axios.put('https://235e-109-245-203-91.ngrok-free.app/changeDaily', {
 					id: user._id,
 					date
 				})
@@ -607,6 +608,36 @@ const Home = () => {
 				const hours = Math.floor(totalMinutes / 60);
 				const minutes = totalMinutes % 60;
 				return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+			} else if(challange.type == 'afternoon'){
+				const currentTime = new Date();
+				const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+				const todayDate = `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`;
+				
+				let totalMinutes = 0;
+				user.workSessions.forEach(session => {
+					const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+					const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+					
+					const startTotalMinutes = startHours * 60 + startMinutes;
+					const endTotalMinutes = endHours * 60 + endMinutes;
+					
+					// Only count time between 12:00 (720 minutes) and 18:00 (1080 minutes)
+					if(startTotalMinutes < 1080 && endTotalMinutes > 720) {
+						const adjustedStart = Math.max(startTotalMinutes, 720);
+						const adjustedEnd = Math.min(endTotalMinutes, 1080);
+						
+						// For ongoing sessions from today, further limit to current time
+						const actualEnd = (endTotalMinutes > currentMinutes && session.date === todayDate)
+							? Math.min(currentMinutes, 1080)
+							: adjustedEnd;
+							
+						totalMinutes += actualEnd - adjustedStart;
+					}
+				});
+
+				const hours = Math.floor(totalMinutes / 60);
+				const minutes = totalMinutes % 60;
+				return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
 			}
 		}
 		
@@ -618,7 +649,7 @@ const Home = () => {
 
 	const collectPoints = (challange, index) => {
 		console.log('colect')
-		axios.put('https://b99d-109-245-203-91.ngrok-free.app/collectDaily', {
+		axios.put('https://235e-109-245-203-91.ngrok-free.app/collectDaily', {
 			id: user._id,
 			points: challange.points,
 			index
@@ -634,7 +665,7 @@ const Home = () => {
 
 
 	const collectGeneralPoints = (challange) => {
-		axios.put('https://b99d-109-245-203-91.ngrok-free.app/collectGeneral', {
+		axios.put('https://235e-109-245-203-91.ngrok-free.app/collectGeneral', {
 			id: user._id,
 			points: challange.points,
 			type: challange.type
@@ -725,7 +756,7 @@ const Home = () => {
 	useEffect(() => {;
 		const email = user.email;
 
-		axios.post('https://b99d-109-245-203-91.ngrok-free.app/getUser', { email })
+		axios.post('https://235e-109-245-203-91.ngrok-free.app/getUser', { email })
 			.then(res => {
 				setIsLoading(false);
 				setUser(res.data);
@@ -793,7 +824,7 @@ const Home = () => {
 			setAlertPopupMessage('Please select a duration');
 			setAlertPopupType('info');
 		} else {
-			axios.put('https://b99d-109-245-203-91.ngrok-free.app/startSession', {
+			axios.put('https://235e-109-245-203-91.ngrok-free.app/startSession', {
 				sessionName,
 				selectedWork,
 				duration,
@@ -918,7 +949,7 @@ const Home = () => {
 
 
 	const endSession = () => {
-		axios.put('https://b99d-109-245-203-91.ngrok-free.app/endSession', {
+		axios.put('https://235e-109-245-203-91.ngrok-free.app/endSession', {
 			id: user._id,
 			sessionId: findCurrentSession().sessionId
 		})
@@ -1284,7 +1315,10 @@ const Home = () => {
 							</MaskedView>
 							<TouchableOpacity 
 								className="rounded-full self-start overflow-hidden"
-								onPress={() => collectPoints(point, index)}
+								onPress={() => {
+									Vibration.vibrate(50);
+									collectPoints(point, index);
+								}}
 								>
 								<LinearGradient
 									colors={['#0369A1', '#0EA5E9']}
