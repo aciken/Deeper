@@ -41,6 +41,10 @@ const Home = () => {
 	const [isAddTaskVisible, setIsAddTaskVisible] = useState(false);
 	const [newTaskText, setNewTaskText] = useState('');
 
+	const [isProfilePopupVisible, setIsProfilePopupVisible] = useState(false);
+
+	const [scaleAnim] = useState(new Animated.Value(1));
+
 	const findTaskById = (id) => {
 		return user.work.find(work => work._id === id)
 	}
@@ -389,7 +393,7 @@ const Home = () => {
 		const changeChallanges = () => {
 			if(user.points.pointsDate !== `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`) {
 				const date = `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`
-				axios.put('https://235e-109-245-203-91.ngrok-free.app/changeDaily', {
+				axios.put('https://160f-109-245-203-91.ngrok-free.app/changeDaily', {	
 					id: user._id,
 					date
 				})
@@ -649,7 +653,7 @@ const Home = () => {
 
 	const collectPoints = (challange, index) => {
 		console.log('colect')
-		axios.put('https://235e-109-245-203-91.ngrok-free.app/collectDaily', {
+		axios.put('https://160f-109-245-203-91.ngrok-free.app/collectDaily', {
 			id: user._id,
 			points: challange.points,
 			index
@@ -665,7 +669,7 @@ const Home = () => {
 
 
 	const collectGeneralPoints = (challange) => {
-		axios.put('https://235e-109-245-203-91.ngrok-free.app/collectGeneral', {
+		axios.put('https://160f-109-245-203-91.ngrok-free.app/collectGeneral', {
 			id: user._id,
 			points: challange.points,
 			type: challange.type
@@ -756,7 +760,7 @@ const Home = () => {
 	useEffect(() => {;
 		const email = user.email;
 
-		axios.post('https://235e-109-245-203-91.ngrok-free.app/getUser', { email })
+		axios.post('https://160f-109-245-203-91.ngrok-free.app/getUser', { email })
 			.then(res => {
 				setIsLoading(false);
 				setUser(res.data);
@@ -824,7 +828,7 @@ const Home = () => {
 			setAlertPopupMessage('Please select a duration');
 			setAlertPopupType('info');
 		} else {
-			axios.put('https://235e-109-245-203-91.ngrok-free.app/startSession', {
+			axios.put('https://160f-109-245-203-91.ngrok-free.app/startSession', {
 				sessionName,
 				selectedWork,
 				duration,
@@ -949,7 +953,7 @@ const Home = () => {
 
 
 	const endSession = () => {
-		axios.put('https://235e-109-245-203-91.ngrok-free.app/endSession', {
+		axios.put('https://160f-109-245-203-91.ngrok-free.app/endSession', {
 			id: user._id,
 			sessionId: findCurrentSession().sessionId
 		})
@@ -965,10 +969,25 @@ const Home = () => {
 		})
 	}
 
-	
+	useEffect(() => {
+		Animated.spring(scaleAnim, {
+			toValue: isProfilePopupVisible ? 0.95 : 1,
+			useNativeDriver: true,
+			friction: 8,
+			tension: 40
+		}).start();
+	}, [isProfilePopupVisible]);
+
 	return (
 		<SafeAreaView className="flex-1 bg-zinc-950" edges={['top']}>
-			<View className="flex-1">
+			<Animated.View 
+				className="flex-1" 
+				style={{
+					transform: [{ scale: scaleAnim }],
+					borderRadius: isProfilePopupVisible ? 20 : 0,
+					overflow: 'hidden'
+				}}
+			>
 				<ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
 				<AlertPopup
 					visible={alertPopupVisible}
@@ -977,8 +996,11 @@ const Home = () => {
 					onHide={() => setAlertPopupVisible(false)}
 				/>
 					{/* Logo and Welcome Section */}
-					<View className="flex-row items-center justify-start mt-2 mb-4 ml-4">
-							<Text className="text-white text-4xl font-bold">deeper</Text>
+					<View className="flex-row items-center justify-between mt-2 mb-4 mx-4">
+							<Text className="text-zinc-300 text-4xl font-bold">deeper</Text>
+							<TouchableOpacity onPress={() => setIsProfilePopupVisible(true)}>
+								<Image source={icons.settings} className="w-6 h-6 tint-zinc-300" />
+							</TouchableOpacity>
 					</View>
 
 					{/* New Iceberg Level Design Section */}
@@ -1237,7 +1259,7 @@ const Home = () => {
               </Animated.View>
             )}
           </View>
-			</View>
+			</Animated.View>
 			
 			<BottomPopup
 				visible={isChallengePopupVisible}
@@ -1666,6 +1688,17 @@ const Home = () => {
 							<Text className="text-white text-lg font-semibold">Add Task</Text>
 						</LinearGradient>
 					</TouchableOpacity>
+				</View>
+			</BottomPopup>
+
+			<BottomPopup
+				visible={isProfilePopupVisible}
+				onClose={() => setIsProfilePopupVisible(false)}
+				height={0.9}
+			>
+				<View className="p-4">
+					<Text className="text-white text-xl font-bold mb-4">Profile Settings</Text>
+					{/* Add your profile settings components here */}
 				</View>
 			</BottomPopup>
 		</SafeAreaView>

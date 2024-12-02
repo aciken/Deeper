@@ -63,15 +63,6 @@ const TabsLayout = () => {
           )
         }}
       />
-      <Tabs.Screen name="Profile"
-        options={{
-          title: 'Profile',
-          headerShown: false,
-          tabBarIcon: ({color}) => (
-            <TabIcon icon={icons.profile} color={color} name='Profile'/>
-          )
-        }}
-      />
     </Tabs>
   );
 };

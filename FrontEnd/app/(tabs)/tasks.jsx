@@ -72,6 +72,8 @@ const Tasks = () => {
   const [timeInSeconds, setTimeInSeconds] = useState(0);
 
   const [isSessionPageVisible, setIsSessionPageVisible] = useState(false);
+  const [isDayPopupVisible, setIsDayPopupVisible] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
 
   const [selectedTab, setSelectedTab] = useState('stats');
 
@@ -258,8 +260,8 @@ const Tasks = () => {
       const currentDate = new Date(monday);
       currentDate.setDate(monday.getDate() + i);
       
-      const dd = String(currentDate.getDate()).padStart(2, '0');
-      const mm = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const dd = currentDate.getDate();
+      const mm = currentDate.getMonth() + 1;
       const yyyy = currentDate.getFullYear();
       
       const dateString = `${dd}:${mm}:${yyyy}`;
@@ -428,7 +430,7 @@ const getGoalWork = () => {
 
 
 const submitNewWork = () => {
-    axios.put('https://235e-109-245-203-91.ngrok-free.app/addJob', {
+    axios.put('https://160f-109-245-203-91.ngrok-free.app/addJob', {
     newWork,
     id: user._id,
   }).then(res => {
@@ -444,7 +446,7 @@ const submitNewWork = () => {
 }
 
 const submitEditWork = () => {
-  axios.put('https://235e-109-245-203-91.ngrok-free.app/editJob', {
+  axios.put('https://160f-109-245-203-91.ngrok-free.app/editJob', {
   editWork,
   index: editIndex,
   id: user._id,
@@ -465,7 +467,7 @@ const submitEditWork = () => {
 
 const submitDeleteWork = () => {
   if(user.work.length !== 1){
-    axios.put('https://235e-109-245-203-91.ngrok-free.app/deleteJob', {
+    axios.put('https://160f-109-245-203-91.ngrok-free.app/deleteJob', {
     index: editIndex,
     id: user._id,
   }).then(res => {
@@ -665,6 +667,9 @@ const formatTime = (seconds) => {
             <View className="flex flex-col justify-between bg-zinc-900/50 rounded-xl p-4 border border-zinc-700/50 mb-6">
               <View className="flex flex-row justify-between pb-4">
                 <Text className="text-lg text-white font-psemibold">Work Activity</Text>
+                {/* <TouchableOpacity className="flex-row justify-center items-center rounded-full bg-zinc-800 p-1 border border-zinc-700 shadow-lg shadow-black/50" onPress={() => setIsWorkActivityPopupVisible(true)}>
+                  <Image source={icons.fullScreen} className="w-6 h-6 tint-white" />
+                </TouchableOpacity> */}
 
               </View>
               <View className="flex flex-row justify-between py-2">
@@ -734,7 +739,12 @@ const formatTime = (seconds) => {
               </View>
 
               <View className="flex flex-row justify-between pt-2">
-                <TouchableOpacity className="flex flex-col items-center justify-center">
+                <TouchableOpacity className="flex flex-col items-center justify-center"
+                onPress={() => {
+                  setIsDayPopupVisible(true)
+                  setSelectedDate(getWeekDates().monday)
+                }}
+                >
                   <Text className="font-pmedium text-sm text-white mb-2">M</Text>
                   <LinearGradient
             colors={workColors(getWeekDates().monday)}
@@ -746,7 +756,12 @@ const formatTime = (seconds) => {
                 </LinearGradient>
 
                 </TouchableOpacity>
-                <TouchableOpacity className="flex flex-col items-center justify-center">
+                <TouchableOpacity className="flex flex-col items-center justify-center"
+                onPress={() => {
+                  setIsDayPopupVisible(true)
+                  setSelectedDate(getWeekDates().tuesday)
+                }}
+                >
                   <Text className="font-pmedium text-sm text-zinc-700 mb-2">T</Text>
                   <LinearGradient
             colors={workColors(getWeekDates().tuesday)}
@@ -757,7 +772,12 @@ const formatTime = (seconds) => {
                 <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().tuesday).length || ''}</Text>
                 </LinearGradient>
                 </TouchableOpacity>
-                <TouchableOpacity className="flex flex-col items-center justify-center">
+                <TouchableOpacity className="flex flex-col items-center justify-center"
+                onPress={() => {
+                  setIsDayPopupVisible(true)
+                  setSelectedDate(getWeekDates().wednesday)
+                }}
+                >
                   <Text className="font-pmedium text-sm text-zinc-700 mb-2">W</Text>
                   <LinearGradient
             colors={workColors(getWeekDates().wednesday)}
@@ -768,7 +788,12 @@ const formatTime = (seconds) => {
                 <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().wednesday).length || ''}</Text>
                 </LinearGradient>
                 </TouchableOpacity>
-                <TouchableOpacity className="flex flex-col items-center justify-center">
+                <TouchableOpacity className="flex flex-col items-center justify-center"
+                onPress={() => {
+                  setIsDayPopupVisible(true)
+                  setSelectedDate(getWeekDates().thursday)
+                }}
+                >
                   <Text className="font-pmedium text-sm text-zinc-700 mb-2">T</Text>
                   <LinearGradient
             colors={workColors(getWeekDates().thursday)}
@@ -779,7 +804,12 @@ const formatTime = (seconds) => {
                 <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().thursday).length || ''}</Text>
                 </LinearGradient>
                 </TouchableOpacity>
-                <TouchableOpacity className="flex flex-col items-center justify-center">
+                <TouchableOpacity className="flex flex-col items-center justify-center"
+                onPress={() => {
+                  setIsDayPopupVisible(true)
+                  setSelectedDate(getWeekDates().friday)
+                }}
+                >
                   <Text className="font-pmedium text-sm text-zinc-700 mb-2">F</Text>
                   <LinearGradient
             colors={workColors(getWeekDates().friday)}
@@ -790,7 +820,12 @@ const formatTime = (seconds) => {
                 <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().friday).length || ''}</Text>
                 </LinearGradient>
                 </TouchableOpacity>
-                <TouchableOpacity className="flex flex-col items-center justify-center">
+                <TouchableOpacity className="flex flex-col items-center justify-center"
+                onPress={() => {
+                  setIsDayPopupVisible(true)
+                  setSelectedDate(getWeekDates().saturday)
+                }}
+                >
                   <Text className="font-pmedium text-sm text-zinc-700 mb-2">S</Text>
                   <LinearGradient
             colors={workColors(getWeekDates().saturday)}
@@ -801,7 +836,12 @@ const formatTime = (seconds) => {
                 <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().saturday).length || ''}</Text>
                 </LinearGradient>
                 </TouchableOpacity>
-                <TouchableOpacity className="flex flex-col items-center justify-center">
+                <TouchableOpacity className="flex flex-col items-center justify-center"
+                onPress={() => {
+                  setIsDayPopupVisible(true)
+                  setSelectedDate(getWeekDates().sunday)
+                }}
+                >
                   <Text className="font-pmedium text-sm text-zinc-700 mb-2">S</Text>
                   <LinearGradient
             colors={workColors(getWeekDates().sunday)}
@@ -1025,7 +1065,6 @@ const formatTime = (seconds) => {
           <Text className="text-white text-xl">+</Text>
         </TouchableOpacity>
       </View>
-      <Text className="text-gray-500 text-sm mt-2 text-center">overall work per day left: 37h 30m</Text>
     </View>
     
     <View className="flex-1" />
@@ -1197,9 +1236,6 @@ const formatTime = (seconds) => {
               <TouchableOpacity onPress={() => setSelectedTab('sessions')}>
                 <Text className={`text-zinc-700 text-lg font-medium ${selectedTab === 'sessions' ? 'text-white underline' : 'text-zinc-600'}`}>Sessions</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setSelectedTab('tasks')}>
-                <Text className={`text-zinc-700 text-lg font-medium ${selectedTab === 'tasks' ? 'text-white underline' : 'text-zinc-600'}`}>Tasks</Text>
-              </TouchableOpacity>
               <TouchableOpacity onPress={() => setSelectedTab('edit')}>
                 <Text className={`text-zinc-700 text-lg font-medium ${selectedTab === 'edit' ? 'text-white underline' : 'text-zinc-600'}`}>Edit</Text>
               </TouchableOpacity>
@@ -1349,6 +1385,116 @@ const formatTime = (seconds) => {
               </View>
             )}
 
+            {selectedTab === 'edit' && (
+  <View className="p-2 bg-zinc-900 rounded-t-3xl flex-1">
+  <View className="mb-4">
+    <Text className="text-gray-400 text-sm mb-2">Work Name</Text>
+    <TextInput
+      className="bg-zinc-800 text-white p-3 rounded-xl"
+      placeholder="Work Name"
+      placeholderTextColor="#71717A" 
+      value={editWork.name}
+      onChangeText={(text) => setEditWork({...editWork, name: text})}
+    />
+  </View>
+  
+  <View className="mb-4">
+    <Text className="text-gray-400 text-sm mb-2">Choose color:</Text>
+    <View className="flex-row justify-between">
+      {/* {['#DC2626', '#16A34A', '#2563EB', '#9333EA', '#CA8A04', '#0EA5E9', '#EC4899'].map((color, index) => (
+        <TouchableOpacity
+          key={index}
+          style={{ backgroundColor: color }}
+          className="w-8 h-8 rounded-full"
+        />
+      ))} */}
+      {ballColors.map((color, index) => (
+        <TouchableOpacity
+          key={index}
+          style={{ backgroundColor: color }}
+          className={`w-8 h-8 rounded-full `}
+          onPress={() => {
+            if (!works.some(work => work.colors[0] === color[0] && work.colors[1] === color[1]) || (initialEditWork.colors[0] === color[0] && initialEditWork.colors[1] === color[1])) {
+              setEditWork({...editWork, colors: color});
+            }
+          }}
+        >
+          <LinearGradient
+            colors={color}
+            start={{x: 0, y: 0}}
+            end={{x: 1, y: 1}}
+            className={`w-8 h-8 rounded-full ${works.some(work => work.colors[0] === color[0] && work.colors[1] === color[1]) && (initialEditWork.colors[0] !== color[0] && initialEditWork.colors[1] !== color[1]) ? 'opacity-20' : ''} ${editWork.colors[0] === color[0] && editWork.colors[1] === color[1] ? 'border-2 border-white' : ''}`}
+          >
+          </LinearGradient>
+        </TouchableOpacity>
+      ))}
+    </View>
+
+  </View>
+  
+  <View className="mb-4">
+    <Text className="text-gray-400 text-sm mb-2">Targeted work per day:</Text>
+    <View className="flex-row items-center justify-between bg-zinc-800 rounded-xl p-2">
+      <TouchableOpacity 
+      onPress={() => {
+        if (editWork.currentTime.includes('m')) { 
+          setEditWork({...editWork, currentTime: parseInt(editWork.currentTime.replace('h', '')) + 'h'})
+        } else {
+          setEditWork({...editWork, currentTime: parseInt(editWork.currentTime.replace('h', '')) - 1 + 'h 30m'})
+        }
+      }}
+      className="bg-zinc-700 w-10 h-10 rounded-full items-center justify-center">
+        <Text className="text-white text-xl">-</Text>
+      </TouchableOpacity>
+      <Text className="text-white text-2xl font-bold">{editWork.currentTime}</Text>
+      <TouchableOpacity 
+      onPress={() => {
+        if (editWork.currentTime.includes('m')) {
+          setEditWork({...editWork, currentTime: parseInt(editWork.currentTime.replace('h', '')) + 1 + 'h'})
+        } else {
+          setEditWork({...editWork, currentTime: parseInt(editWork.currentTime.replace('h', '')) + 'h 30m'})
+        }
+      }}
+      className="bg-zinc-700 w-10 h-10 rounded-full items-center justify-center">
+        <Text className="text-white text-xl">+</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+  
+  <View className="flex-1" />
+  
+  <View className="flex-row justify-between">
+    <TouchableOpacity 
+      onPress={submitEditWork}
+      className="flex-1 mr-2"
+    >
+      <LinearGradient
+        colors={['#0ea5e9', '#60a5fa']}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 1}}
+        className="rounded-full py-4 items-center"
+      >
+        <Text className="text-white text-lg font-semibold">Edit Work</Text>
+      </LinearGradient>
+    </TouchableOpacity>
+    <TouchableOpacity 
+      onPress={submitDeleteWork}
+
+      className=" w-14 h-14 rounded-full items-center justify-center"
+    >
+      <LinearGradient
+        colors={['#DC2626', '#761414']}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 1}}
+        className="w-14 h-14 rounded-full items-center justify-center"
+      >
+        <Image source={icons.trash} className="w-6 h-6 tint-white" />
+      </LinearGradient>
+    </TouchableOpacity>
+  </View>
+</View> 
+            )}
+
 
           </View>
         </ScrollView>
@@ -1429,6 +1575,46 @@ const formatTime = (seconds) => {
           )}
         </View>
       </BottomPopup>
+      <BottomPopup
+        visible={isDayPopupVisible}
+        onClose={() => setIsDayPopupVisible(false)}
+        height={0.9}
+      >
+        <View className="flex-1 bg-zinc-900 p-6">
+          <View className="flex-row justify-between items-center mb-6">
+            <Text className="text-white text-2xl font-bold">Sessions</Text>
+            <Text className="text-zinc-500 text-lg font-medium">{selectedDate}</Text>
+          </View>
+          <ScrollView className="flex-1">
+            {user.workSessions
+              .filter(session => session.date === selectedDate)
+              .map((session, index) => (
+                <View 
+                  key={session.sessionId} 
+                  className="bg-zinc-800/70 rounded-xl p-4 mb-3 border border-zinc-700/50"
+                >
+                  <View className="flex-row justify-between items-center mb-2">
+                    <View className="flex-row items-center">
+                      <View 
+                        className="w-1 h-10 rounded-full mr-3"
+                        style={{backgroundColor: findTaskById(session.workId).colors[0]}}
+                      />
+                      <Text className="text-white text-lg font-medium">{session.name}</Text>
+                    </View>
+                    <Text className="text-zinc-400">
+                      {session.startTime} - {session.endTime}
+                    </Text>
+                  </View>
+                  <Text className="text-zinc-500 text-sm ml-4">
+                    {findTaskById(session.workId).name}
+                  </Text>
+                </View>
+              ))}
+          </ScrollView>
+        </View>
+      </BottomPopup>
+
+
 
       </SafeAreaView>
   )

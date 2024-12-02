@@ -32,6 +32,8 @@ import cancel from "../assets/icons/close-custom.png";
 import check from "../assets/icons/check.png";
 import save from "../assets/icons/content-save.png";
 import restart from "../assets/icons/restart.png";
+import fullScreen from "../assets/icons/fullscreen.png";
+import settings from "../assets/icons/settings.png";
 
 export default {
   play,
@@ -68,4 +70,6 @@ export default {
   check,
   save,
   restart,
+  fullScreen,
+  settings,
 };
