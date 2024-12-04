@@ -13,7 +13,7 @@ const FormField = ({containerStyles,title, placeholder, value,handleTextChange})
         {title}
       </Text>
 
-      <View className="w-full h-16 px-4 border-2 border-gray-900 bg-gray-800 rounded-lg focus:border-sky-200 items-center flex-row">
+      <View className="w-full h-14 px-4 border-2 border-zinc-800 bg-zinc-800 rounded-lg focus:border-zinc-400 items-center flex-row">
         <TextInput
             className="flex-1 text-white  text-base"
             value={value}

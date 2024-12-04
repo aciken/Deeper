@@ -27,14 +27,14 @@ const signup = () => {
   useEffect(() => {
     if (loginSuccess) {
       setIsLoading(false);
-      router.push('/Home'); 
+      router.push('/onboardingGender'); 
     }
   }, [loginSuccess]);
 
   const submit = () => {
     const {name, email, password} = form
       setIsSubmiting(true)
-      axios.put('https://160f-109-245-203-91.ngrok-free.app/signup', {
+      axios.put('https://0faa-109-245-203-91.ngrok-free.app/signup', {
       name, 
       email,
       password
@@ -44,7 +44,7 @@ const signup = () => {
         setUser(res.data);
         setIsLogged(true)
         setLoginSuccess(true)
-        router.push('/Home')
+        router.push('/onboardingGender')
       } else {
         Alert.alert('User already exist')  
       }
@@ -59,7 +59,7 @@ const signup = () => {
 
 
   return (
-    <SafeAreaView className="bg-gray-950 h-full">
+    <SafeAreaView className="bg-zinc-950 h-full">
     <ScrollView contentContainerStyle={{ height: '100%' }}>
       <View className="w-full h-full justify-center items-start relative px-4">
         <ClickableIcon

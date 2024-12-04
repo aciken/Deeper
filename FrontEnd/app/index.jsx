@@ -90,7 +90,7 @@ const index = () => {
 //   }
 
   return (
-    <SafeAreaView className="bg-gray-950 h-full">
+    <SafeAreaView className="bg-zinc-950 h-full">
     <ScrollView contentContainerStyle={{ height: '100%' }}>
       <View className="w-full justify-around items-center h-full px-4 flex-col my-10">
         <View className="w-full flex-col justify-center items-center mb-10">
@@ -98,7 +98,7 @@ const index = () => {
           <Text className="text-white text-lg font-pregular mt-8">Create Account to Continue</Text>
           <Button
             title="Continue with Email"
-            handlePress={() => router.push('/sign-up')}
+            handlePress={() => router.push('/onboardingGender')}
             containerStyles="w-full mt-7"
           />
           <ImageButton

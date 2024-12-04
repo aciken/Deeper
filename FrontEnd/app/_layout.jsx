@@ -47,6 +47,7 @@ const RootLayout = () => {
         <Stack.Screen name='index' options={{ headerShown: false }} />
         <Stack.Screen name='(auth)' options={{ headerShown: false }} />
         <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+        <Stack.Screen name='(onboarding)' options={{ headerShown: false }} />
         {/* <Stack.Screen name='(log)' options={{headerShown: false}}/> */}
         <Stack.Screen name='log/setTask' options={{ headerShown: false }} />
         <Stack.Screen name='log/SomeComponent' options={{ headerShown: false }} />

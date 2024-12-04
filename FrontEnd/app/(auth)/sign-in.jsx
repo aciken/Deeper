@@ -58,7 +58,7 @@ const signin = () => {
 
     setIsSubmiting(true)
     
-    axios.post('https://160f-109-245-203-91.ngrok-free.app/login', {
+    axios.post('https://0faa-109-245-203-91.ngrok-free.app/login', {
       email,
       password
     }).then(res => {
@@ -86,7 +86,7 @@ const signin = () => {
 
 
   return (
-    <SafeAreaView className="bg-gray-950 h-full">
+    <SafeAreaView className="bg-zinc-950 h-full">
     <ScrollView contentContainerStyle={{ height: '100%' }}>
       <View className="w-full h-full justify-center items-start relative px-4">
         <ClickableIcon
