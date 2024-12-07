@@ -34,7 +34,7 @@ const signup = () => {
   const submit = () => {
     const {name, email, password} = form
       setIsSubmiting(true)
-      axios.put('https://0faa-109-245-203-91.ngrok-free.app/signup', {
+      axios.put('https://295f-109-245-203-91.ngrok-free.app/signup', {
       name, 
       email,
       password

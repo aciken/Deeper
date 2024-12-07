@@ -54,7 +54,7 @@ const OnboardingStopping = () => {
         <TouchableOpacity
           onPress={() => {
             if (selectedReason) {
-              router.push('/next-screen');
+              router.push('/onboardingWork');
             }
           }}
           className={`w-full h-14 rounded-full items-center justify-center mb-4

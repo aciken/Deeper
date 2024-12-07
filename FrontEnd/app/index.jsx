@@ -98,7 +98,7 @@ const index = () => {
           <Text className="text-white text-lg font-pregular mt-8">Create Account to Continue</Text>
           <Button
             title="Continue with Email"
-            handlePress={() => router.push('/onboardingGender')}
+            handlePress={() => router.push('/sign-up')}
             containerStyles="w-full mt-7"
           />
           <ImageButton

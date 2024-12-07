@@ -14,6 +14,11 @@ const OnboardingLayout = () => {
         <Stack.Screen name='onboardingDeeptime' options={{ headerShown: false }} />
         <Stack.Screen name='onboardingProductive' options={{ headerShown: false }} />
         <Stack.Screen name='onboardingStopping' options={{ headerShown: false }} />
+        <Stack.Screen name='onboardingWork' options={{ headerShown: false }} />
+        <Stack.Screen name='onboardingWorktime' options={{ headerShown: false }} /> 
+        <Stack.Screen name='onboardingSettingup' options={{ headerShown: false }} />
+        <Stack.Screen name='onboardingResults' options={{ headerShown: false }} />
+        <Stack.Screen name='onboardingPotential' options={{ headerShown: false }} />
       </Stack>
     </View>
   )
