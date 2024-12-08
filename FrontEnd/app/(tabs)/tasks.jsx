@@ -418,6 +418,8 @@ const workToday = (job) => {
 
 
 const getGoalWork = () => {
+  if (!user.work || user.work.length === 0) return '0h';
+  
   const totalMinutes = user.work.reduce((acc, workSession) => {
     const [hours, minutes] = workSession.currentTime.split(' ').map(t => parseInt(t));
     return acc + (hours * 60) + (isNaN(minutes) ? 0 : minutes);
@@ -430,7 +432,7 @@ const getGoalWork = () => {
 
 
 const submitNewWork = () => {
-    axios.put('https://295f-109-245-203-91.ngrok-free.app/addJob', {
+    axios.put('https://b3ef-109-245-203-91.ngrok-free.app/addJob', {
     newWork,
     id: user._id,
   }).then(res => {
@@ -446,7 +448,7 @@ const submitNewWork = () => {
 }
 
 const submitEditWork = () => {
-  axios.put('https://295f-109-245-203-91.ngrok-free.app/editJob', {
+  axios.put('https://b3ef-109-245-203-91.ngrok-free.app/editJob', {
   editWork,
   index: editIndex,
   id: user._id,
@@ -467,7 +469,7 @@ const submitEditWork = () => {
 
 const submitDeleteWork = () => {
   if(user.work.length !== 1){
-    axios.put('https://295f-109-245-203-91.ngrok-free.app/deleteJob', {
+    axios.put('https://b3ef-109-245-203-91.ngrok-free.app/deleteJob', {
     index: editIndex,
     id: user._id,
   }).then(res => {
@@ -727,7 +729,10 @@ const formatTime = (seconds) => {
                     });
 
                     // Find workId with maximum time
-                    const maxWorkId = Object.entries(workTimes).reduce((a, b) => 
+                    const entries = Object.entries(workTimes);
+                    if (entries.length === 0) return "No projects";
+                    
+                    const maxWorkId = entries.reduce((a, b) => 
                       b[1] > a[1] ? b : a
                     )[0];
 

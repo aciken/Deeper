@@ -396,7 +396,7 @@ const Home = () => {
 		const changeChallanges = () => {
 			if(user.points.pointsDate !== `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`) {
 				const date = `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`
-				axios.put('https://295f-109-245-203-91.ngrok-free.app/changeDaily', {	
+				axios.put('https://b3ef-109-245-203-91.ngrok-free.app/changeDaily', {	
 					id: user._id,
 					date
 				})
@@ -656,7 +656,7 @@ const Home = () => {
 
 	const collectPoints = (challange, index) => {
 		console.log('colect')
-		axios.put('https://295f-109-245-203-91.ngrok-free.app/collectDaily', {
+		axios.put('https://b3ef-109-245-203-91.ngrok-free.app/collectDaily', {
 			id: user._id,
 			points: challange.points,
 			index
@@ -672,7 +672,7 @@ const Home = () => {
 
 
 	const collectGeneralPoints = (challange) => {
-		axios.put('https://295f-109-245-203-91.ngrok-free.app/collectGeneral', {
+		axios.put('https://b3ef-109-245-203-91.ngrok-free.app/collectGeneral', {
 			id: user._id,
 			points: challange.points,
 			type: challange.type
@@ -763,7 +763,7 @@ const Home = () => {
 	useEffect(() => {;
 		const email = user.email;
 
-		axios.post('https://295f-109-245-203-91.ngrok-free.app/getUser', { email })
+		axios.post('https://b3ef-109-245-203-91.ngrok-free.app/getUser', { email })
 			.then(res => {
 				setIsLoading(false);
 				setUser(res.data);
@@ -831,7 +831,7 @@ const Home = () => {
 			setAlertPopupMessage('Please select a duration');
 			setAlertPopupType('info');
 		} else {
-			axios.put('https://295f-109-245-203-91.ngrok-free.app/startSession', {	
+			axios.put('https://b3ef-109-245-203-91.ngrok-free.app/startSession', {	
 				sessionName,
 				selectedWork,
 				duration,
@@ -956,7 +956,7 @@ const Home = () => {
 
 
 	const endSession = () => {
-		axios.put('https://295f-109-245-203-91.ngrok-free.app/endSession', {
+		axios.put('https://b3ef-109-245-203-91.ngrok-free.app/endSession', {
 			id: user._id,
 			sessionId: findCurrentSession().sessionId
 		})
@@ -1267,148 +1267,255 @@ const Home = () => {
 			<BottomPopup
 				visible={isChallengePopupVisible}
 				onClose={() => setIsChallengePopupVisible(false)}
-				height={0.65}
+				height={0.85}
 			>
-				<View className="p-2 bg-zinc-900 rounded-t-3xl">
-				<MaskedView
-								maskElement={
-									<Text className="text-white text-3xl font-bold mb-6 text-center">Work Depth</Text>
-								}
-							>
+				<View className="bg-zinc-900 rounded-t-3xl flex-1">
+					<View className="p-6 border-b border-zinc-800">
+						<MaskedView
+							maskElement={
+								<Text className="text-3xl font-bold text-center">Work Depth</Text>
+							}
+						>
 							<LinearGradient
 								colors={['#D4D4D8', '#71717A']}
 								start={{x: 0, y: 0}}
 								end={{x: 1, y: 1}}
 							>
-							<Text className="text-white text-3xl font-bold mb-6 text-center opacity-0">Work Depth</Text>
+								<Text className="text-3xl font-bold text-center opacity-0">Work Depth</Text>
 							</LinearGradient>
 						</MaskedView>
-
-					
-					<View className="mb-6">
-						<View className="flex-row justify-between items-center mb-2">
-							<Text className="text-sky-400 text-lg font-semibold">{user.points.current}%</Text>
-						</View>
-						<View className="bg-zinc-800 h-2 rounded-full">
-							<LinearGradient
-								colors={['#38BDF8', '#216F92']}
-								start={{x: 0, y: 0}}
-								end={{x: 1, y: 0}}
-								className="h-2 rounded-full"
-								style={{ width: `${user.points.current}%` }}
-							>
-								<View className="bg-sky-400 h-2 rounded-full" style={{ width: `${user.points.current}%` }} />
-							</LinearGradient>
-						</View>
 					</View>
 
-					<View className="mb-6">
-						<Text className="text-white text-xl font-semibold mb-4">Daily Points</Text>
-						{currentPoints.daily.length === 0 || currentPoints.daily.every((_,index) => user.points.dailyDone.includes(index)) ? (
-							<View className="py-6 px-4 bg-zinc-800/50 rounded-2xl">
-								<MaskedView
-									maskElement={
-										<Text className="text-xl font-semibold text-center">All Challenges Complete!</Text>
-									}
-								>
-									<LinearGradient
-										colors={['#0EA5E9', '#0369A1']}
-										start={{x: 0, y: 0}}
-										end={{x: 1, y: 0}}
-									>
-										<Text className="text-xl font-semibold text-center opacity-0">All Challenges Complete!</Text>
-									</LinearGradient>
-								</MaskedView>
-								<Text className="text-zinc-400 text-center mt-2">Check back tomorrow for new challenges</Text>
+					<ScrollView 
+						className="flex-1 px-6" 
+						contentContainerStyle={{ paddingTop: 24, paddingBottom: 24 }}
+						showsVerticalScrollIndicator={false}
+					>
+
+						{/* <View className="mb-8">
+							<View className="bg-gradient-to-br from-sky-500/10 to-sky-900/10 rounded-2xl border border-sky-500/20 p-4">
+								<View className="flex-row justify-between items-center mb-4">
+									<Text className="text-white text-lg font-semibold">Specialized Tasks</Text>
+									<View className="bg-sky-500/20 px-3 py-1 rounded-full">
+										<Text className="text-sky-400 font-medium">New</Text>
+									</View>
+								</View>
+
+								<View className="bg-zinc-900/50 rounded-xl p-4 mb-4">
+									<Text className="text-zinc-300 font-medium mb-3">Based on your responses:</Text>
+									<View className="space-y-4">
+
+										<View className="space-y-2">
+											<View className="flex-row items-center">
+												<View className="w-8 h-8 rounded-full bg-sky-500/20 items-center justify-center mr-3">
+													<Image source={icons.clockGray} className="w-4 h-4 tint-sky-400" />
+												</View>
+												<Text className="text-zinc-300 font-medium">10-40 hours per week</Text>
+											</View>
+											<View className="ml-11">
+												<Text className="text-zinc-400">Focus on establishing a consistent work routine with medium-length sessions</Text>
+											</View>
+										</View>
+
+
+										<View className="space-y-2">
+											<View className="flex-row items-center">
+												<View className="w-8 h-8 rounded-full bg-sky-500/20 items-center justify-center mr-3">
+													<Image source={icons.warning} className="w-4 h-4 tint-sky-400" />
+												</View>
+												<Text className="text-zinc-300 font-medium">Main challenges</Text>
+											</View>
+											<View className="ml-11 space-y-2">
+												<View className="flex-row items-center">
+													<View className="w-2 h-2 rounded-full bg-sky-500 mr-2" />
+													<Text className="text-zinc-400">Lack of motivation</Text>
+												</View>
+												<View className="flex-row items-center">
+													<View className="w-2 h-2 rounded-full bg-sky-500 mr-2" />
+													<Text className="text-zinc-400">Distractions</Text>
+												</View>
+											</View>
+										</View>
+									</View>
+								</View>
+
+								<View className="space-y-3">
+									<TouchableOpacity className="bg-sky-500/20 rounded-xl p-4 flex-row items-center justify-between">
+										<View className="flex-row items-center flex-1 mr-3">
+											<View className="w-8 h-8 rounded-full bg-sky-500/20 items-center justify-center mr-3">
+												<Image source={icons.target} className="w-4 h-4 tint-sky-400" />
+											</View>
+											<View>
+												<Text className="text-sky-400 font-medium">Set up Focus Sessions</Text>
+												<Text className="text-zinc-400 text-sm">Create distraction-free work periods</Text>
+											</View>
+										</View>
+										<Image source={icons.chevronRight} className="w-4 h-4 tint-sky-400" />
+									</TouchableOpacity>
+
+									<TouchableOpacity className="bg-sky-500/20 rounded-xl p-4 flex-row items-center justify-between">
+										<View className="flex-row items-center flex-1 mr-3">
+											<View className="w-8 h-8 rounded-full bg-sky-500/20 items-center justify-center mr-3">
+												<Image source={icons.calendar} className="w-4 h-4 tint-sky-400" />
+											</View>
+											<View>
+												<Text className="text-sky-400 font-medium">Build Daily Routine</Text>
+												<Text className="text-zinc-400 text-sm">Schedule consistent work blocks</Text>
+											</View>
+										</View>
+										<Image source={icons.chevronRight} className="w-4 h-4 tint-sky-400" />
+									</TouchableOpacity>
+
+									<TouchableOpacity className="bg-sky-500/20 rounded-xl p-4 flex-row items-center justify-between">
+										<View className="flex-row items-center flex-1 mr-3">
+											<View className="w-8 h-8 rounded-full bg-sky-500/20 items-center justify-center mr-3">
+												<Image source={icons.trophy} className="w-4 h-4 tint-sky-400" />
+											</View>
+											<View>
+												<Text className="text-sky-400 font-medium">Track Progress</Text>
+												<Text className="text-zinc-400 text-sm">Set achievable milestones</Text>
+											</View>
+										</View>
+										<Image source={icons.chevronRight} className="w-4 h-4 tint-sky-400" />
+									</TouchableOpacity>
+								</View>
 							</View>
-						) : (
-							currentPoints.daily.map((point, index) => (
-								!user.points.dailyDone.includes(index) && parseInt(challangeDone(point, 'daily')?.split('h')[0]) >= point.goal ? (
-								<View key={index} className="mb-3 flex flex-row justify-between items-center">
-								<MaskedView
-									maskElement={
-										<Text className="text-zinc-400 font-pmedium">{point.description} <Text className="text-zinc-200">/ {challangeDone(point, 'daily')}</Text></Text>
-									}
-								>
+						</View> */}
+
+						{/* Progress Section */}
+						<View className="mb-8">
+							<View className="flex-row justify-between items-center mb-3">
+								<Text className="text-zinc-400 text-base font-medium">Current Progress</Text>
+								<View className="bg-sky-500/10 px-3 py-1 rounded-full">
+									<Text className="text-sky-400 font-semibold">{user.points.current}%</Text>
+								</View>
+							</View>
+							<View className="bg-zinc-800/50 h-3 rounded-full overflow-hidden border border-zinc-700/50">
 								<LinearGradient
-									colors={['#0369A1', '#0EA5E9']}
+									colors={['#38BDF8', '#216F92']}
 									start={{x: 0, y: 0}}
 									end={{x: 1, y: 0}}
-								>
-									<Text className="text-zinc-400 font-pmedium opacity-0">{point.description} <Text className="text-zinc-200">/ {challangeDone(point, 'daily')}</Text></Text>
-								</LinearGradient>
-							</MaskedView>
-							<TouchableOpacity 
-								className="rounded-full self-start overflow-hidden"
-								onPress={() => {
-									Vibration.vibrate(50);
-									collectPoints(point, index);
-								}}
-								>
-								<LinearGradient
-									colors={['#0369A1', '#0EA5E9']}
-									start={{x: 1, y: 1}}
-									end={{x: 0, y: 0}}
-									className="py-2 px-4"
-								>
-									<Text className="text-white font-semibold">collect {point.points}%</Text>
-								</LinearGradient>
-							</TouchableOpacity>
+									className="h-full rounded-full"
+									style={{ width: `${user.points.current}%` }}
+								/>
+							</View>
 						</View>
-								) : !user.points.dailyDone.includes(index) ? (
-								<View key={index} className="mb-3 flex flex-row justify-between items-center">
-									<Text className="text-zinc-400">{point.description} <Text className="text-zinc-200">/ {challangeDone(point, 'daily')}</Text></Text>
-								<TouchableOpacity className="bg-zinc-800 py-2 px-4 rounded-full self-start">
-									<Text className="text-zinc-400">collect {point.points}%</Text>
-								</TouchableOpacity>
-							</View>
-								) : null
-							))
-						)}
-					</View>
 
-					<View>
-						<Text className="text-white text-xl font-semibold mb-4">General Points</Text>
-						{currentPoints.general.map((point, index) => (
-							parseInt(challangeDone(point, 'general')?.split('h')[0]) >= point.goal ? (
-							<View key={index} className="mb-3 flex flex-row justify-between items-center">
-							<MaskedView
-								maskElement={
-									<Text className="text-zinc-400 font-pmedium">{point.description} <Text className="text-zinc-200">/ {challangeDone(point, 'general')}</Text></Text>
-								}
-							>
-							<LinearGradient
-								colors={['#0369A1', '#0EA5E9']}
-								start={{x: 0, y: 0}}
-								end={{x: 1, y: 0}}
-							>
-								<Text className="text-zinc-400 font-pmedium opacity-0">{point.description} <Text className="text-zinc-200">/ {challangeDone(point, 'general')}</Text></Text>
-							</LinearGradient>
-						</MaskedView>
-						<TouchableOpacity className="rounded-full self-start overflow-hidden"
-							onPress={() => collectGeneralPoints(point)}
-						>
-							<LinearGradient
-								colors={['#0369A1', '#0EA5E9']}
-								start={{x: 1, y: 1}}
-								end={{x: 0, y: 0}}
-								className="py-2 px-4"
-							>
-								<Text className="text-white font-semibold">collect {point.points}%</Text>
-							</LinearGradient>
-						</TouchableOpacity>
-					</View>
-							) :
-						(
-						<View key={index} className="mb-3 flex flex-row justify-between items-center">
-								<Text className="text-zinc-400">{point.description} <Text className="text-zinc-200">/ {challangeDone(point, 'general')}</Text></Text>
-							<TouchableOpacity className="bg-zinc-800 py-2 px-4 rounded-full self-start">
-								<Text className="text-zinc-400">collect {point.points}%</Text>
-							</TouchableOpacity>
+						{/* Daily Points Section */}
+						<View className="mb-8">
+							<Text className="text-white text-xl font-semibold mb-4">Daily Points</Text>
+							{currentPoints.daily.length === 0 || currentPoints.daily.every((_,index) => user.points.dailyDone.includes(index)) ? (
+								<View className="py-8 px-6 bg-zinc-800/30 rounded-2xl border border-zinc-700/30">
+									<View className="items-center">
+										<View className="w-12 h-12 bg-sky-500/10 rounded-full items-center justify-center mb-3">
+											<Image source={icons.check} className="w-6 h-6 tint-sky-400" />
+										</View>
+										<MaskedView
+											maskElement={
+												<Text className="text-xl font-semibold text-center">All Challenges Complete!</Text>
+											}
+										>
+											<LinearGradient
+												colors={['#0EA5E9', '#0369A1']}
+												start={{x: 0, y: 0}}
+												end={{x: 1, y: 0}}
+											>
+												<Text className="text-xl font-semibold text-center opacity-0">All Challenges Complete!</Text>
+											</LinearGradient>
+										</MaskedView>
+										<Text className="text-zinc-400 text-center mt-2">Check back tomorrow for new challenges</Text>
+									</View>
+								</View>
+							) : (
+								<View className="space-y-3">
+									{currentPoints.daily.map((point, index) => (
+										!user.points.dailyDone.includes(index) && (
+											<View key={index} className="bg-zinc-800/30 p-4 rounded-xl border border-zinc-700/30">
+												<View className="flex-row justify-between items-center">
+													<View className="flex-1 mr-4">
+														<Text className="text-zinc-300 font-medium mb-1">{point.description}</Text>
+														<View className="flex-row items-center">
+															<View className="bg-zinc-700/50 h-1.5 flex-1 rounded-full overflow-hidden">
+																<View 
+																	className="bg-sky-500 h-full rounded-full" 
+																	style={{ 
+																		width: `${Math.min((parseInt(challangeDone(point, 'daily')?.split('h')[0]) / point.goal) * 100, 100)}%` 
+																	}} 
+																/>
+															</View>
+															<Text className="text-zinc-400 text-sm ml-3">{challangeDone(point, 'daily')}</Text>
+														</View>
+													</View>
+													<TouchableOpacity 
+														onPress={() => {
+															if (parseInt(challangeDone(point, 'daily')?.split('h')[0]) >= point.goal) {
+																Vibration.vibrate(50);
+																collectPoints(point, index);
+															}
+														}}
+														className={`rounded-full overflow-hidden ${parseInt(challangeDone(point, 'daily')?.split('h')[0]) >= point.goal ? '' : 'opacity-50'}`}
+													>
+														<LinearGradient
+															colors={parseInt(challangeDone(point, 'daily')?.split('h')[0]) >= point.goal ? ['#0EA5E9', '#0369A1'] : ['#3f3f46', '#27272a']}
+															start={{x: 0, y: 0}}
+															end={{x: 1, y: 1}}
+															className="py-2 px-4"
+														>
+															<Text className="text-white font-medium">{point.points}%</Text>
+														</LinearGradient>
+													</TouchableOpacity>
+												</View>
+											</View>
+										)
+									))}
+								</View>
+							)}
+						</View>
+
+						{/* General Points Section */}
+						<View className="mb-6">
+							<Text className="text-white text-xl font-semibold mb-4">General Points</Text>
+							<View className="space-y-3">
+								{currentPoints.general.map((point, index) => (
+									<View key={index} className="bg-zinc-800/30 p-4 rounded-xl border border-zinc-700/30">
+										<View className="flex-row justify-between items-center">
+											<View className="flex-1 mr-4">
+												<Text className="text-zinc-300 font-medium mb-1">{point.description}</Text>
+												<View className="flex-row items-center">
+													<View className="bg-zinc-700/50 h-1.5 flex-1 rounded-full overflow-hidden">
+														<View 
+															className="bg-sky-500 h-full rounded-full" 
+															style={{ 
+																width: `${Math.min((parseInt(challangeDone(point, 'general')?.split('h')[0]) / point.goal) * 100, 100)}%` 
+															}} 
+														/>
+													</View>
+													<Text className="text-zinc-400 text-sm ml-3">{challangeDone(point, 'general')}</Text>
+												</View>
+											</View>
+											<TouchableOpacity 
+												onPress={() => {
+													if (parseInt(challangeDone(point, 'general')?.split('h')[0]) >= point.goal) {
+														collectGeneralPoints(point);
+													}
+												}}
+												className={`rounded-full overflow-hidden ${parseInt(challangeDone(point, 'general')?.split('h')[0]) >= point.goal ? '' : 'opacity-50'}`}
+											>
+												<LinearGradient
+													colors={parseInt(challangeDone(point, 'general')?.split('h')[0]) >= point.goal ? ['#0EA5E9', '#0369A1'] : ['#3f3f46', '#27272a']}
+													start={{x: 0, y: 0}}
+													end={{x: 1, y: 1}}
+													className="py-2 px-4"
+												>
+													<Text className="text-white font-medium">{point.points}%</Text>
+												</LinearGradient>
+											</TouchableOpacity>
+										</View>
+									</View>
+								))}
 							</View>
-						)
-						))}
-					</View>
+						</View>
+					</ScrollView>
 				</View>
 			</BottomPopup>
 
