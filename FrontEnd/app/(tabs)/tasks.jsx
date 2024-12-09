@@ -877,32 +877,34 @@ const formatTime = (seconds) => {
               </View>
             </View> */}
            
-            <View className="flex-row justify-center items-center w-full mb-4">
+            <View className="flex-row justify-center items-center w-full mb-6">
               <TouchableOpacity
-              onPress={() => {setIsWorkVisible(true)}}
-              className="flex-row justify-center items-center px-4 rounded-full mb-4 w-[60%] ">
-              <LinearGradient
-            colors={['#0ea5e9', '#60a5fa']}
-            start={{x: 0, y: 0}}
-            end={{x: 1, y: 1}}
-            className="w-full rounded-full h-14 flex-row justify-center items-center"
-          >
-                <Image source={icons.plusGray} className="w-6 h-6 mr-2 tint-white p-2 bg-sky-300 rounded-full" />
-                <Text className="text-white text-lg font-semibold">Add Work</Text>
+                onPress={() => {setIsWorkVisible(true)}}
+                className="flex-row justify-center items-center px-4 rounded-full w-[70%] shadow-lg"
+              >
+                <LinearGradient
+                  colors={['#27272a', '#171717']}
+                  start={{x: 0, y: 0}}
+                  end={{x: 1, y: 1}}
+                  className="w-full rounded-full h-14 flex-row justify-center items-center"
+                >
+                  <View className="bg-white/10 rounded-full p-2 mr-3">
+                    <Image source={icons.plusGray} className="w-5 h-5 tint-white" />
+                  </View>
+                  <Text className="text-zinc-100 text-lg font-bold">Add Work</Text>
                 </LinearGradient>
-
               </TouchableOpacity>
             </View>
 
             <View>
               {works.map((work, index) => (
-                <TouchableOpacity onPress={() => openEditWork(work, index)} key={index} className="flex-row justify-between items-center w-full mb-6">
+                <TouchableOpacity onPress={() => openEditWork(work, index)} key={index} className="flex-row justify-between items-center bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 w-full mb-4">
                   <View className="flex-row justify-center items-center">
                     <LinearGradient
                       colors={work.colors}
                       start={{x: 0, y: 0}}
                       end={{x: 1, y: 1}}
-                      className="w-6 h-6 rounded-full"
+                      className="w-8 h-8 rounded-lg"
                     >
                     </LinearGradient>
 
@@ -1148,7 +1150,7 @@ const formatTime = (seconds) => {
 								className={`w-4 h-4 tint-gray-400 ${isWorkDropdownVisible ? 'rotate-90' : ''}`} 
 							/>
 						</TouchableOpacity>
-						
+      
 						{isWorkDropdownVisible && (
 							<View className="absolute top-full left-0 right-0 bg-zinc-800 rounded-xl mt-2 p-2 border border-zinc-700">
 								{works.map((work, index) => (
@@ -1201,7 +1203,7 @@ const formatTime = (seconds) => {
 						</View>
 					)}
 				</ScrollView>
-				
+    
 				<View className="bg-zinc-900 p-6">
 					<TouchableOpacity onPress={() => {/* Handle start session */}}>
 						<LinearGradient

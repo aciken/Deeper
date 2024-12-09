@@ -818,6 +818,9 @@ const Home = () => {
 
 
 	const startSession = () => {
+
+		let isAdjusted = false;
+
 		if(sessionName === ''){
 			setAlertPopupVisible(true);
 			setAlertPopupMessage('Please enter a session name');
@@ -831,10 +834,29 @@ const Home = () => {
 			setAlertPopupMessage('Please select a duration');
 			setAlertPopupType('info');
 		} else {
+			// Check if session would exceed midnight
+			const now = new Date();
+			const endTime = new Date(now.getTime() + (duration.hours * 60 + duration.minutes) * 60000);
+			const midnight = new Date(now);
+			midnight.setHours(24, 0, 0, 0);
+
+			let adjustedDuration = {...duration};
+			
+			if (endTime > midnight) {
+				// Calculate remaining minutes until midnight
+				const minutesUntilMidnight = Math.floor((midnight - now) / 60000);
+				adjustedDuration = {
+					hours: Math.floor(minutesUntilMidnight / 60),
+					minutes: minutesUntilMidnight % 60
+				};
+				isAdjusted = true;
+
+			}
+
 			axios.put('https://72df-109-245-203-91.ngrok-free.app/startSession', {	
 				sessionName,
 				selectedWork,
-				duration,
+				duration: adjustedDuration,
 				id: user._id
 			})
 			.then(res => {
@@ -843,9 +865,15 @@ const Home = () => {
 					setAlertPopupMessage('New Session overlaps with existing session');
 					setAlertPopupType('error');
 				} else {
-					setAlertPopupVisible(true);
-					setAlertPopupMessage('Session started');
-					setAlertPopupType('success');
+					if(isAdjusted){
+						setAlertPopupVisible(true);
+						setAlertPopupMessage('Session started, ends at 00:00');
+						setAlertPopupType('info');
+					} else {
+						setAlertPopupVisible(true);
+						setAlertPopupMessage('Session started');
+						setAlertPopupType('success');
+					}
 					setUser(res.data)
 					setIsStartSessionPopupVisible(false)
 				}
