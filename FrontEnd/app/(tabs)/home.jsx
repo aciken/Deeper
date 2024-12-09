@@ -396,7 +396,7 @@ const Home = () => {
 		const changeChallanges = () => {
 			if(user.points.pointsDate !== `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`) {
 				const date = `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`
-				axios.put('https://b3ef-109-245-203-91.ngrok-free.app/changeDaily', {	
+				axios.put('https://72df-109-245-203-91.ngrok-free.app/changeDaily', {	
 					id: user._id,
 					date
 				})
@@ -656,7 +656,7 @@ const Home = () => {
 
 	const collectPoints = (challange, index) => {
 		console.log('colect')
-		axios.put('https://b3ef-109-245-203-91.ngrok-free.app/collectDaily', {
+		axios.put('https://72df-109-245-203-91.ngrok-free.app/collectDaily', {
 			id: user._id,
 			points: challange.points,
 			index
@@ -672,7 +672,7 @@ const Home = () => {
 
 
 	const collectGeneralPoints = (challange) => {
-		axios.put('https://b3ef-109-245-203-91.ngrok-free.app/collectGeneral', {
+		axios.put('https://72df-109-245-203-91.ngrok-free.app/collectGeneral', {
 			id: user._id,
 			points: challange.points,
 			type: challange.type
@@ -763,7 +763,7 @@ const Home = () => {
 	useEffect(() => {;
 		const email = user.email;
 
-		axios.post('https://b3ef-109-245-203-91.ngrok-free.app/getUser', { email })
+		axios.post('https://72df-109-245-203-91.ngrok-free.app/getUser', { email })
 			.then(res => {
 				setIsLoading(false);
 				setUser(res.data);
@@ -831,7 +831,7 @@ const Home = () => {
 			setAlertPopupMessage('Please select a duration');
 			setAlertPopupType('info');
 		} else {
-			axios.put('https://b3ef-109-245-203-91.ngrok-free.app/startSession', {	
+			axios.put('https://72df-109-245-203-91.ngrok-free.app/startSession', {	
 				sessionName,
 				selectedWork,
 				duration,
@@ -956,7 +956,7 @@ const Home = () => {
 
 
 	const endSession = () => {
-		axios.put('https://b3ef-109-245-203-91.ngrok-free.app/endSession', {
+		axios.put('https://72df-109-245-203-91.ngrok-free.app/endSession', {
 			id: user._id,
 			sessionId: findCurrentSession().sessionId
 		})
@@ -1267,7 +1267,7 @@ const Home = () => {
 			<BottomPopup
 				visible={isChallengePopupVisible}
 				onClose={() => setIsChallengePopupVisible(false)}
-				height={0.85}
+				height={0.95}
 			>
 				<View className="bg-zinc-900 rounded-t-3xl flex-1">
 					<View className="p-6 border-b border-zinc-800">
@@ -1658,125 +1658,131 @@ const Home = () => {
 			<BottomPopup
 				visible={isSessionPageVisible}
 				onClose={handleSessionClose}
-				height={0.9}
+				height={0.85}
 			>
-				<View className="flex-1">
+				<View className="flex-1 bg-zinc-900">
 					{findCurrentSession() && (
 						<>
-							<View className="bg-zinc-900 rounded-t-3xl p-2">
+							{/* Header Section */}
+							<View className="px-6 pt-6 pb-8">
 								<Animated.View
 									style={{
 										transform: [{ translateX: slideAnim }],
 										opacity: opacityAnim
 									}}
-									className="flex-row items-center justify-center"
 								>								
-								<MaskedView
-								maskElement={
-									<View className="flex-col justify-center items-center">
-										<Text className="text-white text-2xl font-semibold text-center">
-											{findCurrentSession().name}
-										</Text>
-										<Text className="text-zinc-200 text-lg font-regular text-center">
+									<View className="flex-row items-center mb-4">
+										<LinearGradient
+											colors={findTaskById(findCurrentSession().workId).colors}
+											start={{x: 0, y: 0}}
+											end={{x: 1, y: 1}}
+											className="w-12 h-12 rounded-2xl mr-4 items-center justify-center"
+										>
+											<Image source={icons.target} className="w-6 h-6 tint-zinc-900" />
+										</LinearGradient>
+										<View>
+											<Text className="text-zinc-400 text-base font-medium mb-1">Current Session</Text>
+											<Text className="text-white text-2xl font-bold">
+												{findCurrentSession().name}
+											</Text>
+										</View>
+									</View>
+									
+									<View className="flex-row items-center">
+										<View className="w-1.5 h-1.5 rounded-full bg-zinc-700 mr-2" />
+										<Text className="text-zinc-500 font-medium">
 											{findTaskById(findCurrentSession().workId).name}
 										</Text>
 									</View>
-								}
-							>
-								<LinearGradient
-									colors={['#D4D4D8', findTaskById(findCurrentSession().workId).colors[0]]}
-									start={{x: 0, y: 0}}
-									end={{x: 0, y: 1}}
-								>
-									<View className="flex-col items-center justify-center opacity-0">
-										<Text className="text-white text-2xl font-semibold text-center">
-											{findCurrentSession().name}
-										</Text>
-										<Text className="text-zinc-200 text-lg font-regular text-center">
-											{findTaskById(findCurrentSession().workId).name}
-										</Text>
-									</View>
-								</LinearGradient>
-							</MaskedView>
 								</Animated.View>
 							</View>
-						
-							<Animated.View 
-								style={{
-									transform: [{ translateX: timerSlideAnim }],
-									opacity: timerOpacityAnim
-								}} 
-								className="justify-start items-center mt-12"
-							>
-								<MaskedView
-									maskElement={
-										<Text className="text-white text-6xl font-semibold">
-											{formatTime(timeInSeconds)}
-										</Text>
-									}
+
+							{/* Timer Section */}
+							<View className="flex-1 px-6">
+								<Animated.View 
+									style={{
+										transform: [{ translateX: timerSlideAnim }],
+										opacity: timerOpacityAnim
+									}}
+								>
+									{/* Main Timer Display */}
+									<View className="bg-zinc-800/30 backdrop-blur-xl rounded-3xl p-8 border border-zinc-800/50">
+										<View className="items-center">
+											<MaskedView
+												maskElement={
+													<Text className="text-8xl font-bold text-center tracking-tight">
+														{formatTime(timeInSeconds).split(':')[0]}
+													</Text>
+												}
+											>
+												<LinearGradient
+													colors={findTaskById(findCurrentSession().workId).colors}
+													start={{x: 0, y: 0}}
+													end={{x: 1, y: 0}}
+												>
+													<Text className="text-8xl font-bold text-center tracking-tight opacity-0">
+														{formatTime(timeInSeconds).split(':')[0]}
+													</Text>
+												</LinearGradient>
+											</MaskedView>
+											
+											<View className="flex-row items-center mt-2">
+												<Text className="text-2xl font-semibold text-zinc-400">
+													{formatTime(timeInSeconds).split(':').slice(1).join(':')}
+												</Text>
+												<View className="w-1 h-1 rounded-full bg-zinc-700 mx-3" />
+												<Text className="text-zinc-500 font-medium">remaining</Text>
+											</View>
+										</View>
+									</View>
+
+									{/* Time Details */}
+									<View className="mt-8 space-y-3 mb-24">
+										<View className="bg-zinc-800/30 backdrop-blur-xl rounded-2xl">
+											<View className="flex-row items-center p-4">
+												<View className="w-10 h-10 rounded-xl bg-zinc-700/30 items-center justify-center mr-4">
+													<Image source={icons.clockGray} className="w-5 h-5 tint-zinc-400" />
+												</View>
+												<View className="flex-1">
+													<Text className="text-zinc-400 text-sm mb-1">Start Time</Text>
+													<Text className="text-white text-lg font-semibold">{findCurrentSession().startTime}</Text>
+												</View>
+											</View>
+										</View>
+
+										<View className="bg-zinc-800/30 backdrop-blur-xl rounded-2xl">
+											<View className="flex-row items-center p-4">
+												<View className="w-10 h-10 rounded-xl bg-zinc-700/30 items-center justify-center mr-4">
+													<Image source={icons.timerWhite} className="w-5 h-5 tint-zinc-400" />
+												</View>
+												<View className="flex-1">
+													<Text className="text-zinc-400 text-sm mb-1">End Time</Text>
+													<Text className="text-white text-lg font-semibold">{findCurrentSession().endTime}</Text>
+												</View>
+											</View>
+										</View>
+									</View>
+								</Animated.View>
+							</View>
+
+							{/* End Session Button */}
+							<View className="p-6 absolute bottom-0 left-0 right-0 bg-zinc-900">
+								<TouchableOpacity 
+									onPress={endSession}
+									className="w-full"
 								>
 									<LinearGradient
-										colors={['#52525b', findTaskById(findCurrentSession().workId).colors[0]]}
+										colors={findTaskById(findCurrentSession().workId).colors}
 										start={{x: 0, y: 0}}
-										end={{x: 2, y: 2}}
+										end={{x: 1, y: 1}}
+										className="w-full h-14 rounded-2xl flex-row items-center justify-center shadow-lg shadow-black/50"
 									>
-										<Text className="text-white text-6xl font-semibold opacity-0">
-											{formatTime(timeInSeconds)}
-										</Text>
+										<Text className="text-zinc-900 text-lg font-semibold">End Session</Text>
 									</LinearGradient>
-								</MaskedView>
-							</Animated.View>
-
-							{/* New Task List Section */}
-							<View className="flex-1 px-4 mt-12">
-								<View className="flex-row justify-between items-center mb-4">
-									<Text className="text-zinc-400 text-lg font-semibold">Session Tasks</Text>
-									<TouchableOpacity 
-										onPress={() => setIsAddTaskVisible(true)}
-										className="bg-zinc-800 p-2 rounded-full"
-									>
-										<Image source={icons.plus} className="w-5 h-5 tint-white" />
-									</TouchableOpacity>
-								</View>
-
-								<ScrollView className="flex-1">
-									{sessionTasks.map((task, index) => (
-										<TouchableOpacity 
-											key={index}
-											onPress={() => toggleTaskCompletion(index)}
-											className="flex-row items-center bg-zinc-800/50 p-4 rounded-xl mb-2"
-										>
-											<View className={`w-5 h-5 rounded-full border-2 mr-3 
-												${task.completed ? 'bg-sky-500 border-sky-500' : 'border-zinc-600'}`}
-											>
-												{task.completed && (
-													<Image 
-														source={icons.check} 
-														className="w-3 h-3 tint-white m-auto" 
-													/>
-												)}
-											</View>
-											<Text className={`text-base ${task.completed ? 'text-zinc-500 line-through' : 'text-white'}`}>
-												{task.text}
-											</Text>
-										</TouchableOpacity>
-									))}
-								</ScrollView>
+								</TouchableOpacity>
 							</View>
 						</>
 					)}
-
-					<TouchableOpacity onPress={endSession} className="mt-4 mb-4 mx-4">
-						<LinearGradient
-							colors={['#3f3f46', '#27272a']}
-							start={{x: 0, y: 0}}
-							end={{x: 1, y: 1}}
-							className="w-full rounded-full h-14 flex-row justify-center items-center"
-						>
-							<Text className="text-zinc-300 text-lg font-semibold">End Session</Text>
-						</LinearGradient>
-					</TouchableOpacity>
-
 				</View>
 			</BottomPopup>
 

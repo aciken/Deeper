@@ -1,144 +1,164 @@
-import { View, Text, ScrollView, Image, Alert, TouchableOpacity} from 'react-native'
-import React,{useState,useEffect} from 'react'
-import {router,Link} from 'expo-router'
+import { View, Text, ScrollView, Image, Alert, TouchableOpacity, TextInput } from 'react-native'
+import React, { useState, useEffect } from 'react'
+import { router, Link } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import axios from 'axios'
-import { LinearGradient } from 'expo-linear-gradient';
-
-
-
-
-import Arrow from '../../assets/images/arrow.png'
-import ClickableIcon from '../components/ClickableIcon'
-import FormField from '../components/FormField'
-import Button from '../components/Button'
+import { LinearGradient } from 'expo-linear-gradient'
+import MaskedView from '@react-native-masked-view/masked-view'
+import { icons } from '../../constants'
 
 import { useGlobalContext } from '../context/GlobalProvider'
 
-
-
-const signin = () => {
-
-  const {setIsLogged, setUser, setIsLoading} = useGlobalContext()
+const SignIn = () => {
+  const { setIsLogged, setUser, setIsLoading } = useGlobalContext()
 
   const [form, setForm] = useState({
     email: '',
     password: ''
   })
 
-  const [loginSuccess, setLoginSuccess] = useState(false);
+  const [loginSuccess, setLoginSuccess] = useState(false)
   const [isSubmiting, setIsSubmiting] = useState(false)
   const [updateUser, setUpdateUser] = useState(false)
 
   useEffect(() => {
     if (loginSuccess) {
-      setIsLoading(false);
-      setUpdateUser(false);
-      setLoginSuccess(false);
-      router.push('/Home'); 
+      setIsLoading(false)
+      setUpdateUser(false)
+      setLoginSuccess(false)
+      router.push('/Home')
     }
-  }, [loginSuccess]);
+  }, [loginSuccess])
 
   useEffect(() => {
-    if(updateUser){
+    if(updateUser) {
       setUser(updateUser)
       setUpdateUser(false)
     }
   }, [updateUser])
 
-
   const submit = () => {
-    const {email, password} = form
-    if(!email || !password){
+    const { email, password } = form
+    if(!email || !password) {
       Alert.alert('Please fill in all fields')
-      
     } else {
-
-
-
-    setIsSubmiting(true)
-    
-    axios.post('https://b3ef-109-245-203-91.ngrok-free.app/login', {
-      email,
-      password
-    }).then(res => {
-      if(res.data !== 'failed'){
-        setForm({email: '', password: ''})
-        setUpdateUser(res.data)
-        setIsLogged(true)
-        setLoginSuccess(true)
-
-
-        
-      } else {
-        Alert.alert('Invalid email or password');
-      }
-      setIsSubmiting(false)
-
-    }).catch(() => {
-
-      Alert.alert('An error occured')
-      setIsSubmiting(false)
-    })
+      setIsSubmiting(true)
+      axios.post('https://72df-109-245-203-91.ngrok-free.app/login', {
+        email,
+        password
+      }).then(res => {
+        if(res.data !== 'failed') {
+          setForm({email: '', password: ''})
+          setUpdateUser(res.data)
+          setIsLogged(true)
+          setLoginSuccess(true)
+        } else {
+          Alert.alert('Invalid email or password')
+        }
+        setIsSubmiting(false)
+      }).catch(() => {
+        Alert.alert('An error occurred')
+        setIsSubmiting(false)
+      })
+    }
   }
-  }
-
-
 
   return (
-    <SafeAreaView className="bg-zinc-950 h-full">
-    <ScrollView contentContainerStyle={{ height: '100%' }}>
-      <View className="w-full h-full justify-center items-start relative px-4">
-        <ClickableIcon
-          ImageSource={Arrow}
-          handlePress={() => router.push('/')}
-          containerStyles=" top-4 left-4"
-          imageStyle="w-6 h-6"
-        />
-
-        <Text className="text-2xl font-pbold text-white">Sign In</Text>
-        <FormField
-          title="Email"
-          placeholder="Enter your email"
-          value={form.email}
-          handleTextChange={(e) => setForm({...form, email: e})}
-          containerStyles="mt-7"
-        />
-        <FormField
-          title="Password"
-          placeholder="Enter your password"
-          value={form.password}
-          handleTextChange={(e) => setForm({...form, password: e})}
-          containerStyles="mt-7"
-          />
-          <View className="w-full flex-row justify-end">
-            <Link className='text-base text-gray-500 mt-2 underline' href="/">Forgot Passowrd</Link>
-          </View>
-          <TouchableOpacity
-          className="w-full h-16 bg-sky-400 rounded-lg items-center justify-center mt-10"
-          onPress={() => submit()}
+    <SafeAreaView className="flex-1 bg-zinc-950">
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <View className="flex-1 px-6 justify-center">
+          {/* Back Button */}
+          <TouchableOpacity 
+            onPress={() => router.push('/')}
+            className="absolute top-4 left-6 w-10 h-10 rounded-xl bg-zinc-900/80 items-center justify-center"
           >
-
-            <Text className="text-lg font-psemibold text-gray-900">Sign In</Text>
+            <Image source={icons.backIcon} className="w-5 h-5 tint-zinc-400" />
           </TouchableOpacity>
-          {/* <Button
-          title="Sign In"
-          containerStyles="mt-10 w-full bg-sky-300"
-          isLoading={isSubmiting}
-          handlePress={() => submit()}
-          /> */}
-          <View className="w-full flex-row justify-center mt-4">
-            <Text className="text-lg font-pregular text-gray-400 mr-2">Don't have an account?</Text>
-            <Link className='text-lg font-psemibold text-sky-400' href="/sign-up">Sign Up</Link>
+
+          {/* Header */}
+          <View className="mb-12">
+            <MaskedView
+              maskElement={
+                <Text className="text-4xl font-bold mb-2">Welcome Back</Text>
+              }
+            >
+              <LinearGradient
+                colors={['#D4D4D8', '#71717A']}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 1}}
+              >
+                <Text className="text-4xl font-bold mb-2 opacity-0">Welcome Back</Text>
+              </LinearGradient>
+            </MaskedView>
+            <Text className="text-zinc-500 text-lg">Sign in to continue</Text>
+          </View>
+
+          {/* Form Fields */}
+          <View className="space-y-6">
+            <View>
+              <Text className="text-zinc-400 text-base mb-2">Email</Text>
+              <View className="bg-zinc-900/80 rounded-xl overflow-hidden border border-zinc-800">
+                <TextInput
+                  placeholder="Enter your email"
+                  placeholderTextColor="#52525b"
+                  value={form.email}
+                  onChangeText={(e) => setForm({...form, email: e})}
+                  className="px-4 py-3.5 text-base text-white"
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                />
+              </View>
             </View>
 
+            <View>
+              <Text className="text-zinc-400 text-base mb-2">Password</Text>
+              <View className="bg-zinc-900/80 rounded-xl overflow-hidden border border-zinc-800">
+                <TextInput
+                  placeholder="Enter your password"
+                  placeholderTextColor="#52525b"
+                  value={form.password}
+                  onChangeText={(e) => setForm({...form, password: e})}
+                  className="px-4 py-3.5 text-base text-white"
+                  secureTextEntry
+                />
+              </View>
+            </View>
+          </View>
 
+          {/* Forgot Password */}
+          <TouchableOpacity className="mt-4 self-end">
+            <Text className="text-zinc-500 text-base">Forgot Password?</Text>
+          </TouchableOpacity>
 
+          {/* Sign In Button */}
+          <TouchableOpacity 
+            onPress={submit}
+            className="mt-8 w-full h-14 rounded-2xl overflow-hidden"
+            disabled={isSubmiting}
+          >
+            <LinearGradient
+              colors={['#0ea5e9', '#3b82f6']}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 1}}
+              className="w-full h-full items-center justify-center"
+            >
+              <Text className="text-white text-lg font-semibold">
+                {isSubmiting ? 'Signing in...' : 'Sign In'}
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
 
-      </View>
-    </ScrollView>
-  </SafeAreaView>
+          {/* Sign Up Link */}
+          <View className="flex-row justify-center mt-6">
+            <Text className="text-zinc-500 text-base mr-1">Don't have an account?</Text>
+            <TouchableOpacity onPress={() => router.push('/sign-up')}>
+              <Text className="text-sky-400 text-base font-medium">Sign Up</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   )
 }
 
-export default signin
+export default SignIn
