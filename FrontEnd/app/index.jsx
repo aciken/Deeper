@@ -26,8 +26,8 @@ const Index = () => {
 
 
   const [request, response, promptAsync] = Google.useAuthRequest({
-    androidClientId: '1003474212666-gqrbg8e8s288508ssmkqrq5f9l6q5mf8.apps.googleusercontent.com',
-    iosClientId: '982934180885-5cd3g1fatbn3kinp7niufasmq2o8kud0.apps.googleusercontent.com', 
+    androidClientId: '982934180885-4av5h5gq1fldb8tbbgb1khd4c210k1rf.apps.googleusercontent.com',
+    iosClientId: '982934180885-qha3lvi6roh4e81slf6a0th12sf71rpb.apps.googleusercontent.com', 
     expoClientId: '982934180885-qp8u94ipgl27qq33kuvn55g99pff6huk.apps.googleusercontent.com', 
      redirectUri: 'https://auth.expo.io/@aciken/FrontEnd'
   });
