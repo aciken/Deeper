@@ -34,6 +34,10 @@ import save from "../assets/icons/content-save.png";
 import restart from "../assets/icons/restart.png";
 import fullScreen from "../assets/icons/fullscreen.png";
 import settings from "../assets/icons/settings.png";
+import focus from "../assets/icons/focus.png";
+import track from "../assets/icons/track.png";
+import habit from "../assets/icons/habits.png";
+
 
 export default {
   play,
@@ -72,4 +76,7 @@ export default {
   restart,
   fullScreen,
   settings,
+  focus,
+  track,
+  habit,
 };

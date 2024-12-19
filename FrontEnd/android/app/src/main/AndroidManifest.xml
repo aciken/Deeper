@@ -26,6 +26,9 @@
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="deeper"/>
         <data android:scheme="com.anonymous.FrontEnd"/>
+        <data android:scheme="com.anonymous.FrontEnd"/>
+        <data android:scheme="com.aciken.FrontEnd"/>
+        <data android:scheme="com.aciken.FrontEnd"/>
       </intent-filter>
     </activity>
     <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" android:exported="false"/>

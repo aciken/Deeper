@@ -396,7 +396,7 @@ const Home = () => {
 		const changeChallanges = () => {
 			if(user.points.pointsDate !== `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`) {
 				const date = `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`
-				axios.put('https://72df-109-245-203-91.ngrok-free.app/changeDaily', {	
+				axios.put('https://c18c-109-245-203-91.ngrok-free.app/changeDaily', {	
 					id: user._id,
 					date
 				})
@@ -655,8 +655,7 @@ const Home = () => {
 
 
 	const collectPoints = (challange, index) => {
-		console.log('colect')
-		axios.put('https://72df-109-245-203-91.ngrok-free.app/collectDaily', {
+		axios.put('https://c18c-109-245-203-91.ngrok-free.app/collectDaily', {
 			id: user._id,
 			points: challange.points,
 			index
@@ -672,7 +671,7 @@ const Home = () => {
 
 
 	const collectGeneralPoints = (challange) => {
-		axios.put('https://72df-109-245-203-91.ngrok-free.app/collectGeneral', {
+		axios.put('https://c18c-109-245-203-91.ngrok-free.app/collectGeneral', {
 			id: user._id,
 			points: challange.points,
 			type: challange.type
@@ -763,7 +762,7 @@ const Home = () => {
 	useEffect(() => {;
 		const email = user.email;
 
-		axios.post('https://72df-109-245-203-91.ngrok-free.app/getUser', { email })
+		axios.post('https://c18c-109-245-203-91.ngrok-free.app/getUser', { email })
 			.then(res => {
 				setIsLoading(false);
 				setUser(res.data);
@@ -853,7 +852,7 @@ const Home = () => {
 
 			}
 
-			axios.put('https://72df-109-245-203-91.ngrok-free.app/startSession', {	
+			axios.put('https://c18c-109-245-203-91.ngrok-free.app/startSession', {	
 				sessionName,
 				selectedWork,
 				duration: adjustedDuration,
@@ -984,7 +983,7 @@ const Home = () => {
 
 
 	const endSession = () => {
-		axios.put('https://72df-109-245-203-91.ngrok-free.app/endSession', {
+		axios.put('https://c18c-109-245-203-91.ngrok-free.app/endSession', {
 			id: user._id,
 			sessionId: findCurrentSession().sessionId
 		})

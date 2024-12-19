@@ -43,7 +43,7 @@ const SignIn = () => {
       Alert.alert('Please fill in all fields')
     } else {
       setIsSubmiting(true)
-      axios.post('https://72df-109-245-203-91.ngrok-free.app/login', {
+      axios.post('https://c18c-109-245-203-91.ngrok-free.app/login', {
         email,
         password
       }).then(res => {

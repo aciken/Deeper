@@ -12,10 +12,83 @@ import { BackHandler } from 'react-native'
 import * as Google from 'expo-auth-session/providers/google'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
+import * as WebBrowser from 'expo-web-browser';
+
+WebBrowser.maybeCompleteAuthSession();
+
 const Index = () => {
   const { isLoading, isLogged, setIsLogged, setUser } = useGlobalContext()
   const isFocused = useIsFocused()
   const [userInfo, setUserInfo] = useState(null)
+  const [authError, setAuthError] = useState(null);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+
+
+
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    androidClientId: '1003474212666-gqrbg8e8s288508ssmkqrq5f9l6q5mf8.apps.googleusercontent.com',
+    iosClientId: '982934180885-5cd3g1fatbn3kinp7niufasmq2o8kud0.apps.googleusercontent.com', 
+    expoClientId: '982934180885-qp8u94ipgl27qq33kuvn55g99pff6huk.apps.googleusercontent.com', 
+     redirectUri: 'https://auth.expo.io/@aciken/FrontEnd'
+  });
+
+  useEffect(() => {
+    handleSignInWithGoogle();
+  }, [response]);
+
+  async function handleSignInWithGoogle() {
+    try {
+      setAuthError(null);
+      setIsAuthenticating(true);
+      
+      const user = await AsyncStorage.getItem('@user');
+      if (!user) {
+        if (response?.type === "success") {
+          await getUserInfo(response.authentication.accessToken);
+        } else if (response?.type === "error") {
+          throw new Error(response.error?.message || 'Authentication failed');
+        }
+      } else {
+        const parsedUser = JSON.parse(user);
+        setUserInfo(parsedUser);
+        setUser(parsedUser);
+        setIsLogged(true);
+      }
+    } catch (error) {
+      console.error('Google Sign In Error:', error);
+      setAuthError(error.message || 'Failed to sign in with Google');
+    } finally {
+      setIsAuthenticating(false);
+    }
+  }
+
+  const getUserInfo = async (token) => {
+    if (!token) {
+      throw new Error('No authentication token received');
+    }
+    
+    try {
+      const response = await fetch(
+        "https://www.googleapis.com/userinfo/v2/me",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user info: ${response.status}`);
+      }
+
+      const user = await response.json();
+      await AsyncStorage.setItem('@user', JSON.stringify(user));
+      setUserInfo(user);
+      setUser(user);
+      setIsLogged(true);
+    } catch (error) {
+      console.error('Get User Info Error:', error);
+      throw new Error('Failed to get user information');
+    }
+  };
 
   // const [request, response, promptAsync] = Google.useAuthRequest({
   //   androidClientId: '1003474212666-gqrbg8e8s288508ssmkqrq5f9l6q5mf8.apps.googleusercontent.com',
@@ -98,17 +171,24 @@ const Index = () => {
             </Text>
           </View>
 
+          {/* Error Message Display */}
+          {authError && (
+            <View className="bg-red-900/20 border border-red-500/20 rounded-xl p-4 mb-4">
+              <Text className="text-red-400 text-center">{authError}</Text>
+            </View>
+          )}
+
           {/* Illustration/Feature Section */}
           <View className="py-12">
             <View className="bg-zinc-900/50 rounded-3xl p-6 border border-zinc-800/50">
               <View className="flex-row items-center mb-6">
                 <LinearGradient
-                  colors={['#0ea5e9', '#3b82f6']}
+                  colors={['#27272a', '#27272a']}
                   start={{x: 0, y: 0}}
                   end={{x: 1, y: 1}}
-                  className="w-12 h-12 rounded-2xl items-center justify-center mr-4"
+                  className="w-12 h-12 rounded-2xl items-center justify-center mr-4 bg-zinc-800/50  border border-zinc-700"
                 >
-                  <Image source={icons.target} className="w-6 h-6 tint-white" />
+                  <Image source={icons.focus} className="w-6 h-6 tint-white" />
                 </LinearGradient>
                 <View>
                   <Text className="text-white text-xl font-semibold mb-1">Focus Better</Text>
@@ -118,12 +198,12 @@ const Index = () => {
 
               <View className="flex-row items-center mb-6">
                 <LinearGradient
-                  colors={['#0ea5e9', '#3b82f6']}
+                  colors={['#27272a', '#27272a']}
                   start={{x: 0, y: 0}}
                   end={{x: 1, y: 1}}
-                  className="w-12 h-12 rounded-2xl items-center justify-center mr-4"
+                  className="w-12 h-12 rounded-2xl items-center justify-center mr-4 bg-zinc-800/50  border border-zinc-700"
                 >
-                  <Image source={icons.chart} className="w-6 h-6 tint-white" />
+                  <Image source={icons.track} className="w-6 h-6 tint-white" />
                 </LinearGradient>
                 <View>
                   <Text className="text-white text-xl font-semibold mb-1">Track Progress</Text>
@@ -133,12 +213,12 @@ const Index = () => {
 
               <View className="flex-row items-center">
                 <LinearGradient
-                  colors={['#0ea5e9', '#3b82f6']}
+                  colors={['#27272a', '#27272a']}
                   start={{x: 0, y: 0}}
                   end={{x: 1, y: 1}}
-                  className="w-12 h-12 rounded-2xl items-center justify-center mr-4"
+                  className="w-12 h-12 rounded-2xl items-center justify-center mr-4 bg-zinc-800/50  border border-zinc-700"
                 >
-                  <Image source={icons.timer} className="w-6 h-6 tint-white" />
+                  <Image source={icons.habit} className="w-6 h-6 tint-white" />
                 </LinearGradient>
                 <View>
                   <Text className="text-white text-xl font-semibold mb-1">Build Habits</Text>
@@ -165,14 +245,20 @@ const Index = () => {
             </TouchableOpacity>
 
             <TouchableOpacity 
-              onPress={() => promptAsync()}
+              onPress={() => {
+                setAuthError(null);
+                promptAsync();
+              }}
+              disabled={isAuthenticating}
               className="w-full h-14 rounded-2xl bg-white flex-row items-center justify-center space-x-2"
             >
               <Image 
                 source={require('../assets/images/google.png')} 
                 className="w-5 h-5"
               />
-              <Text className="text-zinc-900 text-lg font-semibold">Continue with Google</Text>
+              <Text className="text-zinc-900 text-lg font-semibold">
+                {isAuthenticating ? 'Signing in...' : 'Continue with Google'}
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
