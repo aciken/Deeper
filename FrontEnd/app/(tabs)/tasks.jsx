@@ -10,6 +10,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AlertPopup from '../components/AlertPopup';
+import images from '../../constants/images';
+
 import Svg, { 
   Circle, 
   Path, 
@@ -316,7 +318,7 @@ const Tasks = () => {
     } else if (totalSessionMinutes <= threshold * 3) {
       return ['#3b82f6', '#1d4ed8'];
     } else {
-      return ['#60a5fa', '#3b82f6'];
+      return ['#93C5FD', '#60a5fa'];
     }
   }
 
@@ -432,7 +434,7 @@ const getGoalWork = () => {
 
 
 const submitNewWork = () => {
-    axios.put('https://c18c-109-245-203-91.ngrok-free.app/addJob', {
+    axios.put('https://f58f-109-245-203-91.ngrok-free.app/addJob', {
     newWork,
     id: user._id,
   }).then(res => {
@@ -448,7 +450,7 @@ const submitNewWork = () => {
 }
 
 const submitEditWork = () => {
-  axios.put('https://c18c-109-245-203-91.ngrok-free.app/editJob', {
+  axios.put('https://f58f-109-245-203-91.ngrok-free.app/editJob', {
   editWork,
   index: editIndex,
   id: user._id,
@@ -469,7 +471,7 @@ const submitEditWork = () => {
 
 const submitDeleteWork = () => {
   if(user.work.length !== 1){
-    axios.put('https://c18c-109-245-203-91.ngrok-free.app/deleteJob', {
+    axios.put('https://f58f-109-245-203-91.ngrok-free.app/deleteJob', {
     index: editIndex,
     id: user._id,
   }).then(res => {
@@ -488,6 +490,24 @@ const submitDeleteWork = () => {
   setAlertPopupVisible(true);
 }
 
+}
+
+
+const endSession = () => {
+  axios.put('https://f58f-109-245-203-91.ngrok-free.app/endSession', {
+    id: user._id,
+    sessionId: findCurrentSession().sessionId
+  })
+  .then(res => {
+    setUser(res.data)
+    setIsSessionPageVisible(false)
+    setAlertPopupVisible(true)
+    setAlertPopupMessage('Session ended')
+    setAlertPopupType('success')
+  })
+  .catch((e) => {
+    console.error('Error ending session:', e);
+  })
 }
 
 const timeFromPoints = (points) => {
@@ -669,10 +689,36 @@ const formatTime = (seconds) => {
             <View className="flex flex-col justify-between bg-zinc-900/50 rounded-xl p-4 border border-zinc-700/50 mb-6">
               <View className="flex flex-row justify-between pb-4">
                 <Text className="text-lg text-white font-psemibold">Work Activity</Text>
-                {/* <TouchableOpacity className="flex-row justify-center items-center rounded-full bg-zinc-800 p-1 border border-zinc-700 shadow-lg shadow-black/50" onPress={() => setIsWorkActivityPopupVisible(true)}>
-                  <Image source={icons.fullScreen} className="w-6 h-6 tint-white" />
-                </TouchableOpacity> */}
-
+                <View className="flex-row items-center">
+                  <Text className="text-zinc-500 font-psemibold text-xs mr-2">less</Text>
+                  <View className="flex-row items-center space-x-1">
+                    <LinearGradient
+                      colors={['#27272a', '#27272a']}
+                      start={{x: 0, y: 0}}
+                      end={{x: 1, y: 1}}
+                      className="w-3 h-3 rounded-sm"
+                    />
+                    <LinearGradient
+                      colors={['#1d4ed8', '#1e3a8a']}
+                      start={{x: 0, y: 0}}
+                      end={{x: 1, y: 1}}
+                      className="w-3 h-3 rounded-sm"  
+                    />
+                    <LinearGradient
+                      colors={['#3b82f6', '#1d4ed8']}
+                      start={{x: 0, y: 0}}
+                      end={{x: 1, y: 1}}
+                      className="w-3 h-3 rounded-sm"
+                    />
+                    <LinearGradient
+                      colors={['#93C5FD', '#60a5fa']}
+                      start={{x: 0, y: 0}}
+                      end={{x: 1, y: 1}}
+                      className="w-3 h-3 rounded-sm"
+                    />
+                  </View>
+                  <Text className="text-zinc-500 font-psemibold text-xs ml-2">more</Text>
+                </View>
               </View>
               <View className="flex flex-row justify-between py-2">
                 <View className="flex flex-col items-center justify-between">
@@ -1510,74 +1556,129 @@ const formatTime = (seconds) => {
       <BottomPopup
         visible={isSessionPageVisible}
         onClose={handleSessionClose}
-        height={0.9}
+        height={0.85}
       >
-        <View className="flex-1">
+        <View className="flex-1 bg-zinc-900">
           {findCurrentSession() && (
             <>
-              <View className="bg-zinc-900 rounded-t-3xl p-2">
+              {/* Header Section */}
+              <View className="px-6 pt-6 pb-8">
                 <Animated.View
                   style={{
                     transform: [{ translateX: slideAnim }],
                     opacity: opacityAnim
                   }}
-                  className="flex-row items-center justify-center"
-                >
-                  <MaskedView
-                    maskElement={
-                      <View className="flex-col justify-center items-center">
-                        <Text className="text-white text-2xl font-semibold text-center">
-                          {findCurrentSession().name}
-                        </Text>
-                        <Text className="text-zinc-200 text-lg font-regular text-center">
-                          {findTaskById(findCurrentSession().workId).name}
-                        </Text>
-                      </View>
-                    }
-                  >
+                >                
+                  <View className="flex-row items-center mb-4">
                     <LinearGradient
-                      colors={['#D4D4D8', findTaskById(findCurrentSession().workId).colors[0]]}
+                      colors={findTaskById(findCurrentSession().workId).colors}
                       start={{x: 0, y: 0}}
-                      end={{x: 0, y: 1}}
+                      end={{x: 1, y: 1}}
+                      className="w-12 h-12 rounded-2xl mr-4 items-center justify-center"
                     >
-                      <View className="flex-col items-center justify-center opacity-0">
-                        <Text className="text-white text-2xl font-semibold text-center">
-                          {findCurrentSession().name}
-                        </Text>
-                        <Text className="text-zinc-200 text-lg font-regular text-center">
-                          {findTaskById(findCurrentSession().workId).name}
-                        </Text>
-                      </View>
+                      <Image source={icons.target} className="w-6 h-6 tint-zinc-900" />
                     </LinearGradient>
-                  </MaskedView>
+                    <View>
+                      <Text className="text-zinc-400 text-base font-medium mb-1">Current Session</Text>
+                      <Text className="text-white text-2xl font-bold">
+                        {findCurrentSession().name}
+                      </Text>
+                    </View>
+                  </View>
+                  
+                  <View className="flex-row items-center">
+                    <View className="w-1.5 h-1.5 rounded-full bg-zinc-700 mr-2" />
+                    <Text className="text-zinc-500 font-medium">
+                      {findTaskById(findCurrentSession().workId).name}
+                    </Text>
+                  </View>
                 </Animated.View>
               </View>
 
-              <Animated.View 
-                style={{
-                  transform: [{ translateX: timerSlideAnim }],
-                  opacity: timerOpacityAnim
-                }} 
-                className="justify-start items-center mt-12"
-              >
-                <MaskedView
-                  maskElement={
-                    <Text className="text-white text-6xl font-semibold">
-                      {formatTime(timeInSeconds)}
-                    </Text>
-                  }
+              {/* Timer Section */}
+              <View className="flex-1 px-6">
+                <Animated.View 
+                  style={{
+                    transform: [{ translateX: timerSlideAnim }],
+                    opacity: timerOpacityAnim
+                  }}
+                >
+                  {/* Main Timer Display */}
+                  <View className="bg-zinc-800/30 backdrop-blur-xl rounded-3xl p-8 border border-zinc-800/50">
+                    <View className="items-center">
+                      <MaskedView
+                        maskElement={
+                          <Text className="text-8xl font-bold text-center tracking-tight">
+                            {formatTime(timeInSeconds).split(':')[0]}
+                          </Text>
+                        }
+                      >
+                        <LinearGradient
+                          colors={findTaskById(findCurrentSession().workId).colors}
+                          start={{x: 0, y: 0}}
+                          end={{x: 1, y: 0}}
+                        >
+                          <Text className="text-8xl font-bold text-center tracking-tight opacity-0">
+                            {formatTime(timeInSeconds).split(':')[0]}
+                          </Text>
+                        </LinearGradient>
+                      </MaskedView>
+                      
+                      <View className="flex-row items-center mt-2">
+                        <Text className="text-2xl font-semibold text-zinc-400">
+                          {formatTime(timeInSeconds).split(':').slice(1).join(':')}
+                        </Text>
+                        <View className="w-1 h-1 rounded-full bg-zinc-700 mx-3" />
+                        <Text className="text-zinc-500 font-medium">remaining</Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* Time Details */}
+                  <View className="mt-8 space-y-3 mb-24">
+                    <View className="bg-zinc-800/30 backdrop-blur-xl rounded-2xl">
+                      <View className="flex-row items-center p-4">
+                        <View className="w-10 h-10 rounded-xl bg-zinc-700/30 items-center justify-center mr-4">
+                          <Image source={icons.clockGray} className="w-5 h-5 tint-zinc-400" />
+                        </View>
+                        <View className="flex-1">
+                          <Text className="text-zinc-400 text-sm mb-1">Start Time</Text>
+                          <Text className="text-white text-lg font-semibold">{findCurrentSession().startTime}</Text>
+                        </View>
+                      </View>
+                    </View>
+
+                    <View className="bg-zinc-800/30 backdrop-blur-xl rounded-2xl">
+                      <View className="flex-row items-center p-4">
+                        <View className="w-10 h-10 rounded-xl bg-zinc-700/30 items-center justify-center mr-4">
+                          <Image source={icons.timerWhite} className="w-5 h-5 tint-zinc-400" />
+                        </View>
+                        <View className="flex-1">
+                          <Text className="text-zinc-400 text-sm mb-1">End Time</Text>
+                          <Text className="text-white text-lg font-semibold">{findCurrentSession().endTime}</Text>
+                        </View>
+                      </View>
+                    </View>
+                  </View>
+                </Animated.View>
+              </View>
+
+              {/* End Session Button */}
+              <View className="p-6 absolute bottom-0 left-0 right-0 bg-zinc-900">
+                <TouchableOpacity 
+                  onPress={endSession}
+                  className="w-full"
                 >
                   <LinearGradient
-                    colors={['#52525b', findTaskById(findCurrentSession().workId).colors[0]]}
+                    colors={findTaskById(findCurrentSession().workId).colors}
                     start={{x: 0, y: 0}}
-                    end={{x: 2, y: 2}}
+                    end={{x: 1, y: 1}}
+                    className="w-full h-14 rounded-2xl flex-row items-center justify-center shadow-lg shadow-black/50"
                   >
-                    <Text className="text-white text-6xl font-semibold opacity-0">
-                      {formatTime(timeInSeconds)}
-                    </Text>
+                    <Text className="text-zinc-900 text-lg font-semibold">End Session</Text>
                   </LinearGradient>
-                </MaskedView>
-              </Animated.View>
+                </TouchableOpacity>
+              </View>
             </>
           )}
         </View>

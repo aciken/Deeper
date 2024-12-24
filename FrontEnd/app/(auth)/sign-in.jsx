@@ -6,6 +6,7 @@ import axios from 'axios'
 import { LinearGradient } from 'expo-linear-gradient'
 import MaskedView from '@react-native-masked-view/masked-view'
 import { icons } from '../../constants'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useGlobalContext } from '../context/GlobalProvider'
 
@@ -43,14 +44,21 @@ const SignIn = () => {
       Alert.alert('Please fill in all fields')
     } else {
       setIsSubmiting(true)
-      axios.post('https://c18c-109-245-203-91.ngrok-free.app/login', {
+      axios.post('https://f58f-109-245-203-91.ngrok-free.app/login', {
         email,
         password
-      }).then(res => {
+      }).then(async (res) => {
         if(res.data !== 'failed') {
           setForm({email: '', password: ''})
           setUpdateUser(res.data)
           setIsLogged(true)
+          // Store user data in AsyncStorage
+          try {
+            await AsyncStorage.setItem('@user', JSON.stringify(res.data))
+            console.log('User data stored successfully')
+          } catch (error) {
+            console.error('Error storing user data:', error)
+          }
           setLoginSuccess(true)
         } else {
           Alert.alert('Invalid email or password')

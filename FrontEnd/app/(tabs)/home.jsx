@@ -13,9 +13,11 @@ import MaskedView from '@react-native-masked-view/masked-view';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AlertPopup from '../components/AlertPopup';
 import { Vibration } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 
 const Home = () => {
-	const { setUser, user, setIsLoading } = useGlobalContext();
+	const { setUser, user, setIsLogged, setIsLoading } = useGlobalContext();
 	const isFocused = useIsFocused();
 	const screenWidth = Dimensions.get('window').width;
 	const barWidth = (screenWidth - 80) / 7; // 80 is total padding
@@ -396,7 +398,7 @@ const Home = () => {
 		const changeChallanges = () => {
 			if(user.points.pointsDate !== `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`) {
 				const date = `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`
-				axios.put('https://c18c-109-245-203-91.ngrok-free.app/changeDaily', {	
+				axios.put('https://f58f-109-245-203-91.ngrok-free.app/changeDaily', {	
 					id: user._id,
 					date
 				})
@@ -655,7 +657,7 @@ const Home = () => {
 
 
 	const collectPoints = (challange, index) => {
-		axios.put('https://c18c-109-245-203-91.ngrok-free.app/collectDaily', {
+		axios.put('https://f58f-109-245-203-91.ngrok-free.app/collectDaily', {
 			id: user._id,
 			points: challange.points,
 			index
@@ -671,7 +673,7 @@ const Home = () => {
 
 
 	const collectGeneralPoints = (challange) => {
-		axios.put('https://c18c-109-245-203-91.ngrok-free.app/collectGeneral', {
+		axios.put('https://f58f-109-245-203-91.ngrok-free.app/collectGeneral', {
 			id: user._id,
 			points: challange.points,
 			type: challange.type
@@ -762,7 +764,7 @@ const Home = () => {
 	useEffect(() => {;
 		const email = user.email;
 
-		axios.post('https://c18c-109-245-203-91.ngrok-free.app/getUser', { email })
+		axios.post(' https://f58f-109-245-203-91.ngrok-free.app/getUser', { email })
 			.then(res => {
 				setIsLoading(false);
 				setUser(res.data);
@@ -852,7 +854,7 @@ const Home = () => {
 
 			}
 
-			axios.put('https://c18c-109-245-203-91.ngrok-free.app/startSession', {	
+			axios.put('https://f58f-109-245-203-91.ngrok-free.app/startSession', {	
 				sessionName,
 				selectedWork,
 				duration: adjustedDuration,
@@ -983,7 +985,7 @@ const Home = () => {
 
 
 	const endSession = () => {
-		axios.put('https://c18c-109-245-203-91.ngrok-free.app/endSession', {
+		axios.put('https://f58f-109-245-203-91.ngrok-free.app/endSession', {
 			id: user._id,
 			sessionId: findCurrentSession().sessionId
 		})
@@ -1851,7 +1853,53 @@ const Home = () => {
 			>
 				<View className="p-4">
 					<Text className="text-white text-xl font-bold mb-4">Profile Settings</Text>
-					{/* Add your profile settings components here */}
+					
+					<View className="mb-6">
+						<Text className="text-zinc-400 text-base mb-2">Account</Text>
+						<View className="bg-zinc-900 rounded-xl p-4">
+							<Text className="text-white text-lg">{user.name}</Text>
+							<Text className="text-zinc-500">{user.email}</Text>
+						</View>
+					</View>
+
+					<View className="mb-6">
+						<Text className="text-zinc-400 text-base mb-2">Preferences</Text>
+						<TouchableOpacity className="bg-zinc-900 rounded-xl p-4 mb-2">
+							<Text className="text-white">Notifications</Text>
+						</TouchableOpacity>
+						<TouchableOpacity className="bg-zinc-900 rounded-xl p-4">
+							<Text className="text-white">Theme</Text>
+						</TouchableOpacity>
+					</View>
+
+					<View className="mb-6">
+						<Text className="text-zinc-400 text-base mb-2">Support</Text>
+						<TouchableOpacity className="bg-zinc-900 rounded-xl p-4 mb-2">
+							<Text className="text-white">Help Center</Text>
+						</TouchableOpacity>
+						<TouchableOpacity className="bg-zinc-900 rounded-xl p-4">
+							<Text className="text-white">Contact Us</Text>
+						</TouchableOpacity>
+					</View>
+
+					<TouchableOpacity 
+						onPress={async () => {
+							try {
+								router.replace('/sign-in');
+								await AsyncStorage.removeItem('@user');
+								setIsLogged(false);
+								setUser(null);
+
+	
+							} catch (error) {
+								console.error('Error logging out:', error);
+								Alert.alert('Error', 'Failed to log out. Please try again.');
+							}
+						}}
+						className="bg-red-500/10 rounded-xl p-4 mt-4"
+					>
+						<Text className="text-red-500 text-center font-semibold">Log Out</Text>
+					</TouchableOpacity>
 				</View>
 			</BottomPopup>
 		</SafeAreaView>

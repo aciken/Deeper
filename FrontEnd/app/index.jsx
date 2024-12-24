@@ -140,12 +140,6 @@ const Index = () => {
     }
   }, [isFocused])
 
-  useEffect(() => {
-    if (!isLoading && isLogged) {
-      router.push('/Home')
-    }
-  }, [])
-
   return (
     <SafeAreaView className="flex-1 bg-zinc-950">
       <StatusBar backgroundColor="#18181b" style="light" />
@@ -244,7 +238,7 @@ const Index = () => {
               </LinearGradient>
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            {/* <TouchableOpacity 
               onPress={() => {
                 setAuthError(null);
                 promptAsync();
@@ -259,7 +253,7 @@ const Index = () => {
               <Text className="text-zinc-900 text-lg font-semibold">
                 {isAuthenticating ? 'Signing in...' : 'Continue with Google'}
               </Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
             <TouchableOpacity 
               onPress={() => router.push('/sign-in')}
