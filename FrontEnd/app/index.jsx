@@ -11,6 +11,8 @@ import { useIsFocused } from '@react-navigation/native'
 import { BackHandler } from 'react-native'
 import * as Google from 'expo-auth-session/providers/google'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { ActivityIndicator } from 'react-native'
+
 
 import * as WebBrowser from 'expo-web-browser';
 
@@ -139,6 +141,18 @@ const Index = () => {
       return () => backHandler.remove()
     }
   }, [isFocused])
+
+  if (isLoading) {
+    return (
+      <View className="flex-1 bg-zinc-950 items-center justify-center">
+        <ActivityIndicator size="large" color="#0EA5E9" />
+      </View>
+    );
+  }
+
+  if (isLogged) {
+    return null;
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-zinc-950">

@@ -398,7 +398,7 @@ const Home = () => {
 		const changeChallanges = () => {
 			if(user.points.pointsDate !== `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`) {
 				const date = `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`
-				axios.put('https://f58f-109-245-203-91.ngrok-free.app/changeDaily', {	
+				axios.put('https://eb09-109-245-203-91.ngrok-free.app/changeDaily', {	
 					id: user._id,
 					date
 				})
@@ -657,7 +657,7 @@ const Home = () => {
 
 
 	const collectPoints = (challange, index) => {
-		axios.put('https://f58f-109-245-203-91.ngrok-free.app/collectDaily', {
+		axios.put('https://eb09-109-245-203-91.ngrok-free.app/collectDaily', {
 			id: user._id,
 			points: challange.points,
 			index
@@ -673,7 +673,7 @@ const Home = () => {
 
 
 	const collectGeneralPoints = (challange) => {
-		axios.put('https://f58f-109-245-203-91.ngrok-free.app/collectGeneral', {
+		axios.put('https://eb09-109-245-203-91.ngrok-free.app/collectGeneral', {
 			id: user._id,
 			points: challange.points,
 			type: challange.type
@@ -761,16 +761,20 @@ const Home = () => {
 
 	
 
-	useEffect(() => {;
-		const email = user.email;
+	useEffect(() => {
+		const id = user._id;
 
-		axios.post(' https://f58f-109-245-203-91.ngrok-free.app/getUser', { email })
+		axios.post('https://eb09-109-245-203-91.ngrok-free.app/getUser', { id })
 			.then(res => {
 				setIsLoading(false);
 				setUser(res.data);
 			})
 			.catch((e) => {
 				console.error('Error fetching user data:', e);
+				// Handle network error gracefully
+				setIsLoading(false);
+				setUser(user); // Keep existing user data on error
+				// Could also show an error message to user here
 			});
 
 		// Animate bars using setTimeout instead of Animated API
@@ -854,7 +858,7 @@ const Home = () => {
 
 			}
 
-			axios.put('https://f58f-109-245-203-91.ngrok-free.app/startSession', {	
+			axios.put('https://eb09-109-245-203-91.ngrok-free.app/startSession', {	
 				sessionName,
 				selectedWork,
 				duration: adjustedDuration,
@@ -985,7 +989,7 @@ const Home = () => {
 
 
 	const endSession = () => {
-		axios.put('https://f58f-109-245-203-91.ngrok-free.app/endSession', {
+		axios.put('https://eb09-109-245-203-91.ngrok-free.app/endSession', {
 			id: user._id,
 			sessionId: findCurrentSession().sessionId
 		})
@@ -1548,141 +1552,94 @@ const Home = () => {
 				</View>
 			</BottomPopup>
 
-			<BottomPopup
-				visible={isStartSessionPopupVisible}
-				onClose={() => setIsStartSessionPopupVisible(false)}
-				height={0.65}
-			>
-				<ScrollView className="bg-zinc-900 rounded-t-3xl flex-1 p-2">
-				<MaskedView
-						maskElement={
-							<Text className="text-white text-3xl font-bold mb-6 text-center">Start Session</Text>
-								}
-							>
-							<LinearGradient
-								colors={['#D4D4D8', '#71717A']}
-								start={{x: 0, y: 0}}
-								end={{x: 1, y: 1}}
-							>
-							<Text className="text-white text-3xl font-bold mb-6 text-center opacity-0">Start Session</Text>
-							</LinearGradient>
-						</MaskedView>
+			{isStartSessionPopupVisible && (
+    <BottomPopup
+        visible={isStartSessionPopupVisible}
+        onClose={() => setIsStartSessionPopupVisible(false)}
+        height={0.85}
+    >
+        <View className="flex-1 bg-zinc-900">
+            <Text className="text-white text-3xl font-bold p-6 text-center bg-gradient-to-r from-zinc-400 to-zinc-500 bg-clip-text">
+                Start Session
+            </Text>
 
-					
-					<View className="mb-4">
-						<TextInput
-							className="bg-zinc-800 text-white p-4 rounded-xl"
-							placeholder="Work Session Name"
-							placeholderTextColor="#71717A"
-							style={{ fontSize: 16 }}
-							value={sessionName}
-							onChangeText={setSessionName}
-						/>
-					</View>
+            <View className="flex-1 px-4">
+                <TextInput
+                    className="bg-zinc-800/50 text-white p-4 rounded-xl text-lg mb-4"
+                    placeholder="Work Session Name"
+                    placeholderTextColor="#71717A"
+                    value={sessionName}
+                    onChangeText={setSessionName}
+                />
 
-					<View className="mb-4 relative z-20">
-						<TouchableOpacity 
-							className="flex-row justify-between items-center bg-zinc-800 p-4 rounded-xl"
-							onPress={() => setIsWorkDropdownVisible(!isWorkDropdownVisible)}
-						>
-							<View className="flex-row items-center">
-								{selectedWork ? (
-									<>
-										<LinearGradient
-											colors={selectedWork.colors}
-											start={{x: 0, y: 0}}
-											end={{x: 1, y: 1}}
-											className="w-5 h-5 rounded-full mr-3"
-										/>
-										<Text className="text-white text-base">{selectedWork.name}</Text>
-									</>
-								) : (
-									<>
-										<Image source={icons.workGray} className="w-5 h-5 mr-3 tint-zinc-400" />
-										<Text className="text-zinc-400 text-base">Select work</Text>
-									</>
-								)}
-							</View>
-							<Image 
-								source={icons.chevronRight} 
-								className={`w-4 h-4 tint-zinc-400 transition-transform ${isWorkDropdownVisible ? 'rotate-90' : ''}`} 
-							/>
-						</TouchableOpacity>
-						
-						{isWorkDropdownVisible && (
-							<View className="absolute top-full left-0 right-0 mt-2 bg-zinc-800 rounded-xl border border-zinc-700 overflow-hidden">
-								<ScrollView className="max-h-48">
-									{user.work.map((work, index) => (
-										<TouchableOpacity
-											key={index}
-											onPress={() => {
-												setSelectedWork(work);
-												setIsWorkDropdownVisible(false);
-											}}
-											className="flex-row items-center p-4 border-b border-zinc-700 active:bg-zinc-700"
-										>
-											<LinearGradient
-												colors={work.colors}
-												start={{x: 0, y: 0}}
-												end={{x: 1, y: 1}}
-												className="w-5 h-5 rounded-full mr-3"
-											/>
-											<Text className="text-white text-base">{work.name}</Text>
-										</TouchableOpacity>
-									))}
-								</ScrollView>
-							</View>
-						)}
-					</View>
+                <Text className="text-zinc-400 text-base mb-2">Set Duration</Text>
+                <View className="bg-zinc-800/50 rounded-xl overflow-hidden">
+                    <DateTimePicker
+                        value={new Date(0, 0, 0, duration.hours, duration.minutes)}
+                        mode="time"
+                        is24Hour={true}
+                        display="spinner"
+                        onChange={onTimeChange}
+                        textColor="white"
+                    />
+                </View>
+            </View>
 
-					<View className="mb-4 relative z-10">
-						<TouchableOpacity 
-							className="flex-row justify-between items-center bg-zinc-800 p-4 rounded-xl"
-							onPress={() => setShowTimePicker(!showTimePicker)}
-						>
-							<View className="flex-row items-center">
-								<Image source={icons.clockGray} className="w-5 h-5 mr-3 tint-zinc-400" />
-								<Text className={duration.hours > 0 || duration.minutes > 0 ? "text-white text-base" : "text-zinc-400 text-base"}>
-									{duration.hours > 0 || duration.minutes > 0 
-										? `${duration.hours}h ${duration.minutes}m`
-										: "Add duration"}
-								</Text>
-							</View>
-							<Image 
-								source={icons.chevronRight} 
-								className={`w-4 h-4 tint-zinc-400 transition-transform ${showTimePicker ? 'rotate-90' : ''}`} 
-							/>
-						</TouchableOpacity>
-						
-						{showTimePicker && (
-							<View className="mt-2 bg-zinc-800 rounded-xl border border-zinc-700 p-4">
-								<DateTimePicker
-									value={new Date(0, 0, 0, duration.hours, duration.minutes)}
-									mode="time"
-									is24Hour={true}
-									display="spinner"
-									onChange={onTimeChange}
-									textColor="white"
-								/>
-							</View>
-						)}
-					</View>
-				</ScrollView>
-				
-				<View className="bg-zinc-900 p-6">
-					<TouchableOpacity onPress={startSession}>
-						<LinearGradient
-							colors={['#0ea5e9', '#60a5fa']}
-							start={{x: 0, y: 0}}
-							end={{x: 1, y: 1}}
-							className="w-full rounded-full h-14 flex-row justify-center items-center"
-						>
-							<Image source={icons.play} className="w-6 h-6 mr-2 tint-white" />
-							<Text className="text-white text-lg font-semibold">Start Session</Text>
-						</LinearGradient>
-					</TouchableOpacity>
-				</View>
-			</BottomPopup>
+            <View className="bg-zinc-900 p-4">
+                <Text className="text-zinc-400 text-base mb-2">Select Work</Text>
+                <ScrollView 
+                    horizontal 
+                    showsHorizontalScrollIndicator={false}
+                    className="mb-4"
+                >
+                    <View className="flex-row space-x-2">
+                        {user.work.map((work, index) => (
+                            <TouchableOpacity
+                                key={index}
+                                onPress={() => setSelectedWork(work)}
+                                className={`p-4 rounded-xl border min-w-[140px] ${
+                                    selectedWork?._id === work._id 
+                                    ? 'bg-zinc-800/80 border-sky-500/50' 
+                                    : 'bg-zinc-800/50 border-transparent'
+                                }`}
+                            >
+                                <View className="flex-row items-center mb-2">
+                                    <View className="w-6 h-6 rounded-full overflow-hidden">
+                                        <LinearGradient
+                                            colors={work.colors}
+                                            start={{x: 0, y: 0}}
+                                            end={{x: 1, y: 1}}
+                                            className="w-full h-full"
+                                        />
+                                    </View>
+                                    {selectedWork?._id === work._id && (
+                                        <View className="w-3 h-3 rounded-full bg-sky-500 ml-auto" />
+                                    )}
+                                </View>
+                                <Text className="text-white text-base">{work.name}</Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </ScrollView>
+
+                <TouchableOpacity 
+                    onPress={startSession}
+                    className="overflow-hidden rounded-xl"
+                >
+                    <LinearGradient
+                        colors={['#0ea5e9', '#60a5fa']}
+                        start={{x: 0, y: 0}}
+                        end={{x: 1, y: 1}}
+                        className="py-4 flex-row justify-center items-center"
+                    >
+                        <Image source={icons.play} className="w-6 h-6 tint-white" />
+                        <Text className="text-white text-xl font-semibold ml-2">Start Session</Text>
+                    </LinearGradient>
+                </TouchableOpacity>
+            </View>
+        </View>
+    </BottomPopup>
+)}
 
 			<BottomPopup
 				visible={isSessionPageVisible}

@@ -1,43 +1,45 @@
 {
   "expo": {
-    "name": "FrontEnd",
+    "name": "deeper",
     "slug": "FrontEnd",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "scheme": "com.aciken.FrontEnd",
-    "newArchEnabled": true,
+    "backgroundColor": "#09090b",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#1f2937"
+      "backgroundColor": "#09090b"
     },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.aciken.FrontEnd"
+      "bundleIdentifier": "com.aciken.FrontEnd",
+      "backgroundColor": "#09090b",
+      "userInterfaceStyle": "dark"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#1f2937"
+        "backgroundColor": "#09090b"
       },
-      "package": "com.aciken.FrontEnd"
+      "package": "com.aciken.FrontEnd",
+      "userInterfaceStyle": "dark"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-router",
-      "expo-font"
-    ],
     "extra": {
-      "router": {
-        "origin": false
-      },
       "eas": {
-        "projectId": "ae3f66a6-49fa-4287-aea3-359f931bebcc"
+        "projectId": "982934180885"
       }
-    }
+    },
+    "scheme": "deeper",
+    "plugins": [
+      "expo-router"
+    ]
   }
 }

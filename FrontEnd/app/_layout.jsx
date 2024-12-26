@@ -1,11 +1,18 @@
-import { StyleSheet, Text, View, Image } from 'react-native';
+import { StyleSheet, Text, View, Image, Animated, Platform } from 'react-native';
 import { Slot, SplashScreen, Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import GlobalProvider from './context/GlobalProvider';
 
 const RootLayout = () => {
+  const [appReady, setAppReady] = useState(false);
+  const [splashAnimationFinished, setSplashAnimationFinished] = useState(false);
+  
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.95)).current;
+
   const [fontsLoaded, error] = useFonts({
     "Poppins-Black": require('../assets/fonts/Poppins-Black.ttf'),
     "Poppins-Bold": require('../assets/fonts/Poppins-Bold.ttf'),
@@ -19,49 +26,92 @@ const RootLayout = () => {
   });
 
   useEffect(() => {
-    if (error) {
-      console.error('Error loading fonts', error);
-      return;
-    }
+    if (error) throw error;
+  }, [error]);
 
+  useEffect(() => {
     if (fontsLoaded) {
       SplashScreen.hideAsync();
+      // Start opening animation
+      Animated.sequence([
+        Animated.parallel([
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.spring(scaleAnim, {
+            toValue: 1,
+            tension: 20,
+            friction: 7,
+            useNativeDriver: true,
+          })
+        ]),
+        Animated.delay(500),
+        Animated.parallel([
+          Animated.timing(fadeAnim, {
+            toValue: 0,
+            duration: 400,
+            useNativeDriver: true,
+          }),
+          Animated.spring(scaleAnim, {
+            toValue: 1.1,
+            tension: 20,
+            friction: 7,
+            useNativeDriver: true,
+          })
+        ])
+      ]).start(() => {
+        setSplashAnimationFinished(true);
+      });
     }
-  }, [fontsLoaded, error]);
+  }, [fontsLoaded]);
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded || !splashAnimationFinished) {
     return (
-      <View className="h-full w-full bg-gray-800 flex-row justify-center items-center">
-        <Image
-        className="w-96 h-56"
-          source={require('../assets/images/deeperLogo.png')}
-          resizeMode='contain'
-        />
+      <View className="h-full w-full bg-zinc-950 flex-row justify-center items-center">
+        <Animated.View 
+          style={{
+            opacity: fadeAnim,
+            transform: [{ scale: scaleAnim }]
+          }}
+        >
+          <Image
+            className="w-96 h-56"
+            source={require('../assets/images/deeperLogo.png')}
+            resizeMode='contain'
+          />
+        </Animated.View>
       </View>
     );
   }
 
   return (
     <GlobalProvider>
-      <Stack>
-        <Stack.Screen name='index' options={{ headerShown: false }} />
-        <Stack.Screen name='(auth)' options={{ headerShown: false }} />
-        <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
-        <Stack.Screen name='(onboarding)' options={{ headerShown: false }} />
-        {/* <Stack.Screen name='(log)' options={{headerShown: false}}/> */}
-        <Stack.Screen name='log/setTask' options={{ headerShown: false }} />
-        <Stack.Screen name='log/SomeComponent' options={{ headerShown: false }} />
-        <Stack.Screen name='log/editTask' options={{ headerShown: false }} />
-        <Stack.Screen name='log/timer' options={{ headerShown: false }} />
-        <Stack.Screen name='log/taskList' options={{ headerShown: false }} />
-        <Stack.Screen name='log/SchedulePage' options={{ headerShown: false }} /> 
-        <Stack.Screen name='log/addPreset' options={{ headerShown: false }} />
-        <Stack.Screen name='log/createPreset' options={{ headerShown: false }} />
-      </Stack>
-    </GlobalProvider>
+    <Stack
+           screenOptions={{
+           contentStyle: { backgroundColor: '#09090b' },
+           animation: 'none',
+           animationDuration: 0,
+           animationEnabled: false,
+           }}>
+
+      <Stack.Screen name='index' options={{ headerShown: false }} />
+      <Stack.Screen name='(auth)' options={{ headerShown: false }} />
+      <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+      <Stack.Screen name='(onboarding)' options={{ headerShown: false }} />
+      {/* <Stack.Screen name='(log)' options={{headerShown: false}}/> */}
+      <Stack.Screen name='log/setTask' options={{ headerShown: false }} />
+      <Stack.Screen name='log/SomeComponent' options={{ headerShown: false }} />
+      <Stack.Screen name='log/editTask' options={{ headerShown: false }} />
+      <Stack.Screen name='log/timer' options={{ headerShown: false }} />
+      <Stack.Screen name='log/taskList' options={{ headerShown: false }} />
+      <Stack.Screen name='log/SchedulePage' options={{ headerShown: false }} /> 
+      <Stack.Screen name='log/addPreset' options={{ headerShown: false }} />
+      <Stack.Screen name='log/createPreset' options={{ headerShown: false }} />
+    </Stack>
+  </GlobalProvider>
   );
 };
-
-
 
 export default RootLayout;

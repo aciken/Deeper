@@ -1,10 +1,9 @@
 const User = require('../DataBase/User');
 
 const GetUser = async (req, res) => {
-    const {email} = req.body;
-    console.log('getting user')
+    const {id} = req.body;
     try {
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ _id: id });
         if (user) {
             res.json(user);
         } else {

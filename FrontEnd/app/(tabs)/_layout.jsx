@@ -30,40 +30,46 @@ const TabsLayout = () => {
   };
 
   return (
-    <Tabs
-      screenOptions={{
-        tabBarShowLabel: false,
-        tabBarActiveTintColor: '#ffffff',
-        tabBarInactiveTintColor: '#1f2937',
-        tabBarStyle: {
-          backgroundColor: '#09090b',
-          borderTopColor: '#27272a',
-          borderTopWidth: 1,
-          height: 50 + insets.bottom,
-          paddingBottom: insets.bottom,
-          paddingTop: 2,
-        },
-      }}
-    >
-      <Tabs.Screen name="Home"
-        options={{
-          title: 'Home',
+    <View style={{ flex: 1, backgroundColor: '#09090b' }}>
+      <Tabs
+        screenOptions={{
+          tabBarShowLabel: false,
+          tabBarActiveTintColor: '#ffffff',
+          tabBarInactiveTintColor: '#1f2937',
+          tabBarStyle: {
+            backgroundColor: '#09090b',
+            borderTopColor: '#27272a',
+            borderTopWidth: 1,
+            height: 50 + insets.bottom,
+            paddingBottom: insets.bottom,
+            paddingTop: 2,
+          },
           headerShown: false,
-          tabBarIcon: ({color}) => (
-            <TabIcon icon={icons.home} color={color} name='Home'/>
-          )
+          contentStyle: {
+            backgroundColor: '#09090b'
+          }
         }}
-      />
-      <Tabs.Screen name="Tasks"
-        options={{
-          title: 'Tasks',
-          headerShown: false,
-          tabBarIcon: ({color}) => (
-            <TabIcon icon={icons.plus} color={color} name='Tasks'/>
-          )
-        }}
-      />
-    </Tabs>
+      >
+        <Tabs.Screen name="Home"
+          options={{
+            title: 'Home',
+            headerShown: false,
+            tabBarIcon: ({color}) => (
+              <TabIcon icon={icons.home} color={color} name='Home'/>
+            )
+          }}
+        />
+        <Tabs.Screen name="Tasks"
+          options={{
+            title: 'Tasks',
+            headerShown: false,
+            tabBarIcon: ({color}) => (
+              <TabIcon icon={icons.plus} color={color} name='Tasks'/>
+            )
+          }}
+        />
+      </Tabs>
+    </View>
   );
 };
 
