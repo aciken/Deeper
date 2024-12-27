@@ -35,7 +35,7 @@ const SignUp = () => {
     }
     
     setIsSubmiting(true)
-    axios.put('https://eb09-109-245-203-91.ngrok-free.app/signup', {
+    axios.put('https://0f3b-109-245-203-91.ngrok-free.app/signup', {
       name,
       email,
       password

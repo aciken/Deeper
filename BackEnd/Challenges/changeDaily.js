@@ -2,8 +2,27 @@ const User = require('../DataBase/User');
 
 const changeDaily = async (req, res) => {
     const { id, date } = req.body;
-    
+
     try {
+        // Get user first to check points date
+        const existingUser = await User.findById(id);
+        
+        // Calculate days difference
+        if (existingUser.points.pointsDate) {
+            const [oldDay, oldMonth, oldYear] = existingUser.points.pointsDate.split(':').map(Number);
+            const [newDay, newMonth, newYear] = date.split(':').map(Number);
+
+            const oldDate = new Date(oldYear, oldMonth - 1, oldDay);
+            const newDate = new Date(newYear, newMonth - 1, newDay);
+            
+            const diffTime = Math.abs(newDate - oldDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays > 0) {
+                existingUser.points.current = Math.max(0, existingUser.points.current - diffDays);
+            }
+        }
+
         // Generate two random unique numbers between 0-3
         let nums = new Set();
         while(nums.size < 2) {
@@ -17,7 +36,8 @@ const changeDaily = async (req, res) => {
                 $set: {
                     'points.pointsDate': date,
                     'points.currentDaily': randomNums,
-                    'points.dailyDone': []
+                    'points.dailyDone': [],
+                    'points.current': existingUser.points.current
                 }
             },
             { new: true }

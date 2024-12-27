@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, ScrollView, BackHandler, Dimensions, TouchableOpacity, Image, Platform, TextInput, Animated } from 'react-native';
+import { View, Text, ScrollView, BackHandler, Dimensions, TouchableOpacity, Image, Platform, TextInput, Animated, Easing } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useIsFocused } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -45,10 +45,13 @@ const Home = () => {
 
 	const [isProfilePopupVisible, setIsProfilePopupVisible] = useState(false);
 
-	const [scaleAnim] = useState(new Animated.Value(1));
+	const [scaleAnim] = useState(new Animated.Value(0.8));
 
 	const [isWorkSelectionVisible, setIsWorkSelectionVisible] = useState(false);
 	const [isTimeSelectionVisible, setIsTimeSelectionVisible] = useState(false);
+
+	// Replace the workDepthScale animation with an icebergScale animation
+	const icebergScale = useRef(new Animated.Value(0.6)).current;
 
 	const findTaskById = (id) => {
 		return user.work.find(work => work._id === id)
@@ -398,7 +401,7 @@ const Home = () => {
 		const changeChallanges = () => {
 			if(user.points.pointsDate !== `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`) {
 				const date = `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`
-				axios.put('https://eb09-109-245-203-91.ngrok-free.app/changeDaily', {	
+				axios.put('https://0f3b-109-245-203-91.ngrok-free.app/changeDaily', {	
 					id: user._id,
 					date
 				})
@@ -442,7 +445,7 @@ const Home = () => {
 		}
 	}
 	changeChallanges()
-	}, [])
+	}, [user, setUser])
 
 
 	const challangeDone = (challange, type) =>{
@@ -657,7 +660,7 @@ const Home = () => {
 
 
 	const collectPoints = (challange, index) => {
-		axios.put('https://eb09-109-245-203-91.ngrok-free.app/collectDaily', {
+		axios.put('https://0f3b-109-245-203-91.ngrok-free.app/collectDaily', {
 			id: user._id,
 			points: challange.points,
 			index
@@ -673,7 +676,7 @@ const Home = () => {
 
 
 	const collectGeneralPoints = (challange) => {
-		axios.put('https://eb09-109-245-203-91.ngrok-free.app/collectGeneral', {
+		axios.put('https://0f3b-109-245-203-91.ngrok-free.app/collectGeneral', {
 			id: user._id,
 			points: challange.points,
 			type: challange.type
@@ -764,7 +767,7 @@ const Home = () => {
 	useEffect(() => {
 		const id = user._id;
 
-		axios.post('https://eb09-109-245-203-91.ngrok-free.app/getUser', { id })
+		axios.post('https://0f3b-109-245-203-91.ngrok-free.app/getUser', { id })
 			.then(res => {
 				setIsLoading(false);
 				setUser(res.data);
@@ -858,7 +861,7 @@ const Home = () => {
 
 			}
 
-			axios.put('https://eb09-109-245-203-91.ngrok-free.app/startSession', {	
+			axios.put('https://0f3b-109-245-203-91.ngrok-free.app/startSession', {	
 				sessionName,
 				selectedWork,
 				duration: adjustedDuration,
@@ -989,7 +992,7 @@ const Home = () => {
 
 
 	const endSession = () => {
-		axios.put('https://eb09-109-245-203-91.ngrok-free.app/endSession', {
+		axios.put('https://0f3b-109-245-203-91.ngrok-free.app/endSession', {
 			id: user._id,
 			sessionId: findCurrentSession().sessionId
 		})
@@ -1013,6 +1016,100 @@ const Home = () => {
 			tension: 40
 		}).start();
 	}, [isProfilePopupVisible]);
+
+	useEffect(() => {
+		Animated.spring(scaleAnim, {
+			toValue: 1,
+			tension: 20,
+			friction: 7,
+			useNativeDriver: true,
+		}).start();
+	}, []);
+
+	useEffect(() => {
+		Animated.sequence([
+			Animated.spring(icebergScale, {
+				toValue: 1,
+				tension: 15,
+				friction: 8,
+				useNativeDriver: true,
+			}),
+			Animated.spring(icebergScale, {
+				toValue: 1,
+				tension: 20,
+				friction: 7,
+				useNativeDriver: true,
+			})
+		]).start();
+	}, []);
+
+	// Replace the existing animation states
+	const cardGlow = useRef(new Animated.Value(0)).current;
+
+	// Add this useEffect for the visual animation
+	useEffect(() => {
+		const pulseAnimation = () => {
+			Animated.sequence([
+				Animated.timing(cardGlow, {
+					toValue: 1,
+					duration: 1000,
+					easing: Easing.inOut(Easing.ease),
+					useNativeDriver: false
+				}),
+				Animated.timing(cardGlow, {
+					toValue: 0.3,
+					duration: 1000,
+					easing: Easing.inOut(Easing.ease),
+					useNativeDriver: false
+				})
+			]).start();
+		};
+
+		pulseAnimation();
+	}, []);
+
+	// Add these new animation values near other animation declarations
+	const minusPercentageOpacity = useRef(new Animated.Value(0)).current;
+	const minusPercentageTranslate = useRef(new Animated.Value(0)).current;
+
+	// Update the minus percentage animation useEffect
+	useEffect(() => {
+		minusPercentageOpacity.setValue(0);
+		minusPercentageTranslate.setValue(-10);
+
+		Animated.sequence([
+			Animated.delay(1000), // Wait longer for initial impact
+			Animated.parallel([
+				Animated.spring(minusPercentageOpacity, {
+					toValue: 1,
+					tension: 40,
+					friction: 8,
+					useNativeDriver: true
+				}),
+				Animated.spring(minusPercentageTranslate, {
+					toValue: 0,
+					tension: 50,
+					friction: 10,
+					useNativeDriver: true
+				})
+			]),
+			Animated.delay(2000), // Show longer
+			Animated.parallel([
+				Animated.timing(minusPercentageOpacity, {
+					toValue: 0,
+					duration: 600,
+					easing: Easing.out(Easing.cubic),
+					useNativeDriver: true
+				}),
+				Animated.timing(minusPercentageTranslate, {
+					toValue: 10,
+					duration: 600,
+					easing: Easing.out(Easing.cubic),
+					useNativeDriver: true
+				})
+			])
+		]).start();
+	}, []);
 
 	return (
 		<SafeAreaView className="flex-1 bg-zinc-950" edges={['top']}>
@@ -1040,114 +1137,174 @@ const Home = () => {
 					</View>
 
 					{/* New Iceberg Level Design Section */}
-					<TouchableOpacity onPress={() => setIsChallengePopupVisible(true)} className="mx-4 mb-8 bg-zinc-900/50 p-6 rounded-2xl border border-zinc-700/50">
-						<Text className="text-zinc-300 text-xl font-bold mb-4">Work Depth</Text>
-						<View className="items-center">
-							<MaskedView
-								style={{ width: 200, height: 200, zIndex: 2, opacity: 0.95 }}
-								maskElement={
-									<View style={{ backgroundColor: 'transparent' }}>
-										<Image
-											source={iceberg}
-											style={{ width: 200, height: 200 }}
-											resizeMode="contain"
-										/>
-									</View>
-								}
-							>
-									<View style={{ flex: 1 }}>
-											<LinearGradient
-												colors={['#27272a', '#18181b']}
-												style={{
+					<Animated.View style={{ transform: [{ scale: icebergScale }] }}>
+						<TouchableOpacity 
+							onPress={() => setIsChallengePopupVisible(true)} 
+							className="mx-4 mb-8"
+						>
+							<View className="relative">
+								{/* Update the -2% indicator view */}
+								<Animated.View style={{
+									position: 'absolute',
+									top: 12,
+									right: 12,
+									opacity: minusPercentageOpacity,
+									transform: [{ translateY: minusPercentageTranslate }],
+									zIndex: 10,
+									shadowColor: '#0ea5e9',
+									shadowOffset: { width: 0, height: 0 },
+									shadowOpacity: 0.5,
+									shadowRadius: 10,
+									elevation: 5,
+								}}>
+									<LinearGradient
+										colors={['#0ea5e9', '#2563eb']}
+										start={{ x: 0, y: 0 }}
+										end={{ x: 1, y: 1 }}
+										style={{
+											paddingHorizontal: 12,
+											paddingVertical: 6,
+											borderRadius: 12,
+											borderWidth: 1,
+											borderColor: 'rgba(14, 165, 233, 0.3)',
+										}}
+									>
+										<Text style={{
+											color: 'white',
+											fontSize: 20,
+											fontWeight: 'bold',
+											textShadowColor: 'rgba(14, 165, 233, 0.5)',
+											textShadowOffset: { width: 0, height: 0 },
+											textShadowRadius: 10,
+										}}>
+											-2%
+										</Text>
+									</LinearGradient>
+								</Animated.View>
+								<Animated.View style={{
+									backgroundColor: cardGlow.interpolate({
+										inputRange: [0, 1],
+										outputRange: ['rgba(14, 165, 233, 0)', 'rgba(14, 165, 233, 0.08)']
+									}),
+									borderColor: cardGlow.interpolate({
+										inputRange: [0, 1],
+										outputRange: ['rgba(39, 39, 42, 0.5)', 'rgba(14, 165, 233, 0.3)']
+									}),
+									borderWidth: 1,
+									borderRadius: 16,
+									padding: 24,
+								}}>
+									<Text className="text-zinc-300 text-xl font-bold mb-4">Work Depth</Text>
+									<View className="items-center">
+										<MaskedView
+											style={{ width: 200, height: 200, zIndex: 2, opacity: 0.95 }}
+											maskElement={
+												<View style={{ backgroundColor: 'transparent' }}>
+													<Image
+														source={iceberg}
+														style={{ width: 200, height: 200 }}
+														resizeMode="contain"
+													/>
+												</View>
+											}
+										>
+											<View style={{ flex: 1 }}>
+												<LinearGradient
+													colors={['#27272a', '#18181b']}
+													style={{
+														position: 'absolute',
+														bottom: 0,
+														left: 0,
+														right: 0,
+														height: `${100 - user.points.current}%`,
+													}}
+													start={{ x: 0, y: 0 }}
+													end={{ x: 0, y: 1 }}
+												/>
+												<View style={{
 													position: 'absolute',
-													bottom: 0,
+													top: 0,
 													left: 0,
 													right: 0,
-													height: `${100 - user.points.current}%`,
-												}}
-												start={{ x: 0, y: 0 }}
-												end={{ x: 0, y: 1 }}
+													bottom: `${100 - user.points.current}%`,
+													backgroundColor: 'transparent',
+												}} />
+											</View>
+											<View style={{ 
+												position: 'absolute', 
+												top: 0, 
+												left: 0, 
+												right: 0, 
+												bottom: 0, 
+												justifyContent: 'center', 
+												alignItems: 'center',
+												backgroundColor: 'transparent'
+											}}>
+												<View style={{ flexDirection: 'row', alignItems: 'center' }}>
+													<Text style={{
+														color: 'white', 
+														fontSize: 30, 
+														fontWeight: 'bold',
+														textShadowColor: 'rgba(0, 0, 0, 0.75)',
+														textShadowOffset: {width: -1, height: 1},
+														textShadowRadius: 10,
+													}}>
+														{user.points.current}%
+													</Text>
+												</View>
+											</View>
+										</MaskedView>
+										<View style={{ width: 200, height: 200, position: 'absolute' }}>    
+											<Image
+												source={iceberg}
+												style={{ width: 200, height: 200, zIndex: 1 }}
+												resizeMode="contain"
 											/>
-											<View style={{
-												position: 'absolute',
-												top: 0,
-												left: 0,
-												right: 0,
-												bottom: `${100 - user.points.current}%`,
-												backgroundColor: 'transparent',
-											}} />
+										</View>
 									</View>
-									<View style={{ 
-										position: 'absolute', 
-										top: 0, 
-										left: 0, 
-										right: 0, 
-										bottom: 0, 
-										justifyContent: 'center', 
-										alignItems: 'center',
-										backgroundColor: 'transparent'
-									}}>
-									<Text style={{
-										color: 'white', 
-										fontSize: 30, 
-										fontWeight: 'bold',
-										textShadowColor: 'rgba(0, 0, 0, 0.75)',
-										textShadowOffset: {width: -1, height: 1},
-										textShadowRadius: 10
-									}}>
-										{user.points.current}%
-									</Text>
-									</View>
-							</MaskedView>
-							<View style={{ width: 200, height: 200, position: 'absolute' }}>	
-								<Image
-									source={iceberg}
-									style={{ width: 200, height: 200, zIndex: 1 }}
-									resizeMode="contain"
-								/>
-							</View>
-						</View>
-
-							<View className="flex flex-col justify-center items-center">
-									<MaskedView
-										maskElement={
-											<Text className="text-sm font-semibold mt-2 text-center">
+									<View className="flex flex-col justify-center items-center">
+										<MaskedView
+											maskElement={
+												<Text className="text-sm font-semibold mt-2 text-center">
+													Work more to go deeper
+												</Text>
+											}
+										>
+											<LinearGradient
+												colors={['#a1a1aa', '#27272a']}
+												start={{x: 0, y: 0}}
+												end={{x: 0, y: 1.5}}
+											>
+												<Text className="text-sm mt-2 font-semibold text-center opacity-0">
 												Work more to go deeper
-											</Text>
-										}
-									>
-										<LinearGradient
-											colors={['#a1a1aa', '#27272a']}
-											start={{x: 0, y: 0}}
-											end={{x: 0, y: 1.5}}
+												</Text>
+											</LinearGradient>
+										</MaskedView>
+										<MaskedView
+											maskElement={
+												<Text className="text-center rotate-90 font-bold text-3xl">
+													{'>'}
+												</Text>
+											}
 										>
-											<Text className="text-sm mt-2 font-semibold text-center opacity-0">
-											Work more to go deeper
-											</Text>
-										</LinearGradient>
-									</MaskedView>
-									<MaskedView
-										maskElement={
-											<Text className="text-center rotate-90 font-bold text-3xl">
+											<LinearGradient
+												colors={['#a1a1aa', '#27272a']}
+												start={{x: 0, y: 0}}
+												end={{x: 0, y: 1}}
+											>
+												<Text className="text-center rotate-90 font-bold text-3xl opacity-0">
 												{'>'}
-											</Text>
-										}
-									>
-										<LinearGradient
-											colors={['#a1a1aa', '#27272a']}
-											start={{x: 0, y: 0}}
-											end={{x: 0, y: 1}}
-										>
-											<Text className="text-center rotate-90 font-bold text-3xl opacity-0">
-											{'>'}
-											</Text>
-										</LinearGradient>
-									</MaskedView>
+												</Text>
+											</LinearGradient>
+										</MaskedView>
 
 
+									</View>
+
+								</Animated.View>
 							</View>
-
-							</TouchableOpacity>
+						</TouchableOpacity>
+					</Animated.View>
 
 					{/* Quick Actions */}
 					{/* <View className="flex-row justify-around mb-6">
