@@ -9,7 +9,7 @@ const WorktimeSelect = () => {
   const { onboardingData: onboardingDataString } = useLocalSearchParams();
   
   const [onboardingData, setOnboardingData] = useState(null);
-  const [selectedWorktime, setSelectedWorktime] = useState(null);
+  const [selectedTime, setSelectedTime] = useState(null);
 
   useEffect(() => {
     if (onboardingDataString) {
@@ -34,61 +34,61 @@ const WorktimeSelect = () => {
     }
   }, [onboardingDataString]);
 
-  const handleWorktimeSelect = (worktime) => {
-    setSelectedWorktime(worktime);
+  const handleTimeSelect = (time) => {
+    setSelectedTime(time);
     if (onboardingData) {
-      setOnboardingData(prev => ({...prev, worktime: worktime}));
+      setOnboardingData(prev => ({...prev, worktime: time}));
     }
   };
 
   const handleNext = () => {
-    if (selectedWorktime && onboardingData) {
+    if (selectedTime && onboardingData) {
       const updatedData = {
         ...onboardingData,
-        worktime: selectedWorktime
+        worktime: selectedTime
       };
       router.push({
-        pathname: '/onboardingResults',
+        pathname: '/sign-up',
         params: { onboardingData: JSON.stringify(updatedData) }
       });
     }
   };
 
-  const worktimeOptions = [
+  const timeOptions = [
     {
-      title: "Morning",
-      description: "4:00 AM - 12:00 PM"
+      title: "1 hour",
+      description: "Quick daily session"
     },
     {
-      title: "Afternoon",
-      description: "12:00 PM - 6:00 PM"
+      title: "2 hours",
+      description: "Standard focus period"
     },
     {
-      title: "Evening",
-      description: "6:00 PM - 10:00 PM"
+      title: "4 hours",
+      description: "Half day dedication"
     },
     {
-      title: "Night",
-      description: "10:00 PM - 4:00 AM"
+      title: "6 hours",
+      description: "Major daily commitment"
     },
     {
-      title: "Flexible",
-      description: "No specific time preference"
+      title: "8 hours",
+      description: "Full-time dedication"
     }
   ];
 
-  const WorktimeButton = ({ option }) => (
+  const TimeButton = ({ option }) => (
     <TouchableOpacity
-      onPress={() => handleWorktimeSelect(option.title)}
+      onPress={() => handleTimeSelect(option.title.split(' ')[0]+'h')}
       className={`w-full h-20 rounded-xl mb-4 flex justify-center px-4
-        ${selectedWorktime === option.title ? 'bg-sky-400' : 'bg-zinc-900/70'}`}
+        ${selectedTime === option.title ? 'bg-sky-400' : 'bg-zinc-900/70'}`}
     >
       <Text className={`text-lg font-medium
-        ${selectedWorktime === option.title ? 'text-zinc-900' : 'text-white'}`}>
+        ${selectedTime === option.title ? 'text-zinc-900' : 'text-white'}`}>
         {option.title}
       </Text>
       <Text className={`text-sm mt-1
-        ${selectedWorktime === option.title ? 'text-zinc-800' : 'text-zinc-400'}`}>
+        ${selectedTime === option.title ? 'text-zinc-800' : 'text-zinc-400'}`}>
         {option.description}
       </Text>
     </TouchableOpacity>
@@ -110,14 +110,14 @@ const WorktimeSelect = () => {
 
         {/* Title */}
         <Text className="text-white text-4xl font-bold mt-2">
-          When do you prefer to work?
+          How much time will you spend on {onboardingData?.workname}?
         </Text>
 
-        {/* Worktime Options */}
+        {/* Time Options */}
         <View className="flex-1 justify-center">
           <View className="w-full">
-            {worktimeOptions.map((option) => (
-              <WorktimeButton key={option.title} option={option} />
+            {timeOptions.map((option) => (
+              <TimeButton key={option.title} option={option} />
             ))}
           </View>
         </View>
@@ -126,10 +126,10 @@ const WorktimeSelect = () => {
         <TouchableOpacity
           onPress={handleNext}
           className={`w-full h-14 rounded-full items-center justify-center mt-auto mb-4
-            ${selectedWorktime ? 'bg-white' : 'bg-zinc-900/70'}`}
+            ${selectedTime ? 'bg-white' : 'bg-zinc-900/70'}`}
         >
           <Text className={`text-lg font-medium
-            ${selectedWorktime ? 'text-black' : 'text-zinc-700'}`}>
+            ${selectedTime ? 'text-black' : 'text-zinc-700'}`}>
             Next
           </Text>
         </TouchableOpacity>

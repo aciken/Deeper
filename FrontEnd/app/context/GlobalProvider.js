@@ -23,38 +23,31 @@ const GlobalProvider = ({ children }) => {
             const storedUser = await AsyncStorage.getItem('@user');
             console.log('Stored user:', storedUser);
             if (storedUser) {
-                axios.post('https://0f3b-109-245-203-91.ngrok-free.app/getUser', { id: storedUser._id })
+                console.log(`storedUser type: ${typeof storedUser}, value: ${storedUser}`)
+                const parsedUser = JSON.parse(storedUser);
+                
+                axios.post('https://0f3b-109-245-203-91.ngrok-free.app/getUser', { id: parsedUser._id })
                     .then(res => {
+                        console.log('User data:', res.data);
                         if(res.data == 'User not found'){
                             AsyncStorage.clear();
                             setIsLogged(false);
                             setUser(null);
                         } else {
-                            const parsedUser = JSON.parse(storedUser);
                             setUser(parsedUser);
                             setIsLogged(true);
                             router.push('/Home');
                         }
-
                     })
                     .catch(e => {
                         console.error('Error fetching user data:', e);
                     })
-                // axios.post('https://0f3b-109-245-203-91.ngrok-free.app/getUser', { id: storedUser._id })
-                //     .then(res => {
-                //         console.log('User found in AsyncStorage', storedUser);
-                //         const parsedUser = JSON.parse(storedUser);
-                //         console.log('Parsed user:', parsedUser);
-                //         setUser(parsedUser);
-                //         setIsLogged(true);
-                //         router.push('/Home');
-                //     })
-                //     .catch(e => {
-                //         console.error('Error fetching user data:', e);
-                //     })
             }
         } catch (error) {
             console.error('Error checking login status:', error);
+            AsyncStorage.clear();
+            setIsLogged(false);
+            setUser(null);
         } finally {
             setIsLoading(false);
         }

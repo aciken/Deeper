@@ -56,6 +56,7 @@ const SignIn = () => {
           try {
             await AsyncStorage.setItem('@user', JSON.stringify(res.data))
             console.log('User data stored successfully')
+
           } catch (error) {
             console.error('Error storing user data:', error)
           }
@@ -159,8 +160,8 @@ const SignIn = () => {
           {/* Sign Up Link */}
           <View className="flex-row justify-center mt-6">
             <Text className="text-zinc-500 text-base mr-1">Don't have an account?</Text>
-            <TouchableOpacity onPress={() => router.push('/sign-up')}>
-              <Text className="text-sky-400 text-base font-medium">Sign Up</Text>
+            <TouchableOpacity onPress={() => router.push('/onboardingGender')}>
+              <Text className="text-sky-400 text-base font-medium">Create Account</Text>
             </TouchableOpacity>
           </View>
         </View>

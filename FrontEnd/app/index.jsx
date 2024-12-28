@@ -143,6 +143,7 @@ const Index = () => {
   }, [isFocused])
 
   if (isLoading) {
+    
     return (
       <View className="flex-1 bg-zinc-950 items-center justify-center">
         <ActivityIndicator size="large" color="#0EA5E9" />
@@ -239,7 +240,7 @@ const Index = () => {
           {/* Action Buttons */}
           <View className="space-y-4">
             <TouchableOpacity 
-              onPress={() => router.push('/sign-up')}
+              onPress={() => router.push('/onboardingGender')}
               className="w-full h-14 rounded-2xl overflow-hidden"
             >
               <LinearGradient

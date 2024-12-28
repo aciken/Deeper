@@ -1,11 +1,36 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Image } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
 
 const OnboardingSettingup = () => {
   const router = useRouter();
+  const { onboardingData: onboardingDataString } = useLocalSearchParams();
+  const [onboardingData, setOnboardingData] = useState(null);
+
+  useEffect(() => {
+    if (onboardingDataString) {
+      try {
+        const parsedData = JSON.parse(onboardingDataString);
+        setOnboardingData(parsedData);
+        console.log('Received data:', parsedData); // Debug log
+      } catch (error) {
+        console.error('Error parsing onboarding data:', error);
+        setOnboardingData({
+          gender: null,
+          born: null,
+          time: null,
+          deeptime: null,
+          productive: null,
+          stopping: null,
+          work: null,
+          workname: null,
+          worktime: null,
+        });
+      }
+    }
+  }, [onboardingDataString]);
 
   useEffect(() => {
     const timer = setTimeout(() => {

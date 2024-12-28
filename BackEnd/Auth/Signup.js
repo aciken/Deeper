@@ -1,10 +1,17 @@
 const User = require('../DataBase/User');
+const mongoose = require('mongoose');
+
 
 
 const Signup = async (req, res) => {
-    const {name, email, password } = req.body;
+    const {name, email, password, onboardingData } = req.body;
 
-
+    const newWork = {
+        _id: new mongoose.Types.ObjectId(),
+        name: onboardingData.workname,
+        colors: ['#2563EB',"#153885"],
+        currentTime: onboardingData.worktime,
+    }
 
     console.log('signing up started')
 
@@ -13,6 +20,7 @@ const Signup = async (req, res) => {
         name,
         email,
         password,
+        work: [newWork],
     });
 
     console.log(name,email,password)

@@ -1,16 +1,44 @@
 import { View, Text, ScrollView, Image, Alert, TouchableOpacity, TextInput } from 'react-native'
 import React, { useState, useEffect } from 'react'
-import { router, Link } from 'expo-router'
+import { router, Link,useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import axios from 'axios'
 import { LinearGradient } from 'expo-linear-gradient'
 import MaskedView from '@react-native-masked-view/masked-view'
 import { icons } from '../../constants'
+import { useLocalSearchParams } from 'expo-router'
+
 
 import { useGlobalContext } from '../context/GlobalProvider'
 
 const SignUp = () => {
   const { setIsLogged, setUser, setIsLoading } = useGlobalContext()
+  const router = useRouter();
+  const { onboardingData: onboardingDataString } = useLocalSearchParams();
+  const [onboardingData, setOnboardingData] = useState(null);
+
+  useEffect(() => {
+    if (onboardingDataString) {
+      try {
+        const parsedData = JSON.parse(onboardingDataString);
+        setOnboardingData(parsedData);
+        console.log('Received data:', parsedData); // Debug log
+      } catch (error) {
+        console.error('Error parsing onboarding data:', error);
+        setOnboardingData({
+          gender: null,
+          born: null,
+          time: null,
+          deeptime: null,
+          productive: null,
+          stopping: null,
+          work: null,
+          workname: null,
+          worktime: null,
+        });
+      }
+    }
+  }, [onboardingDataString]);
 
   const [form, setForm] = useState({
     name: '',
@@ -23,7 +51,7 @@ const SignUp = () => {
   useEffect(() => {
     if (loginSuccess) {
       setIsLoading(false)
-      router.push('/onboardingGender')
+      router.push('/onboardingSettingup')
     }
   }, [loginSuccess])
 
@@ -38,14 +66,15 @@ const SignUp = () => {
     axios.put('https://0f3b-109-245-203-91.ngrok-free.app/signup', {
       name,
       email,
-      password
+      password,
+      onboardingData,
     }).then(res => {
       if (res.data !== 'exist') {
         setForm({ email: '', password: '', name: '' })
         setUser(res.data)
         setIsLogged(true)
         setLoginSuccess(true)
-        router.push('/onboardingGender')
+        router.push('/onboardingSettingup')
       } else {
         Alert.alert('User already exists')
       }
@@ -62,7 +91,7 @@ const SignUp = () => {
         <View className="flex-1 px-6 justify-center">
           {/* Back Button */}
           <TouchableOpacity 
-            onPress={() => router.push('/')}
+            onPress={() => router.back()}
             className="absolute top-4 left-6 w-10 h-10 rounded-xl bg-zinc-900/80 items-center justify-center"
           >
             <Image source={icons.backIcon} className="w-5 h-5 tint-zinc-400" />
@@ -150,13 +179,6 @@ const SignUp = () => {
             </LinearGradient>
           </TouchableOpacity>
 
-          {/* Sign In Link */}
-          <View className="flex-row justify-center mt-6">
-            <Text className="text-zinc-500 text-base mr-1">Already have an account?</Text>
-            <TouchableOpacity onPress={() => router.push('/sign-in')}>
-              <Text className="text-sky-400 text-base font-medium">Sign In</Text>
-            </TouchableOpacity>
-          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
