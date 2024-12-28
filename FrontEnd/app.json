@@ -40,6 +40,13 @@
     "scheme": "deeper",
     "plugins": [
       "expo-router"
-    ]
+    ],
+    "androidNavigationBar": {
+      "backgroundColor": "#09090b"
+    },
+    "androidStatusBar": {
+      "backgroundColor": "#09090b",
+      "barStyle": "light-content"
+    }
   }
 }

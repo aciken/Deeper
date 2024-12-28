@@ -79,6 +79,9 @@ const Tasks = () => {
 
   const [selectedTab, setSelectedTab] = useState('stats');
 
+  const [sessionTimeframe, setSessionTimeframe] = useState('today');
+  
+
   const screenWidth = Dimensions.get('window').width;
   const graphHeight = 200;
 
@@ -434,7 +437,7 @@ const getGoalWork = () => {
 
 
 const submitNewWork = () => {
-    axios.put('https://0f3b-109-245-203-91.ngrok-free.app/addJob', {
+    axios.put('https://0310-109-245-203-91.ngrok-free.app/addJob', {
     newWork,
     id: user._id,
   }).then(res => {
@@ -450,7 +453,7 @@ const submitNewWork = () => {
 }
 
 const submitEditWork = () => {
-  axios.put('https://0f3b-109-245-203-91.ngrok-free.app/editJob', {
+  axios.put('https://0310-109-245-203-91.ngrok-free.app/editJob', {
   editWork,
   index: editIndex,
   id: user._id,
@@ -471,7 +474,7 @@ const submitEditWork = () => {
 
 const submitDeleteWork = () => {
   if(user.work.length !== 1){
-    axios.put('https://0f3b-109-245-203-91.ngrok-free.app/deleteJob', {
+    axios.put('https://0310-109-245-203-91.ngrok-free.app/deleteJob', {
     index: editIndex,
     id: user._id,
   }).then(res => {
@@ -494,7 +497,7 @@ const submitDeleteWork = () => {
 
 
 const endSession = () => {
-  axios.put('https://0f3b-109-245-203-91.ngrok-free.app/endSession', {
+  axios.put('https://0310-109-245-203-91.ngrok-free.app/endSession', {
     id: user._id,
     sessionId: findCurrentSession().sessionId
   })
@@ -1268,7 +1271,7 @@ const formatTime = (seconds) => {
       <BottomPopup
         visible={isWorkEditPopupVisible}
         onClose={() => setIsWorkEditPopupVisible(false)}
-        height={0.65}
+        height={0.90}
       >
         <ScrollView className="flex-1 bg-zinc-900">
           <View className="p-4 rounded-t-3xl">
@@ -1282,270 +1285,641 @@ const formatTime = (seconds) => {
               <Text className="text-white text-2xl font-bold">{editWork.name}</Text>
             </View>
 
-            <View className="flex-row justify-start items-center space-x-4 mb-4">
-              <TouchableOpacity onPress={() => setSelectedTab('stats')}>
-                <Text className={`text-zinc-700 text-lg font-medium ${selectedTab === 'stats' ? 'text-white underline' : 'text-zinc-600'}`}>Stats</Text>
+            <View className="flex-row justify-center items-center bg-zinc-800/30 rounded-full p-1 mb-6">
+              <TouchableOpacity 
+                onPress={() => setSelectedTab('stats')}
+                className={`flex-1 py-2 px-4 rounded-full ${selectedTab === 'stats' ? 'bg-zinc-800' : ''}`}
+              >
+                <Text className={`text-base font-medium text-center ${selectedTab === 'stats' ? 'text-white' : 'text-zinc-500'}`}>Stats</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setSelectedTab('sessions')}>
-                <Text className={`text-zinc-700 text-lg font-medium ${selectedTab === 'sessions' ? 'text-white underline' : 'text-zinc-600'}`}>Sessions</Text>
+              <TouchableOpacity 
+                onPress={() => setSelectedTab('sessions')}
+                className={`flex-1 py-2 px-4 rounded-full ${selectedTab === 'sessions' ? 'bg-zinc-800' : ''}`}
+              >
+                <Text className={`text-base font-medium text-center ${selectedTab === 'sessions' ? 'text-white' : 'text-zinc-500'}`}>Sessions</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setSelectedTab('edit')}>
-                <Text className={`text-zinc-700 text-lg font-medium ${selectedTab === 'edit' ? 'text-white underline' : 'text-zinc-600'}`}>Edit</Text>
+              <TouchableOpacity 
+                onPress={() => setSelectedTab('edit')}
+                className={`flex-1 py-2 px-4 rounded-full ${selectedTab === 'edit' ? 'bg-zinc-800' : ''}`}
+              >
+                <Text className={`text-base font-medium text-center ${selectedTab === 'edit' ? 'text-white' : 'text-zinc-500'}`}>Edit</Text>
               </TouchableOpacity>
             </View>
 
             {selectedTab === 'stats' && (
-              <View className="mb-6">
-                <View className="h-72 mb-4 relative bg-zinc-800/30 rounded-xl p-4">
-                  {/* Vertical grid lines */}
-                  {[...Array(7)].map((_, i) => (
-                    <View 
-                      key={i}
-                      className="absolute h-full border-l border-zinc-800/50"
-                      style={{ left: `${(i * 100) / 6}%` }}
-                    />
-                  ))}
+              <ScrollView className="mb-6">
+                {/* Last 7 days */}
+                <Text className="text-zinc-400 text-sm font-medium mb-4">Last 7 days</Text>
+
+                {/* Weekly stats summary */}
+                <View className="bg-zinc-800/30 rounded-2xl p-6 space-y-6 shadow-lg border border-zinc-800/50">
                   
-                  {/* Horizontal grid lines */}
-                  {[...Array(5)].map((_, i) => (
-                    <View 
-                      key={i}
-                      className="absolute w-full border-t border-zinc-800/50"
-                      style={{ top: `${(i * 100) / 4}%` }}
-                    />
-                  ))}
+                  {/* Top row stats */}
+                  <View className="flex-row justify-between">
+                    <View className="items-center bg-zinc-800/50 p-4 rounded-xl flex-1 mr-3">
+                      <Text className="text-zinc-400 text-sm mb-2 font-medium">Weekly Total</Text>
+                      <Text className="text-white text-2xl font-bold">{(() => {
+                        if (editIndex === null) return '0:00';
+                        
+                        let totalMinutes = 0;
+                        const today = new Date();
+                        const sevenDaysAgo = new Date(today);
+                        sevenDaysAgo.setDate(today.getDate() - 7);
 
-                  {/* Background gradient */}
-                  <LinearGradient
-                    colors={['rgba(96, 165, 250, 0.1)', 'rgba(96, 165, 250, 0)']}
-                    start={{x: 0, y: 0}}
-                    end={{x: 0, y: 1}}
-                    style={{
-                      position: 'absolute',
-                      top: '10%',
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      borderRadius: 12,
-                    }}
-                  />
+                        user.workSessions
+                          .filter(session => {
+                            const [day, month, year] = session.date.split(':').map(Number);
+                            const sessionDate = new Date(year, month - 1, day);
+                            return session.workId === user.work[editIndex]._id && 
+                                   sessionDate >= sevenDaysAgo && 
+                                   sessionDate <= today;
+                          })
+                          .forEach(session => {
+                            const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+                            const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+                            const startInMinutes = startHours * 60 + startMinutes;
+                            const endInMinutes = endHours * 60 + endMinutes;
+                            totalMinutes += endInMinutes - startInMinutes;
+                          });
+                        const hours = Math.floor(totalMinutes / 60);
+                        const minutes = totalMinutes % 60;
+                        return `${hours}:${minutes.toString().padStart(2, '0')}`;
+                      })()}h</Text>
+                    </View>
 
-                  {/* Limit line and text - moved higher */}
-                  <View 
-                    className="absolute w-full flex-row items-center px-4" 
-                    style={{ top: '10%' }}
-                  >
-                    <View className="flex-1 border-t-2 border-red-400/20 border-dashed" />
-                    <View className="bg-red-400/10 rounded-full px-2 py-1 ml-2">
-                      <Text className="text-red-400/80 text-xs font-medium">Weekly Goal: 40h</Text>
+                    <View className="items-center bg-zinc-800/50 p-4 rounded-xl flex-1">
+                      <Text className="text-zinc-400 text-sm mb-2 font-medium">Daily Average</Text>
+                      <Text className="text-white text-2xl font-bold">{(() => {
+                        if (editIndex === null) return '0:00';
+                        
+                        let totalMinutes = 0;
+                        const today = new Date();
+                        const sevenDaysAgo = new Date(today);
+                        sevenDaysAgo.setDate(today.getDate() - 7);
+
+                        user.workSessions
+                          .filter(session => {
+                            const [day, month, year] = session.date.split(':').map(Number);
+                            const sessionDate = new Date(year, month - 1, day);
+                            return session.workId === user.work[editIndex]._id && 
+                                   sessionDate >= sevenDaysAgo && 
+                                   sessionDate <= today;
+                          })
+                          .forEach(session => {
+                            const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+                            const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+                            const startInMinutes = startHours * 60 + startMinutes;
+                            const endInMinutes = endHours * 60 + endMinutes;
+                            totalMinutes += endInMinutes - startInMinutes;
+                          });
+
+                        const avgMinutesPerDay = totalMinutes / 7;
+                        const hours = Math.floor(avgMinutesPerDay / 60);
+                        const minutes = Math.round(avgMinutesPerDay % 60);
+                        return `${hours}:${minutes.toString().padStart(2, '0')}`;
+                      })()}h</Text>
                     </View>
                   </View>
 
-                  {/* Graph */}
-                  <Svg height="100%" width="100%" style={{ position: 'absolute' }}>
-                    <Defs>
-                      <SvgLinearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                        <Stop offset="0" stopColor="#60A5FA" stopOpacity="0.2" />
-                        <Stop offset="1" stopColor="#60A5FA" stopOpacity="0.05" />
-                      </SvgLinearGradient>
-                    </Defs>
+                  <View className="items-center">
+                    {(() => {
+                      if (editIndex === null) return <Text className="text-zinc-400 text-xs">-</Text>;
+                      
+                      const today = new Date();
+                      const sevenDaysAgo = new Date(today);
+                      sevenDaysAgo.setDate(today.getDate() - 7);
+                      const fourteenDaysAgo = new Date(today);
+                      fourteenDaysAgo.setDate(today.getDate() - 14);
+                      
+                      let thisWeekTotal = 0;
+                      let lastWeekTotal = 0;
 
-                    {points && points.length > 0 && (
-                      <>
-                        {/* Area under curve */}
-                        <Path
-                          d={`
-                            ${createSmoothPath(points, screenWidth - 32, graphHeight)}
-                            L ${screenWidth - 32},${graphHeight}
-                            L 0,${graphHeight}
-                            Z
-                          `}
-                          fill="url(#areaGradient)"
-                        />
+                      // Calculate this week and last week totals
+                      user.workSessions
+                        .filter(session => session.workId === user.work[editIndex]._id)
+                        .forEach(session => {
+                          const [day, month, year] = session.date.split(':').map(Number);
+                          const sessionDate = new Date(year, month - 1, day);
+                          const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+                          const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+                          const duration = (endHours * 60 + endMinutes) - (startHours * 60 + startMinutes);
 
-                        {/* Line */}
-                        <Path
-                          d={createSmoothPath(points, screenWidth - 32, graphHeight)}
-                          stroke="#60A5FA"
-                          strokeWidth="2.5"
-                          fill="none"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
+                          if (sessionDate >= sevenDaysAgo && sessionDate <= today) {
+                            thisWeekTotal += duration;
+                          } else if (sessionDate >= fourteenDaysAgo && sessionDate < sevenDaysAgo) {
+                            lastWeekTotal += duration;
+                          }
+                        });
 
-                        {/* Points */}
-                        {points.map((point, index) => (
-                          <G key={index}>
-                            <Circle
-                              cx={index * ((screenWidth - 32) / 6)}
-                              cy={point.value}
-                              r="4"
-                              fill="#60A5FA"
-                            />
-                            <Circle
-                              cx={index * ((screenWidth - 32) / 6)}
-                              cy={point.value}
-                              r="2"
-                              fill="#fff"
-                            />
-                          </G>
-                        ))}
-                      </>
-                    )}
-                  </Svg>
+                      if (lastWeekTotal === 0 && thisWeekTotal === 0) {
+                        return <Text className="text-zinc-400 text-xs">-</Text>;
+                      }
+                      
+                      if (lastWeekTotal === 0 && thisWeekTotal > 0) {
+                        return <Text className="text-emerald-400 text-xs font-medium">+100% from last week</Text>;
+                      }
 
-                  {/* Time labels */}
-                  <View className="absolute bottom-2 w-full flex-row justify-between px-4">
-                    {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => (
-                      <View key={i} className="items-center">
-                        <Text className="text-zinc-400 text-xs font-medium">
-                          {day}
+                      const percentChange = ((thisWeekTotal - lastWeekTotal) / lastWeekTotal) * 100;
+                      const roundedChange = Math.round(percentChange);
+                      const textColor = roundedChange >= 0 ? 'text-emerald-400' : 'text-red-400';
+
+                      return (
+                        <Text className={`${textColor} text-xs font-medium`}>
+                          {`${roundedChange >= 0 ? '+' : ''}${roundedChange}% from last week`}
                         </Text>
-                      </View>
-                    ))}
+                      );
+                    })()}
                   </View>
-                </View>
 
-                {/* Weekly stats summary */}
-                <View className="flex-row justify-between bg-zinc-800/30 rounded-xl p-4">
-                  <View className="items-center">
-                    <Text className="text-zinc-400 text-sm mb-1">Weekly Total</Text>
-                    <Text className="text-white text-xl font-bold">32.5h</Text>
-                    <Text className="text-sky-400 text-xs">+12%</Text>
+                  {/* Divider */}
+                  <View className="border-t border-zinc-800" />
+
+                  {/* Middle row stats */}
+                  <View className="flex-row justify-between">
+                    <View className="items-center bg-zinc-800/50 p-4 rounded-xl flex-1 mr-3">
+                      <Text className="text-zinc-400 text-sm mb-2 font-medium">Most Productive Day</Text>
+                      <Text className="text-white text-2xl font-bold">
+                        {(() => {
+                          if (editIndex === null) return '-';
+                          
+                          const today = new Date();
+                          const sevenDaysAgo = new Date(today);
+                          sevenDaysAgo.setDate(today.getDate() - 7);
+
+                          const dailyMinutes = {};
+                          const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+                          user.workSessions
+                            .filter(session => {
+                              const [day, month, year] = session.date.split(':').map(Number);
+                              const sessionDate = new Date(year, month - 1, day);
+                              return session.workId === user.work[editIndex]._id && 
+                                     sessionDate >= sevenDaysAgo && 
+                                     sessionDate <= today;
+                            })
+                            .forEach(session => {
+                              const [day, month, year] = session.date.split(':').map(Number);
+                              const sessionDate = new Date(year, month - 1, day);
+                              const dayName = dayNames[sessionDate.getDay()];
+                              
+                              const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+                              const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+                              const sessionMinutes = (endHours * 60 + endMinutes) - (startHours * 60 + startMinutes);
+                              
+                              dailyMinutes[dayName] = (dailyMinutes[dayName] || 0) + sessionMinutes;
+                            });
+
+                          let bestDay = '-';
+                          let maxMinutes = 0;
+                          
+                          Object.entries(dailyMinutes).forEach(([day, minutes]) => {
+                            if (minutes > maxMinutes) {
+                              maxMinutes = minutes;
+                              bestDay = day;
+                            }
+                          });
+
+                          return bestDay;
+                        })()}
+                      </Text>
+                      <Text className="text-xs text-sky-400 font-medium">
+                        {(() => {
+                          if (editIndex === null) return '0h';
+                          
+                          const today = new Date();
+                          const sevenDaysAgo = new Date(today);
+                          sevenDaysAgo.setDate(today.getDate() - 7);
+
+                          const dailyMinutes = {};
+
+                          user.workSessions
+                            .filter(session => {
+                              const [day, month, year] = session.date.split(':').map(Number);
+                              const sessionDate = new Date(year, month - 1, day);
+                              return session.workId === user.work[editIndex]._id && 
+                                     sessionDate >= sevenDaysAgo && 
+                                     sessionDate <= today;
+                            })
+                            .forEach(session => {
+                              const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+                              const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+                              const sessionMinutes = (endHours * 60 + endMinutes) - (startHours * 60 + startMinutes);
+                              
+                              const [day, month, year] = session.date.split(':').map(Number);
+                              const sessionDate = new Date(year, month - 1, day);
+                              const dayName = sessionDate.toLocaleDateString('en-US', { weekday: 'short' });
+                              
+                              dailyMinutes[dayName] = (dailyMinutes[dayName] || 0) + sessionMinutes;
+                            });
+
+                          const maxMinutes = Math.max(...Object.values(dailyMinutes), 0);
+                          const hours = Math.floor(maxMinutes / 60);
+                          const minutes = Math.round(maxMinutes % 60);
+                          
+                          return `${hours}:${minutes.toString().padStart(2, '0')}h`;
+                        })()}
+                      </Text>
+                    </View>
+
+                    <View className="items-center bg-zinc-800/50 p-4 rounded-xl flex-1">
+                      <Text className="text-zinc-400 text-sm mb-2 font-medium">Weekly Goal Progress</Text>
+                      <Text className="text-white text-2xl font-bold">{(() => {
+                        if (editIndex === null) return '0%';
+                        
+                        let totalMinutes = 0;
+                        const today = new Date();
+                        const sevenDaysAgo = new Date(today);
+                        sevenDaysAgo.setDate(today.getDate() - 7);
+
+                        user.workSessions
+                          .filter(session => {
+                            const [day, month, year] = session.date.split(':').map(Number);
+                            const sessionDate = new Date(year, month - 1, day);
+                            return session.workId === user.work[editIndex]._id && 
+                                   sessionDate >= sevenDaysAgo && 
+                                   sessionDate <= today;
+                          })
+                          .forEach(session => {
+                            const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+                            const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+                            const startInMinutes = startHours * 60 + startMinutes;
+                            const endInMinutes = endHours * 60 + endMinutes;
+                            totalMinutes += endInMinutes - startInMinutes;
+                          });
+
+                        const goalMinutes = parseInt(user.work[editIndex].currentTime) * 7 * 60;
+                        const percentage = Math.round((totalMinutes / goalMinutes) * 100);
+                        
+                        return `${percentage}%`;
+                      })()}</Text>
+                      <Text className="text-sky-400 text-xs font-medium">{(() => {
+                        if (editIndex === null) return '0:00h / 0:00h';
+                        
+                        let totalMinutes = 0;
+                        const today = new Date();
+                        const sevenDaysAgo = new Date(today);
+                        sevenDaysAgo.setDate(today.getDate() - 7);
+
+                        user.workSessions
+                          .filter(session => {
+                            const [day, month, year] = session.date.split(':').map(Number);
+                            const sessionDate = new Date(year, month - 1, day);
+                            return session.workId === user.work[editIndex]._id && 
+                                   sessionDate >= sevenDaysAgo && 
+                                   sessionDate <= today;
+                          })
+                          .forEach(session => {
+                            const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+                            const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+                            const startInMinutes = startHours * 60 + startMinutes;
+                            const endInMinutes = endHours * 60 + endMinutes;
+                            totalMinutes += endInMinutes - startInMinutes;
+                          });
+
+                        const hours = Math.floor(totalMinutes / 60);
+                        const minutes = totalMinutes % 60;
+                        
+                        const goalHours = parseInt(user.work[editIndex].currentTime) * 7;
+                        
+                        return `${hours}:${minutes.toString().padStart(2, '0')}h / ${goalHours}:00h`;
+                      })()}</Text>
+                    </View>
                   </View>
-                  <View className="items-center">
-                    <Text className="text-zinc-400 text-sm mb-1">Daily Avg</Text>
-                    <Text className="text-white text-xl font-bold">4.6h</Text>
-                    <Text className="text-emerald-400 text-xs">+5%</Text>
+
+                  {/* Divider */}
+                  <View className="border-t border-zinc-800" />
+
+                  {/* Bottom row stats */}
+                  <View className="flex-row justify-between">
+                    <View className="items-center bg-zinc-800/50 p-4 rounded-xl flex-1 mr-3">
+                      <Text className="text-zinc-400 text-sm mb-2 font-medium">Longest Session</Text>
+                      <Text className="text-white text-2xl font-bold">{(() => {
+                        if (editIndex === null) return '0:00h';
+                        
+                        let longestDuration = 0;
+                        const today = new Date();
+                        const sevenDaysAgo = new Date(today);
+                        sevenDaysAgo.setDate(today.getDate() - 7);
+
+                        user.workSessions
+                          .filter(session => {
+                            const [day, month, year] = session.date.split(':').map(Number);
+                            const sessionDate = new Date(year, month - 1, day);
+                            return session.workId === user.work[editIndex]._id && 
+                                   sessionDate >= sevenDaysAgo && 
+                                   sessionDate <= today;
+                          })
+                          .forEach(session => {
+                            const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+                            const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+                            const startInMinutes = startHours * 60 + startMinutes;
+                            const endInMinutes = endHours * 60 + endMinutes;
+                            const duration = endInMinutes - startInMinutes;
+                            longestDuration = Math.max(longestDuration, duration);
+                          });
+
+                        const hours = Math.floor(longestDuration / 60);
+                        const minutes = longestDuration % 60;
+                        return `${hours}:${minutes.toString().padStart(2, '0')}h`;
+                      })()}</Text>
+                      <Text className="text-emerald-400 text-xs font-medium">{(() => {
+                        if (editIndex === null) return '';
+                        
+                        let longestSession = null;
+                        let longestDuration = 0;
+                        const today = new Date();
+                        const sevenDaysAgo = new Date(today);
+                        sevenDaysAgo.setDate(today.getDate() - 7);
+                        
+                        user.workSessions
+                          .filter(session => {
+                            const [day, month, year] = session.date.split(':').map(Number);
+                            const sessionDate = new Date(year, month - 1, day);
+                            return session.workId === user.work[editIndex]._id && 
+                                   sessionDate >= sevenDaysAgo && 
+                                   sessionDate <= today;
+                          })
+                          .forEach(session => {
+                            const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+                            const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+                            const startInMinutes = startHours * 60 + startMinutes;
+                            const endInMinutes = endHours * 60 + endMinutes;
+                            const duration = endInMinutes - startInMinutes;
+                            
+                            if (duration > longestDuration) {
+                              longestDuration = duration;
+                              longestSession = session;
+                            }
+                          });
+
+                        if (!longestSession) return '';
+                        
+                        const [day, month, year] = longestSession.date.split(':').map(Number);
+                        const date = new Date(year, month - 1, day);
+                        const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+                        return `Started ${dayName} ${longestSession.startTime}`;
+                      })()}</Text>
+                    </View>
+                    <View className="items-center bg-zinc-800/50 p-4 rounded-xl flex-1">
+                      <Text className="text-zinc-400 text-sm mb-2 font-medium">Total Sessions</Text>
+                      <Text className="text-white text-2xl font-bold">{(() => {
+                        if (editIndex === null) return '0';
+                        
+                        const today = new Date();
+                        const sevenDaysAgo = new Date(today);
+                        sevenDaysAgo.setDate(today.getDate() - 7);
+                        
+                        const thisWeekSessions = user.workSessions.filter(session => {
+                          const [day, month, year] = session.date.split(':').map(Number);
+                          const sessionDate = new Date(year, month - 1, day);
+                          return session.workId === user.work[editIndex]._id && 
+                                 sessionDate >= sevenDaysAgo && 
+                                 sessionDate <= today;
+                        }).length;
+                        
+                        return thisWeekSessions;
+                      })()}</Text>
+                      <Text className={`text-xs font-medium ${(() => {
+                        if (editIndex === null) return 'text-zinc-400';
+                        
+                        const today = new Date();
+                        const sevenDaysAgo = new Date(today);
+                        sevenDaysAgo.setDate(today.getDate() - 7);
+                        const fourteenDaysAgo = new Date(today);
+                        fourteenDaysAgo.setDate(today.getDate() - 14);
+                        
+                        const thisWeekSessions = user.workSessions.filter(session => {
+                          const [day, month, year] = session.date.split(':').map(Number);
+                          const sessionDate = new Date(year, month - 1, day);
+                          return session.workId === user.work[editIndex]._id && 
+                                 sessionDate >= sevenDaysAgo && 
+                                 sessionDate <= today;
+                        }).length;
+                        
+                        const lastWeekSessions = user.workSessions.filter(session => {
+                          const [day, month, year] = session.date.split(':').map(Number);
+                          const sessionDate = new Date(year, month - 1, day);
+                          return session.workId === user.work[editIndex]._id && 
+                                 sessionDate >= fourteenDaysAgo && 
+                                 sessionDate < sevenDaysAgo;
+                        }).length;
+                        
+                        const diff = thisWeekSessions - lastWeekSessions;
+                        return diff > 0 ? 'text-emerald-400' : diff < 0 ? 'text-red-400' : 'text-zinc-400';
+                      })()}`}>{(() => {
+                        if (editIndex === null) return '-';
+                        
+                        const today = new Date();
+                        const sevenDaysAgo = new Date(today);
+                        sevenDaysAgo.setDate(today.getDate() - 7);
+                        const fourteenDaysAgo = new Date(today);
+                        fourteenDaysAgo.setDate(today.getDate() - 14);
+                        
+                        const thisWeekSessions = user.workSessions.filter(session => {
+                          const [day, month, year] = session.date.split(':').map(Number);
+                          const sessionDate = new Date(year, month - 1, day);
+                          return session.workId === user.work[editIndex]._id && 
+                                 sessionDate >= sevenDaysAgo && 
+                                 sessionDate <= today;
+                        }).length;
+                        
+                        const lastWeekSessions = user.workSessions.filter(session => {
+                          const [day, month, year] = session.date.split(':').map(Number);
+                          const sessionDate = new Date(year, month - 1, day);
+                          return session.workId === user.work[editIndex]._id && 
+                                 sessionDate >= fourteenDaysAgo && 
+                                 sessionDate < sevenDaysAgo;
+                        }).length;
+                        
+                        const diff = thisWeekSessions - lastWeekSessions;
+                        return diff > 0 ? `+${diff} from last week` : diff < 0 ? `${diff} from last week` : 'Same as last week';
+                      })()}</Text>
+                    </View>
                   </View>
-                  <View className="items-center">
-                    <Text className="text-zinc-400 text-sm mb-1">Best Day</Text>
-                    <Text className="text-white text-xl font-bold">Thu</Text>
-                    <Text className="text-sky-400 text-xs">7.5h</Text>
-                  </View>
+
                 </View>
-              </View>
+              </ScrollView>
             )}
 
             {selectedTab === 'sessions' && (
-              <View>
-                {user.workSessions.filter(session => session.workId === user.work[editIndex]._id && session.date === `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`).map((session, index) => (
-                  <View key={index} className="bg-zinc-800/50 rounded-xl p-2 mb-2 flex flex-row justify-between items-center border border-zinc-700/50">
-                    <Text className="text-zinc-200 text-base font-pregular">{session.name}</Text>
-                    <Text className="text-zinc-600 text-base font-pregular">{session.startTime} - {session.endTime}</Text>
+              <View className="space-y-4">
+                <View className="flex-row justify-center items-center bg-zinc-800/30 rounded-full p-1 mb-4">
+                  <TouchableOpacity 
+                    onPress={() => setSessionTimeframe('today')}
+                    className={`flex-1 py-2 px-4 rounded-full ${sessionTimeframe === 'today' ? 'bg-zinc-800' : ''}`}
+                  >
+                    <Text className={`text-base font-medium text-center ${sessionTimeframe === 'today' ? 'text-white' : 'text-zinc-500'}`}>Today</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    onPress={() => setSessionTimeframe('week')}
+                    className={`flex-1 py-2 px-4 rounded-full ${sessionTimeframe === 'week' ? 'bg-zinc-800' : ''}`}
+                  >
+                    <Text className={`text-base font-medium text-center ${sessionTimeframe === 'week' ? 'text-white' : 'text-zinc-500'}`}>Last 7 Days</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <Text className="text-zinc-400 text-sm font-medium mb-2">
+                  {sessionTimeframe === 'today' ? "Today's Sessions" : "Last 7 Days Sessions"}
+                </Text>
+                
+                {user.workSessions.filter(session => {
+                  const [day, month, year] = session.date.split(':').map(Number);
+                  const sessionDate = new Date(year, month - 1, day);
+                  const today = new Date();
+                  const sevenDaysAgo = new Date(today);
+                  sevenDaysAgo.setDate(today.getDate() - 7);
+
+                  if (sessionTimeframe === 'today') {
+                    return session.workId === user.work[editIndex]._id && 
+                           session.date === `${today.getDate()}:${today.getMonth() + 1}:${today.getFullYear()}`;
+                  } else {
+                    return session.workId === user.work[editIndex]._id && 
+                           sessionDate >= sevenDaysAgo && 
+                           sessionDate <= today;
+                  }
+                }).map((session, index) => (
+                  <View key={index} className="bg-zinc-800/30 rounded-xl p-4 border border-zinc-800/50 shadow-lg">
+                    <View className="flex-row justify-between items-center">
+                      <View className="flex-row items-center">
+                        <View className="w-2 h-2 rounded-full bg-sky-400 mr-3" />
+                        <Text className="text-white text-base font-medium">{session.name}</Text>
+                      </View>
+                      <View className="bg-zinc-800/50 px-3 py-1 rounded-full">
+                        <Text className="text-sky-400 text-sm font-medium">
+                          {session.startTime} - {session.endTime}
+                        </Text>
+                      </View>
+                    </View>
                   </View>
                 ))}
+                {user.workSessions.filter(session => 
+                  session.workId === user.work[editIndex]._id && 
+                  session.date === `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`
+                ).length === 0 && (
+                  <View className="items-center py-6">
+                    <Text className="text-zinc-600 text-base">No sessions today</Text>
+                  </View>
+                )}
               </View>
             )}
 
             {selectedTab === 'edit' && (
-  <View className="p-2 bg-zinc-900 rounded-t-3xl flex-1">
-  <View className="mb-4">
-    <Text className="text-gray-400 text-sm mb-2">Work Name</Text>
-    <TextInput
-      className="bg-zinc-800 text-white p-3 rounded-xl"
-      placeholder="Work Name"
-      placeholderTextColor="#71717A" 
-      value={editWork.name}
-      onChangeText={(text) => setEditWork({...editWork, name: text})}
-    />
-  </View>
-  
-  <View className="mb-4">
-    <Text className="text-gray-400 text-sm mb-2">Choose color:</Text>
-    <View className="flex-row justify-between">
-      {/* {['#DC2626', '#16A34A', '#2563EB', '#9333EA', '#CA8A04', '#0EA5E9', '#EC4899'].map((color, index) => (
-        <TouchableOpacity
-          key={index}
-          style={{ backgroundColor: color }}
-          className="w-8 h-8 rounded-full"
-        />
-      ))} */}
-      {ballColors.map((color, index) => (
-        <TouchableOpacity
-          key={index}
-          style={{ backgroundColor: color }}
-          className={`w-8 h-8 rounded-full `}
-          onPress={() => {
-            if (!works.some(work => work.colors[0] === color[0] && work.colors[1] === color[1]) || (initialEditWork.colors[0] === color[0] && initialEditWork.colors[1] === color[1])) {
-              setEditWork({...editWork, colors: color});
-            }
-          }}
-        >
-          <LinearGradient
-            colors={color}
-            start={{x: 0, y: 0}}
-            end={{x: 1, y: 1}}
-            className={`w-8 h-8 rounded-full ${works.some(work => work.colors[0] === color[0] && work.colors[1] === color[1]) && (initialEditWork.colors[0] !== color[0] && initialEditWork.colors[1] !== color[1]) ? 'opacity-20' : ''} ${editWork.colors[0] === color[0] && editWork.colors[1] === color[1] ? 'border-2 border-white' : ''}`}
-          >
-          </LinearGradient>
-        </TouchableOpacity>
-      ))}
-    </View>
+              <View className="p-2 bg-zinc-900 rounded-t-3xl flex-1">
+                {/* Work Name Input */}
+                <View className="mb-6">
+                  <Text className="text-zinc-400 text-sm font-medium mb-2">Work Name</Text>
+                  <TextInput
+                    className="bg-zinc-800/50 text-white p-4 rounded-xl border border-zinc-800"
+                    placeholder="Work Name" 
+                    placeholderTextColor="#71717A"
+                    value={editWork.name}
+                    onChangeText={(text) => setEditWork({...editWork, name: text})}
+                    style={{fontSize: 16}}
+                  />
+                </View>
 
-  </View>
-  
-  <View className="mb-4">
-    <Text className="text-gray-400 text-sm mb-2">Targeted work per day:</Text>
-    <View className="flex-row items-center justify-between bg-zinc-800 rounded-xl p-2">
-      <TouchableOpacity 
-      onPress={() => {
-        if (editWork.currentTime.includes('m')) { 
-          setEditWork({...editWork, currentTime: parseInt(editWork.currentTime.replace('h', '')) + 'h'})
-        } else {
-          setEditWork({...editWork, currentTime: parseInt(editWork.currentTime.replace('h', '')) - 1 + 'h 30m'})
-        }
-      }}
-      className="bg-zinc-700 w-10 h-10 rounded-full items-center justify-center">
-        <Text className="text-white text-xl">-</Text>
-      </TouchableOpacity>
-      <Text className="text-white text-2xl font-bold">{editWork.currentTime}</Text>
-      <TouchableOpacity 
-      onPress={() => {
-        if (editWork.currentTime.includes('m')) {
-          setEditWork({...editWork, currentTime: parseInt(editWork.currentTime.replace('h', '')) + 1 + 'h'})
-        } else {
-          setEditWork({...editWork, currentTime: parseInt(editWork.currentTime.replace('h', '')) + 'h 30m'})
-        }
-      }}
-      className="bg-zinc-700 w-10 h-10 rounded-full items-center justify-center">
-        <Text className="text-white text-xl">+</Text>
-      </TouchableOpacity>
-    </View>
-  </View>
-  
-  <View className="flex-1" />
-  
-  <View className="flex-row justify-between">
-    <TouchableOpacity 
-      onPress={submitEditWork}
-      className="flex-1 mr-2"
-    >
-      <LinearGradient
-        colors={['#0ea5e9', '#60a5fa']}
-        start={{x: 0, y: 0}}
-        end={{x: 1, y: 1}}
-        className="rounded-full py-4 items-center"
-      >
-        <Text className="text-white text-lg font-semibold">Edit Work</Text>
-      </LinearGradient>
-    </TouchableOpacity>
-    <TouchableOpacity 
-      onPress={submitDeleteWork}
+                {/* Color Selection */}
+                <View className="mb-6">
+                  <Text className="text-zinc-400 text-sm font-medium mb-3">Color Theme</Text>
+                  <View className="flex-row justify-between px-2">
+                    {ballColors.map((color, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        onPress={() => {
+                          if (!works.some(work => work.colors[0] === color[0] && work.colors[1] === color[1]) || 
+                              (initialEditWork.colors[0] === color[0] && initialEditWork.colors[1] === color[1])) {
+                            setEditWork({...editWork, colors: color});
+                          }
+                        }}
+                        className="p-1"
+                      >
+                        <LinearGradient
+                          colors={color}
+                          start={{x: 0, y: 0}}
+                          end={{x: 1, y: 1}}
+                          className={`w-10 h-10 rounded-full shadow-lg ${
+                            works.some(work => work.colors[0] === color[0] && work.colors[1] === color[1]) && 
+                            (initialEditWork.colors[0] !== color[0] && initialEditWork.colors[1] !== color[1]) 
+                              ? 'opacity-20' 
+                              : ''
+                          } ${
+                            editWork.colors[0] === color[0] && editWork.colors[1] === color[1]
+                              ? 'border-2 border-white'
+                              : ''
+                          }`}
+                        />
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
 
-      className=" w-14 h-14 rounded-full items-center justify-center"
-    >
-      <LinearGradient
-        colors={['#DC2626', '#761414']}
-        start={{x: 0, y: 0}}
-        end={{x: 1, y: 1}}
-        className="w-14 h-14 rounded-full items-center justify-center"
-      >
-        <Image source={icons.trash} className="w-6 h-6 tint-white" />
-      </LinearGradient>
-    </TouchableOpacity>
-  </View>
-</View> 
+                {/* Daily Target Time */}
+                <View className="mb-6">
+                  <Text className="text-zinc-400 text-sm font-medium mb-3">Daily Target Time</Text>
+                  <View className="flex-row items-center justify-between bg-zinc-800/50 rounded-xl p-3 border border-zinc-800">
+                    <TouchableOpacity 
+                      onPress={() => {
+                        if (editWork.currentTime.includes('m')) { 
+                          setEditWork({...editWork, currentTime: parseInt(editWork.currentTime.replace('h', '')) + 'h'})
+                        } else {
+                          setEditWork({...editWork, currentTime: parseInt(editWork.currentTime.replace('h', '')) - 1 + 'h 30m'})
+                        }
+                      }}
+                      className="bg-zinc-700/80 w-12 h-12 rounded-full items-center justify-center shadow-lg"
+                    >
+                      <Text className="text-white text-xl font-medium">-</Text>
+                    </TouchableOpacity>
+                    
+                    <Text className="text-white text-2xl font-bold">{editWork.currentTime}</Text>
+                    
+                    <TouchableOpacity 
+                      onPress={() => {
+                        if (editWork.currentTime.includes('m')) {
+                          setEditWork({...editWork, currentTime: parseInt(editWork.currentTime.replace('h', '')) + 1 + 'h'})
+                        } else {
+                          setEditWork({...editWork, currentTime: parseInt(editWork.currentTime.replace('h', '')) + 'h 30m'})
+                        }
+                      }}
+                      className="bg-zinc-700/80 w-12 h-12 rounded-full items-center justify-center shadow-lg"
+                    >
+                      <Text className="text-white text-xl font-medium">+</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <View className="flex-1" />
+
+                {/* Action Buttons */}
+                <View className="flex-row justify-between space-x-3 mt-4">
+                  <TouchableOpacity 
+                    onPress={submitEditWork}
+                    className="flex-1"
+                  >
+                    <LinearGradient
+                      colors={['#0ea5e9', '#60a5fa']}
+                      start={{x: 0, y: 0}}
+                      end={{x: 1, y: 1}}
+                      className="rounded-full py-4 items-center shadow-lg"
+                    >
+                      <Text className="text-white text-lg font-semibold">Save Changes</Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity 
+                    onPress={submitDeleteWork}
+                    className="w-14 h-14"
+                  >
+                    <LinearGradient
+                      colors={['#DC2626', '#991B1B']}
+                      start={{x: 0, y: 0}}
+                      end={{x: 1, y: 1}}
+                      className="w-14 h-14 rounded-full items-center justify-center shadow-lg"
+                    >
+                      <Image source={icons.trash} className="w-6 h-6 tint-white" />
+                    </LinearGradient>
+                  </TouchableOpacity>
+                </View>
+              </View>
             )}
 
 

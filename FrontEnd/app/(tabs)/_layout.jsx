@@ -16,15 +16,6 @@ const TabsLayout = () => {
           tintColor={color}
           style={styles.tabIcon}
         />
-        <Text 
-          style={[
-            styles.tabLabel,
-            { color: color === '#ffffff' ? '#ffffff' : '#6b7280' }
-          ]}
-          numberOfLines={1}
-        >
-          {name}
-        </Text>
       </View>
     );
   };
@@ -34,15 +25,16 @@ const TabsLayout = () => {
       <Tabs
         screenOptions={{
           tabBarShowLabel: false,
-          tabBarActiveTintColor: '#ffffff',
+          tabBarActiveTintColor: '#0284c7',
           tabBarInactiveTintColor: '#1f2937',
           tabBarStyle: {
             backgroundColor: '#09090b',
-            borderTopColor: '#27272a',
             borderTopWidth: 1,
+            borderTopColor: '#18181b',
             height: 50 + insets.bottom,
             paddingBottom: insets.bottom,
             paddingTop: 2,
+            elevation: 0,
           },
           headerShown: false,
           contentStyle: {
@@ -52,7 +44,6 @@ const TabsLayout = () => {
       >
         <Tabs.Screen name="Home"
           options={{
-            title: 'Home',
             headerShown: false,
             tabBarIcon: ({color}) => (
               <TabIcon icon={icons.home} color={color} name='Home'/>
@@ -61,7 +52,6 @@ const TabsLayout = () => {
         />
         <Tabs.Screen name="Tasks"
           options={{
-            title: 'Tasks',
             headerShown: false,
             tabBarIcon: ({color}) => (
               <TabIcon icon={icons.plus} color={color} name='Tasks'/>

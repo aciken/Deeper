@@ -419,7 +419,7 @@ const Home = () => {
 
 				
 
-				axios.put('https://0f3b-109-245-203-91.ngrok-free.app/changeDaily', {	
+				axios.put('https://0310-109-245-203-91.ngrok-free.app/changeDaily', {	
 					id: user._id,
 					date
 				})
@@ -719,7 +719,7 @@ const Home = () => {
 
 
 	const collectPoints = (challange, index) => {
-		axios.put('https://0f3b-109-245-203-91.ngrok-free.app/collectDaily', {
+		axios.put('https://0310-109-245-203-91.ngrok-free.app/collectDaily', {
 			id: user._id,
 			points: challange.points,
 			index
@@ -735,7 +735,7 @@ const Home = () => {
 
 
 	const collectGeneralPoints = (challange) => {
-		axios.put('https://0f3b-109-245-203-91.ngrok-free.app/collectGeneral', {
+		axios.put('https://0310-109-245-203-91.ngrok-free.app/collectGeneral', {
 			id: user._id,
 			points: challange.points,
 			type: challange.type
@@ -826,7 +826,7 @@ const Home = () => {
 	useEffect(() => {
 		const id = user._id;
 		console.log('setting user')
-		axios.post('https://0f3b-109-245-203-91.ngrok-free.app/getUser', { id })
+		axios.post('https://0310-109-245-203-91.ngrok-free.app/getUser', { id })
 			.then(async res => {
 				setIsLoading(false);
 				setUser(res.data);
@@ -924,7 +924,7 @@ const Home = () => {
 
 			}
 
-			axios.put('https://0f3b-109-245-203-91.ngrok-free.app/startSession', {	
+			axios.put('https://0310-109-245-203-91.ngrok-free.app/startSession', {	
 				sessionName,
 				selectedWork,
 				duration: adjustedDuration,
@@ -1056,7 +1056,7 @@ const Home = () => {
 
 
 	const endSession = () => {
-		axios.put('https://0f3b-109-245-203-91.ngrok-free.app/endSession', {
+		axios.put('https://0310-109-245-203-91.ngrok-free.app/endSession', {
 			id: user._id,
 			sessionId: findCurrentSession().sessionId
 		})
