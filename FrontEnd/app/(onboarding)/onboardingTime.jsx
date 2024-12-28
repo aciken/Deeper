@@ -1,26 +1,76 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { icons } from '../../constants';
 
-const OnboardingTime = () => {
-  const [selectedTime, setSelectedTime] = useState(null);
+const TimeSelect = () => {
   const router = useRouter();
+  const { onboardingData: onboardingDataString } = useLocalSearchParams();
+  
+  const [onboardingData, setOnboardingData] = useState(null);
+  const [selectedTime, setSelectedTime] = useState(null);
 
-  const TimeButton = ({ hours, description }) => (
+  useEffect(() => {
+    if (onboardingDataString) {
+      try {
+        const parsedData = JSON.parse(onboardingDataString);
+        setOnboardingData(parsedData);
+        console.log('Received data:', parsedData); // Debug log
+      } catch (error) {
+        console.error('Error parsing onboarding data:', error);
+        setOnboardingData({
+          gender: null,
+          born: null,
+          time: null,
+          deeptime: null,
+          productive: null,
+          stopping: null,
+          work: null,
+          workname: null,
+          worktime: null,
+        });
+      }
+    }
+  }, [onboardingDataString]);
+
+  const handleTimeSelect = (time) => {
+    setSelectedTime(time);
+    if (onboardingData) {
+      setOnboardingData(prev => ({...prev, time: time}));
+    }
+  };
+
+  const handleNext = () => {
+    if (selectedTime && onboardingData) {
+      const updatedData = {
+        ...onboardingData,
+        time: selectedTime
+      };
+      router.push({
+        pathname: '/onboardingDeeptime',
+        params: { onboardingData: JSON.stringify(updatedData) }
+      });
+    }
+  };
+
+  const timeOptions = [
+    "Less than 2 hours",
+    "2-4 hours",
+    "4-6 hours",
+    "6-8 hours",
+    "More than 8 hours"
+  ];
+
+  const TimeButton = ({ time }) => (
     <TouchableOpacity
-      onPress={() => setSelectedTime(hours)}
-      className={`w-full h-24 rounded-xl mb-4 flex justify-center px-4
-        ${selectedTime === hours ? 'bg-sky-400' : 'bg-zinc-900/70'}`}
+      onPress={() => handleTimeSelect(time)}
+      className={`w-full h-14 rounded-xl mb-4 flex items-center justify-center
+        ${selectedTime === time ? 'bg-sky-400' : 'bg-zinc-900/70'}`}
     >
-      <Text className={`text-xl font-medium
-        ${selectedTime === hours ? 'text-zinc-900' : 'text-white'}`}>
-        {hours}
-      </Text>
-      <Text className={`text-base mt-1
-        ${selectedTime === hours ? 'text-zinc-800' : 'text-zinc-400'}`}>
-        {description}
+      <Text className={`text-lg font-medium
+        ${selectedTime === time ? 'text-zinc-900' : 'text-white'}`}>
+        {time}
       </Text>
     </TouchableOpacity>
   );
@@ -40,36 +90,23 @@ const OnboardingTime = () => {
         </TouchableOpacity>
 
         {/* Title */}
-        <Text className="text-white text-4xl font-bold mt-2 mb-8">
-          How many hours you{'\n'}work per week?
+        <Text className="text-white text-4xl font-bold mt-2">
+          How much time do you spend working daily?
         </Text>
 
         {/* Time Options */}
         <View className="flex-1 justify-center">
           <View className="w-full">
-            <TimeButton 
-              hours="0-10 hours" 
-              description="Works sometimes"
-            />
-            <TimeButton 
-              hours="10-40 hours" 
-              description="Average worker"
-            />
-            <TimeButton 
-              hours="40+ hours" 
-              description="Working machine"
-            />
+            {timeOptions.map((time) => (
+              <TimeButton key={time} time={time} />
+            ))}
           </View>
         </View>
 
         {/* Next Button */}
         <TouchableOpacity
-          onPress={() => {
-            if (selectedTime) {
-              router.push('/onboardingDeeptime');
-            }
-          }}
-          className={`w-full h-14 rounded-full items-center justify-center mb-4
+          onPress={handleNext}
+          className={`w-full h-14 rounded-full items-center justify-center mt-auto mb-4
             ${selectedTime ? 'bg-white' : 'bg-zinc-900/70'}`}
         >
           <Text className={`text-lg font-medium
@@ -82,4 +119,4 @@ const OnboardingTime = () => {
   );
 };
 
-export default OnboardingTime;
+export default TimeSelect;

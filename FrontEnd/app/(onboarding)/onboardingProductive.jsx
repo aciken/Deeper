@@ -1,26 +1,91 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { icons } from '../../constants';
 
-const OnboardingProductive = () => {
-  const [selectedTime, setSelectedTime] = useState(null);
+const ProductiveSelect = () => {
   const router = useRouter();
+  const { onboardingData: onboardingDataString } = useLocalSearchParams();
+  
+  const [onboardingData, setOnboardingData] = useState(null);
+  const [selectedProductive, setSelectedProductive] = useState(null);
 
-  const TimeButton = ({ timeRange, description }) => (
+  useEffect(() => {
+    if (onboardingDataString) {
+      try {
+        const parsedData = JSON.parse(onboardingDataString);
+        setOnboardingData(parsedData);
+        console.log('Received data:', parsedData); // Debug log
+      } catch (error) {
+        console.error('Error parsing onboarding data:', error);
+        setOnboardingData({
+          gender: null,
+          born: null,
+          time: null,
+          deeptime: null,
+          productive: null,
+          stopping: null,
+          work: null,
+          workname: null,
+          worktime: null,
+        });
+      }
+    }
+  }, [onboardingDataString]);
+
+  const handleProductiveSelect = (productive) => {
+    setSelectedProductive(productive);
+    if (onboardingData) {
+      setOnboardingData(prev => ({...prev, productive: productive}));
+    }
+  };
+
+  const handleNext = () => {
+    if (selectedProductive && onboardingData) {
+      const updatedData = {
+        ...onboardingData,
+        productive: selectedProductive
+      };
+      router.push({
+        pathname: '/onboardingStopping',
+        params: { onboardingData: JSON.stringify(updatedData) }
+      });
+    }
+  };
+
+  const productiveOptions = [
+    {
+      title: "Not productive",
+      description: "I get distracted easily"
+    },
+    {
+      title: "Somewhat productive",
+      description: "I can focus but need improvement"
+    },
+    {
+      title: "Very productive",
+      description: "I stay focused most of the time"
+    },
+    {
+      title: "Extremely productive",
+      description: "I'm a productivity machine"
+    }
+  ];
+
+  const ProductiveButton = ({ option }) => (
     <TouchableOpacity
-      onPress={() => setSelectedTime(timeRange)}
-      className={`w-full h-24 rounded-xl mb-4 flex justify-center px-4
-        ${selectedTime === timeRange ? 'bg-sky-400' : 'bg-zinc-900/70'}`}
+      onPress={() => handleProductiveSelect(option.title)}
+      className={`w-full h-20 rounded-xl mb-4 flex justify-center px-4
+        ${selectedProductive === option.title ? 'bg-sky-400' : 'bg-zinc-900/70'}`}
     >
-      <Text className={`text-xl font-medium
-        ${selectedTime === timeRange ? 'text-zinc-900' : 'text-white'}`}>
-        {timeRange}
+      <Text className={`text-lg font-medium
+        ${selectedProductive === option.title ? 'text-zinc-900' : 'text-white'}`}>
+        {option.title}
       </Text>
-      <Text className={`text-base mt-1
-        ${selectedTime === timeRange ? 'text-zinc-800' : 'text-zinc-400'}`}>
-        {description}
+      <Text className={`text-sm mt-1
+        ${selectedProductive === option.title ? 'text-zinc-800' : 'text-zinc-400'}`}>
+        {option.description}
       </Text>
     </TouchableOpacity>
   );
@@ -40,40 +105,27 @@ const OnboardingProductive = () => {
         </TouchableOpacity>
 
         {/* Title */}
-        <Text className="text-white text-4xl font-bold mt-2 mb-8">
-          When are you most{'\n'}productive?
+        <Text className="text-white text-4xl font-bold mt-2">
+          How productive are you currently?
         </Text>
 
-        {/* Time Options */}
+        {/* Productive Options */}
         <View className="flex-1 justify-center">
           <View className="w-full">
-            <TimeButton 
-              timeRange="04:00 - 12:00" 
-              description="Morning worker"
-            />
-            <TimeButton 
-              timeRange="12:00 - 18:00" 
-              description="Afternoon worker"
-            />
-            <TimeButton 
-              timeRange="18:00 - 04:00" 
-              description="Night worker"
-            />
+            {productiveOptions.map((option) => (
+              <ProductiveButton key={option.title} option={option} />
+            ))}
           </View>
         </View>
 
         {/* Next Button */}
         <TouchableOpacity
-          onPress={() => {
-            if (selectedTime) {
-              router.push('/onboardingStopping');
-            }
-          }}
-          className={`w-full h-14 rounded-full items-center justify-center mb-4
-            ${selectedTime ? 'bg-white' : 'bg-zinc-900/70'}`}
+          onPress={handleNext}
+          className={`w-full h-14 rounded-full items-center justify-center mt-auto mb-4
+            ${selectedProductive ? 'bg-white' : 'bg-zinc-900/70'}`}
         >
           <Text className={`text-lg font-medium
-            ${selectedTime ? 'text-black' : 'text-zinc-700'}`}>
+            ${selectedProductive ? 'text-black' : 'text-zinc-700'}`}>
             Next
           </Text>
         </TouchableOpacity>
@@ -82,4 +134,4 @@ const OnboardingProductive = () => {
   );
 };
 
-export default OnboardingProductive;
+export default ProductiveSelect;

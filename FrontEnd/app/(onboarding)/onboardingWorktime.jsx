@@ -1,20 +1,98 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { icons } from '../../constants';
-import DateTimePicker from '@react-native-community/datetimepicker';
 
-
-const OnboardingWorktime = () => {
-  const [time, setTime] = useState(new Date());
+const WorktimeSelect = () => {
   const router = useRouter();
+  const { onboardingData: onboardingDataString } = useLocalSearchParams();
+  
+  const [onboardingData, setOnboardingData] = useState(null);
+  const [selectedWorktime, setSelectedWorktime] = useState(null);
 
-  const onTimeChange = (event, selectedTime) => {
-    if (selectedTime) {
-      setTime(selectedTime);
+  useEffect(() => {
+    if (onboardingDataString) {
+      try {
+        const parsedData = JSON.parse(onboardingDataString);
+        setOnboardingData(parsedData);
+        console.log('Received data:', parsedData); // Debug log
+      } catch (error) {
+        console.error('Error parsing onboarding data:', error);
+        setOnboardingData({
+          gender: null,
+          born: null,
+          time: null,
+          deeptime: null,
+          productive: null,
+          stopping: null,
+          work: null,
+          workname: null,
+          worktime: null,
+        });
+      }
+    }
+  }, [onboardingDataString]);
+
+  const handleWorktimeSelect = (worktime) => {
+    setSelectedWorktime(worktime);
+    if (onboardingData) {
+      setOnboardingData(prev => ({...prev, worktime: worktime}));
     }
   };
+
+  const handleNext = () => {
+    if (selectedWorktime && onboardingData) {
+      const updatedData = {
+        ...onboardingData,
+        worktime: selectedWorktime
+      };
+      router.push({
+        pathname: '/onboardingResults',
+        params: { onboardingData: JSON.stringify(updatedData) }
+      });
+    }
+  };
+
+  const worktimeOptions = [
+    {
+      title: "Morning",
+      description: "4:00 AM - 12:00 PM"
+    },
+    {
+      title: "Afternoon",
+      description: "12:00 PM - 6:00 PM"
+    },
+    {
+      title: "Evening",
+      description: "6:00 PM - 10:00 PM"
+    },
+    {
+      title: "Night",
+      description: "10:00 PM - 4:00 AM"
+    },
+    {
+      title: "Flexible",
+      description: "No specific time preference"
+    }
+  ];
+
+  const WorktimeButton = ({ option }) => (
+    <TouchableOpacity
+      onPress={() => handleWorktimeSelect(option.title)}
+      className={`w-full h-20 rounded-xl mb-4 flex justify-center px-4
+        ${selectedWorktime === option.title ? 'bg-sky-400' : 'bg-zinc-900/70'}`}
+    >
+      <Text className={`text-lg font-medium
+        ${selectedWorktime === option.title ? 'text-zinc-900' : 'text-white'}`}>
+        {option.title}
+      </Text>
+      <Text className={`text-sm mt-1
+        ${selectedWorktime === option.title ? 'text-zinc-800' : 'text-zinc-400'}`}>
+        {option.description}
+      </Text>
+    </TouchableOpacity>
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-black">
@@ -31,30 +109,27 @@ const OnboardingWorktime = () => {
         </TouchableOpacity>
 
         {/* Title */}
-        <Text className="text-white text-4xl font-bold mt-2 mb-8">
-        How many hours per day you want to work on it?
+        <Text className="text-white text-4xl font-bold mt-2">
+          When do you prefer to work?
         </Text>
 
-        {/* Time Picker */}
-        <View className="flex-1 justify-center items-center">
-          <DateTimePicker
-            value={time}
-            mode="time"
-            is24Hour={true}
-            display="spinner"
-            onChange={onTimeChange}
-            textColor="white"
-            themeVariant="dark"
-            style={{ width: '100%' }}
-          />
+        {/* Worktime Options */}
+        <View className="flex-1 justify-center">
+          <View className="w-full">
+            {worktimeOptions.map((option) => (
+              <WorktimeButton key={option.title} option={option} />
+            ))}
+          </View>
         </View>
 
         {/* Next Button */}
         <TouchableOpacity
-          onPress={() => router.push('/onboardingSettingup')}
-          className="w-full h-14 rounded-full items-center justify-center mb-4 bg-white"
+          onPress={handleNext}
+          className={`w-full h-14 rounded-full items-center justify-center mt-auto mb-4
+            ${selectedWorktime ? 'bg-white' : 'bg-zinc-900/70'}`}
         >
-          <Text className="text-lg font-medium text-black">
+          <Text className={`text-lg font-medium
+            ${selectedWorktime ? 'text-black' : 'text-zinc-700'}`}>
             Next
           </Text>
         </TouchableOpacity>
@@ -63,4 +138,4 @@ const OnboardingWorktime = () => {
   );
 };
 
-export default OnboardingWorktime;
+export default WorktimeSelect;

@@ -43,6 +43,8 @@ const Home = () => {
 	const [isAddTaskVisible, setIsAddTaskVisible] = useState(false);
 	const [newTaskText, setNewTaskText] = useState('');
 
+	const [dayDifference, setDayDifference] = useState(0);
+
 	const [isProfilePopupVisible, setIsProfilePopupVisible] = useState(false);
 
 	const [scaleAnim] = useState(new Animated.Value(0.8));
@@ -400,7 +402,23 @@ const Home = () => {
 	useEffect(() => {
 		const changeChallanges = () => {
 			if(user.points.pointsDate !== `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`) {
+				const lastDate = user.points.pointsDate;
+				console.log(lastDate, `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`);
 				const date = `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`
+
+				// Calculate day difference
+				const [lastDay, lastMonth, lastYear] = lastDate.split(':').map(Number);
+				const [currentDay, currentMonth, currentYear] = date.split(':').map(Number);
+
+				const lastDateObj = new Date(lastYear, lastMonth - 1, lastDay);
+				const currentDateObj = new Date(currentYear, currentMonth - 1, currentDay);
+				console.log(lastDateObj, currentDateObj)
+
+				const diffTime = Math.abs(currentDateObj - lastDateObj);
+				const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+				
+
 				axios.put('https://0f3b-109-245-203-91.ngrok-free.app/changeDaily', {	
 					id: user._id,
 					date
@@ -437,6 +455,10 @@ const Home = () => {
 							}
 						]
 					});
+					if (diffDays > 0) {
+						setDayDifference(diffDays);
+						animatePercentage();
+					}
 				})
 				.catch((e) => {
 					console.error(e);
@@ -447,6 +469,43 @@ const Home = () => {
 	changeChallanges()
 	}, [user, setUser])
 
+	// Add animation function
+	const animatePercentage = () => {
+		// Reset values
+		minusPercentageOpacity.setValue(0);
+		minusPercentageTranslate.setValue(-20);
+
+		Animated.parallel([
+			Animated.timing(minusPercentageOpacity, {
+				toValue: 1,
+				duration: 500,
+				useNativeDriver: true,
+			}),
+			Animated.timing(minusPercentageTranslate, {
+				toValue: 0,
+				duration: 500,
+				useNativeDriver: true,
+			})
+		]).start(() => {
+			// After showing for 3 seconds, fade out
+			setTimeout(() => {
+				Animated.parallel([
+					Animated.timing(minusPercentageOpacity, {
+						toValue: 0,
+						duration: 500,
+						useNativeDriver: true,
+					}),
+					Animated.timing(minusPercentageTranslate, {
+						toValue: 20,
+						duration: 500,
+						useNativeDriver: true,
+					})
+				]).start(() => {
+					setDayDifference(0);
+				});
+			}, 3000);
+		});
+	};
 
 	const challangeDone = (challange, type) =>{
 		if(type == 'daily'){
@@ -766,15 +825,19 @@ const Home = () => {
 
 	useEffect(() => {
 		const id = user._id;
-
+		console.log('setting user')
 		axios.post('https://0f3b-109-245-203-91.ngrok-free.app/getUser', { id })
-			.then(res => {
+			.then(async res => {
 				setIsLoading(false);
 				setUser(res.data);
+				// Store updated user data in AsyncStorage
+				await AsyncStorage.setItem('@user', JSON.stringify(res.data));
+				console.log(res.data.points.pointsDate)
 			})
 			.catch((e) => {
 				console.error('Error fetching user data:', e);
 				// Handle network error gracefully
+				console.log(user.points.pointsDate)
 				setIsLoading(false);
 				setUser(user); // Keep existing user data on error
 				// Could also show an error message to user here
@@ -867,7 +930,7 @@ const Home = () => {
 				duration: adjustedDuration,
 				id: user._id
 			})
-			.then(res => {
+			.then(async res => {
 				if(res.data === 'Time overlap'){
 					setAlertPopupVisible(true);
 					setAlertPopupMessage('New Session overlaps with existing session');
@@ -882,13 +945,14 @@ const Home = () => {
 						setAlertPopupMessage('Session started');
 						setAlertPopupType('success');
 					}
-					setUser(res.data)
+					setUser(res.data);
+					await AsyncStorage.setItem('@user', JSON.stringify(res.data));
 					setIsStartSessionPopupVisible(false)
 				}
 			})
 			.catch((e) => {
 				console.error('Error starting session:', e);
-			})
+			});
 		}
 	}
 
@@ -1144,6 +1208,7 @@ const Home = () => {
 						>
 							<View className="relative">
 								{/* Update the -2% indicator view */}
+								{dayDifference > 0 && (
 								<Animated.View style={{
 									position: 'absolute',
 									top: 12,
@@ -1177,10 +1242,11 @@ const Home = () => {
 											textShadowOffset: { width: 0, height: 0 },
 											textShadowRadius: 10,
 										}}>
-											-2%
+											-{dayDifference}%
 										</Text>
 									</LinearGradient>
 								</Animated.View>
+								)}
 								<Animated.View style={{
 									backgroundColor: cardGlow.interpolate({
 										inputRange: [0, 1],

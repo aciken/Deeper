@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
+import { View, Text, TouchableOpacity, Image, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { icons } from '../../constants';
 
-const BornSelect = () => {
+const WorknameSelect = () => {
   const router = useRouter();
   const { onboardingData: onboardingDataString } = useLocalSearchParams();
   
   const [onboardingData, setOnboardingData] = useState(null);
-  const [selectedYear, setSelectedYear] = useState(null);
+  const [workname, setWorkname] = useState('');
 
   useEffect(() => {
     if (onboardingDataString) {
@@ -34,42 +34,18 @@ const BornSelect = () => {
     }
   }, [onboardingDataString]);
 
-  const handleYearSelect = (year) => {
-    setSelectedYear(year);
-    if (onboardingData) {
-      setOnboardingData(prev => ({...prev, born: year}));
-    }
-  };
-
   const handleNext = () => {
-    if (selectedYear && onboardingData) {
+    if (workname.trim() && onboardingData) {
       const updatedData = {
         ...onboardingData,
-        born: selectedYear
+        workname: workname.trim()
       };
       router.push({
-        pathname: '/onboardingTime',
+        pathname: '/onboardingWorktime',
         params: { onboardingData: JSON.stringify(updatedData) }
       });
     }
   };
-
-  // Generate years from 1950 to current year
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: currentYear - 1949 }, (_, i) => currentYear - i);
-
-  const YearButton = ({ year }) => (
-    <TouchableOpacity
-      onPress={() => handleYearSelect(year)}
-      className={`w-full h-14 rounded-xl mb-4 flex items-center justify-center
-        ${selectedYear === year ? 'bg-sky-400' : 'bg-zinc-900/70'}`}
-    >
-      <Text className={`text-lg font-medium
-        ${selectedYear === year ? 'text-zinc-900' : 'text-white'}`}>
-        {year}
-      </Text>
-    </TouchableOpacity>
-  );
 
   return (
     <SafeAreaView className="flex-1 bg-black">
@@ -87,24 +63,30 @@ const BornSelect = () => {
 
         {/* Title */}
         <Text className="text-white text-4xl font-bold mt-2">
-          When were you born?
+          Name your project
         </Text>
 
-        {/* Years List */}
-        <View className="flex-1 mt-4">
-          {years.map((year) => (
-            <YearButton key={year} year={year} />
-          ))}
+        {/* Work Name Input */}
+        <View className="flex-1 justify-center">
+          <TextInput
+            value={workname}
+            onChangeText={setWorkname}
+            placeholder="Enter project name"
+            placeholderTextColor="#52525b"
+            className="w-full h-14 bg-zinc-900/70 rounded-xl px-4 text-white text-lg"
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
         </View>
 
         {/* Next Button */}
         <TouchableOpacity
           onPress={handleNext}
           className={`w-full h-14 rounded-full items-center justify-center mt-auto mb-4
-            ${selectedYear ? 'bg-white' : 'bg-zinc-900/70'}`}
+            ${workname.trim() ? 'bg-white' : 'bg-zinc-900/70'}`}
         >
           <Text className={`text-lg font-medium
-            ${selectedYear ? 'text-black' : 'text-zinc-700'}`}>
+            ${workname.trim() ? 'text-black' : 'text-zinc-700'}`}>
             Next
           </Text>
         </TouchableOpacity>
@@ -113,4 +95,4 @@ const BornSelect = () => {
   );
 };
 
-export default BornSelect;
+export default WorknameSelect;

@@ -7,14 +7,44 @@ import { icons } from '../../constants';
 const GenderSelect = () => {
   const [selectedGender, setSelectedGender] = useState(null);
   const router = useRouter();
+  
+  const [onboardingData, setOnboardingData] = useState({
+    gender: null,
+    born: null,
+    time: null,
+    deeptime: null,
+    productive: null,
+    stopping: null,
+    work: null,
+    workname: null,
+    worktime: null,
+  });
+
+  const handleGenderSelect = (gender) => {
+    setSelectedGender(gender);
+    setOnboardingData(prev => ({...prev, gender: gender}));
+  };
+
+  const handleNext = () => {
+    if (selectedGender) {
+      const updatedData = {
+        ...onboardingData,
+        gender: selectedGender
+      };
+      router.push({
+        pathname: '/onboardingTime',
+        params: { onboardingData: JSON.stringify(updatedData) }
+      });
+    }
+  };
 
   const GenderButton = ({ gender }) => (
     <TouchableOpacity
-      onPress={() => setSelectedGender(gender)}
+      onPress={() => handleGenderSelect(gender)}
       className={`w-full h-14 rounded-xl mb-4 flex items-center justify-center
         ${selectedGender === gender ? 'bg-sky-400' : 'bg-zinc-900/70'}`}
     >
-      <Text className={`text-white text-lg font-medium
+      <Text className={`text-lg font-medium
         ${selectedGender === gender ? 'text-zinc-900' : 'text-white'}`}>
         {gender}
       </Text>
@@ -51,12 +81,7 @@ const GenderSelect = () => {
 
         {/* Next Button */}
         <TouchableOpacity
-          onPress={() => {
-            if (selectedGender) {
-              // Handle navigation or data submission
-              router.push('/onboardingBorn');
-            }
-          }}
+          onPress={handleNext}
           className={`w-full h-14 rounded-full items-center justify-center mt-auto mb-4
             ${selectedGender ? 'bg-white' : 'bg-zinc-900/70'}`}
         >

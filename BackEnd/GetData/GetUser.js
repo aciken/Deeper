@@ -5,6 +5,7 @@ const GetUser = async (req, res) => {
     try {
         const user = await User.findOne({ _id: id });
         if (user) {
+            console.log(user)
             res.json(user);
         } else {
             res.json('User not found');
