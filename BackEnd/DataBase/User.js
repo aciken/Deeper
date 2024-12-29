@@ -71,6 +71,10 @@ const UserSchema = new mongoose.Schema({
       currentGeneral: [0],
       currentGeneralPlus: [0],
     }
+  },
+  resetCode: {
+    type: Number,
+    default: 0
   }
 });
 

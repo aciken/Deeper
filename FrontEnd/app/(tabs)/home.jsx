@@ -422,7 +422,7 @@ const Home = () => {
 
 				
 
-				axios.put('https://09a9-109-245-203-91.ngrok-free.app/changeDaily', {	
+				axios.put('https://36c0-109-245-203-91.ngrok-free.app/changeDaily', {	
 					id: user._id,
 					date
 				})
@@ -722,7 +722,7 @@ const Home = () => {
 
 
 	const collectPoints = (challange, index) => {
-		axios.put('https://09a9-109-245-203-91.ngrok-free.app/collectDaily', {
+		axios.put('https://36c0-109-245-203-91.ngrok-free.app/collectDaily', {
 			id: user._id,
 			points: challange.points,
 			index
@@ -738,7 +738,7 @@ const Home = () => {
 
 
 	const collectGeneralPoints = (challange) => {
-		axios.put('https://09a9-109-245-203-91.ngrok-free.app/collectGeneral', {
+		axios.put('https://36c0-109-245-203-91.ngrok-free.app/collectGeneral', {
 			id: user._id,
 			points: challange.points,
 			type: challange.type
@@ -829,7 +829,7 @@ const Home = () => {
 	useEffect(() => {
 		const id = user._id;
 		console.log('setting user')
-		axios.post('https://09a9-109-245-203-91.ngrok-free.app/getUser', { id })
+		axios.post('https://36c0-109-245-203-91.ngrok-free.app/getUser', { id })
 			.then(async res => {
 				setIsLoading(false);
 				setUser(res.data);
@@ -926,7 +926,7 @@ const Home = () => {
 
 			}
 
-			axios.put('https://09a9-109-245-203-91.ngrok-free.app/startSession', {	
+			axios.put('https://36c0-109-245-203-91.ngrok-free.app/startSession', {	
 				sessionName,
 				selectedWork,
 				duration: adjustedDuration,
@@ -1074,7 +1074,7 @@ const Home = () => {
 
 
 	const endSession = () => {
-		axios.put('https://09a9-109-245-203-91.ngrok-free.app/endSession', {
+		axios.put('https://36c0-109-245-203-91.ngrok-free.app/endSession', {
 			id: user._id,
 			sessionId: findCurrentSession().sessionId
 		})
@@ -1366,23 +1366,34 @@ const Home = () => {
 												</Text>
 											</LinearGradient>
 										</MaskedView>
-										<MaskedView
-											maskElement={
-												<Text className="text-center rotate-90 font-bold text-3xl">
-													{'>'}
-												</Text>
-											}
-										>
-											<LinearGradient
-												colors={['#a1a1aa', '#27272a']}
-												start={{x: 0, y: 0}}
-												end={{x: 0, y: 1}}
+										<View style={{transform: [{rotate: '90deg'}]}}>
+											<MaskedView
+												maskElement={
+													<Text style={{
+														textAlign: 'center',
+														fontWeight: 'bold',
+														fontSize: 30
+													}}>
+														{'>'}
+													</Text>
+												}
 											>
-												<Text className="text-center rotate-90 font-bold text-3xl opacity-0">
-												{'>'}
-												</Text>
-											</LinearGradient>
-										</MaskedView>
+												<LinearGradient
+													colors={['#a1a1aa', '#27272a']}
+													start={{x: 0, y: 0}}
+													end={{x: 0, y: 1}}
+												>
+													<Text style={{
+														textAlign: 'center',
+														fontWeight: 'bold',
+														fontSize: 30,
+														opacity: 0
+													}}>
+														{'>'}
+													</Text>
+												</LinearGradient>
+											</MaskedView>
+										</View>
 
 
 									</View>

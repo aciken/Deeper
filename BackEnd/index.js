@@ -28,6 +28,10 @@ const changeDaily = require('./Challenges/changeDaily');
 const collectDaily = require('./Challenges/collectDaily')
 const collectGeneral = require('./Challenges/collectGeneral')
 const Verify = require('./Auth/Verify');
+const ForgotPasswordEmail = require('./Auth/ForgotPasswordEmail');
+const ForgotPasswordVerification = require('./Auth/ForgotPasswordVerification');
+const resetPassword = require('./Auth/resetPassword');
+
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
@@ -56,7 +60,9 @@ app.put('/changeDaily', changeDaily);
 app.put('/collectDaily', collectDaily);
 app.put('/collectGeneral', collectGeneral)
 app.put('/verify', Verify);
-
+app.post('/forgotPassword', ForgotPasswordEmail);
+app.post('/forgotPasswordVerification', ForgotPasswordVerification);
+app.post('/forgotPasswordReset', resetPassword);
 
 app.listen(port, () => {
     console.log(`App listening at http://localhost:${port}`);

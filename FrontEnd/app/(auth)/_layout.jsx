@@ -11,6 +11,9 @@ const AuthLayout = () => {
         <Stack.Screen name='sign-in' options={{ headerShown: false}} />
         <Stack.Screen name='sign-up' options={{ headerShown: false }} />
         <Stack.Screen name='verify' options={{ headerShown: false, gestureEnabled: false}} />
+        <Stack.Screen name='forgotPassword' options={{ headerShown: false, gestureEnabled: false}} />
+        <Stack.Screen name='forgotPasswordVerification' options={{ headerShown: false, gestureEnabled: false}} />
+        <Stack.Screen name='forgotPasswordReset' options={{ headerShown: false, gestureEnabled: false}} />
       </Stack>
     </View>
   )

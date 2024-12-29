@@ -49,7 +49,7 @@ const SignIn = () => {
       Alert.alert('Please fill in all fields')
     } else {
       setIsSubmiting(true)
-      axios.post('https://09a9-109-245-203-91.ngrok-free.app/login', {
+      axios.post('https://36c0-109-245-203-91.ngrok-free.app/login', {
         email,
         password
       }).then(async (res) => {
@@ -140,7 +140,7 @@ const SignIn = () => {
           </View>
 
           {/* Forgot Password */}
-          <TouchableOpacity className="mt-4 self-end">
+          <TouchableOpacity className="mt-4 self-end" onPress={() => router.push('/forgotPassword')}>
             <Text className="text-zinc-500 text-base">Forgot Password?</Text>
           </TouchableOpacity>
 
