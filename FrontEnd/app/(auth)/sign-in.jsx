@@ -11,7 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useGlobalContext } from '../context/GlobalProvider'
 
 const SignIn = () => {
-  const { setIsLogged, setUser, setIsLoading } = useGlobalContext()
+  const { setIsLogged, setUser, setIsLoading,user } = useGlobalContext()
 
   const [form, setForm] = useState({
     email: '',
@@ -27,7 +27,12 @@ const SignIn = () => {
       setIsLoading(false)
       setUpdateUser(false)
       setLoginSuccess(false)
-      router.push('/Home')
+      console.log('updateUserVERIFY', user.verify)
+      if(user.verify != 1){
+        router.push('/verify')
+      } else {
+        router.push('/Home')
+      }
     }
   }, [loginSuccess])
 
@@ -44,7 +49,7 @@ const SignIn = () => {
       Alert.alert('Please fill in all fields')
     } else {
       setIsSubmiting(true)
-      axios.post('https://0310-109-245-203-91.ngrok-free.app/login', {
+      axios.post('https://09a9-109-245-203-91.ngrok-free.app/login', {
         email,
         password
       }).then(async (res) => {

@@ -14,6 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { ActivityIndicator } from 'react-native'
 
 
+
 import * as WebBrowser from 'expo-web-browser';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -24,15 +25,22 @@ const Index = () => {
   const [userInfo, setUserInfo] = useState(null)
   const [authError, setAuthError] = useState(null);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
-
-
+  const [showInitialLoading, setShowInitialLoading] = useState(true);
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId: '982934180885-4av5h5gq1fldb8tbbgb1khd4c210k1rf.apps.googleusercontent.com',
-    iosClientId: '982934180885-qha3lvi6roh4e81slf6a0th12sf71rpb.apps.googleusercontent.com', 
-    expoClientId: '982934180885-qp8u94ipgl27qq33kuvn55g99pff6huk.apps.googleusercontent.com', 
-     redirectUri: 'https://auth.expo.io/@aciken/FrontEnd'
+    iosClientId: '982934180885-qha3lvi6roh4e81slf6a0th12sf71rpb.apps.googleusercontent.com',
+    expoClientId: '982934180885-qp8u94ipgl27qq33kuvn55g99pff6huk.apps.googleusercontent.com',
+    redirectUri: 'https://auth.expo.io/@aciken/FrontEnd',
   });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowInitialLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     handleSignInWithGoogle();
@@ -92,45 +100,6 @@ const Index = () => {
     }
   };
 
-  // const [request, response, promptAsync] = Google.useAuthRequest({
-  //   androidClientId: '1003474212666-gqrbg8e8s288508ssmkqrq5f9l6q5mf8.apps.googleusercontent.com',
-  //   webClientId: '1003474212666-jkpr0kqcpkhckv0qtfg2qo33plvqq97t.apps.googleusercontent.com',
-  // })
-
-  // useEffect(() => {
-  //   handleSignInWithGoogle()
-  // }, [response])
-
-  // async function handleSignInWithGoogle() {
-  //   const user = await AsyncStorage.getItem('@user')
-  //   if (!user) {
-  //     if (response?.type === "success") {
-  //       await getUserInfo(response.authentication.accessToken)
-  //     }
-  //   } else {
-  //     setUserInfo(JSON.parse(user))
-  //   }
-  // }
-
-  // const getUserInfo = async (token) => {
-  //   if (!token) return
-  //   try {
-  //     const response = await fetch(
-  //       "https://www.googleapis.com/userinfo/v2/me",
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       }
-  //     )
-  //     const user = await response.json()
-  //     await AsyncStorage.setItem('@user', JSON.stringify(user))
-  //     setUserInfo(user)
-  //     setUser(user)
-  //     setIsLogged(true)
-  //   } catch (error) {
-  //     console.error(error)
-  //   }
-  // }
-
   useEffect(() => {
     if (isFocused && !isLogged && isLoading) {
       const backAction = () => {
@@ -142,17 +111,12 @@ const Index = () => {
     }
   }, [isFocused])
 
-  if (isLoading) {
-    
+  if (showInitialLoading) {
     return (
       <View className="flex-1 bg-zinc-950 items-center justify-center">
         <ActivityIndicator size="large" color="#0EA5E9" />
       </View>
     );
-  }
-
-  if (isLogged) {
-    return null;
   }
 
   return (
@@ -252,23 +216,6 @@ const Index = () => {
                 <Text className="text-white text-lg font-semibold">Create Account</Text>
               </LinearGradient>
             </TouchableOpacity>
-
-            {/* <TouchableOpacity 
-              onPress={() => {
-                setAuthError(null);
-                promptAsync();
-              }}
-              disabled={isAuthenticating}
-              className="w-full h-14 rounded-2xl bg-white flex-row items-center justify-center space-x-2"
-            >
-              <Image 
-                source={require('../assets/images/google.png')} 
-                className="w-5 h-5"
-              />
-              <Text className="text-zinc-900 text-lg font-semibold">
-                {isAuthenticating ? 'Signing in...' : 'Continue with Google'}
-              </Text>
-            </TouchableOpacity> */}
 
             <TouchableOpacity 
               onPress={() => router.push('/sign-in')}

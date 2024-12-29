@@ -437,7 +437,7 @@ const getGoalWork = () => {
 
 
 const submitNewWork = () => {
-    axios.put('https://0310-109-245-203-91.ngrok-free.app/addJob', {
+    axios.put('https://09a9-109-245-203-91.ngrok-free.app/addJob', {
     newWork,
     id: user._id,
   }).then(res => {
@@ -453,7 +453,7 @@ const submitNewWork = () => {
 }
 
 const submitEditWork = () => {
-  axios.put('https://0310-109-245-203-91.ngrok-free.app/editJob', {
+  axios.put('https://09a9-109-245-203-91.ngrok-free.app/editJob', {
   editWork,
   index: editIndex,
   id: user._id,
@@ -474,7 +474,7 @@ const submitEditWork = () => {
 
 const submitDeleteWork = () => {
   if(user.work.length !== 1){
-    axios.put('https://0310-109-245-203-91.ngrok-free.app/deleteJob', {
+    axios.put('https://09a9-109-245-203-91.ngrok-free.app/deleteJob', {
     index: editIndex,
     id: user._id,
   }).then(res => {
@@ -497,7 +497,7 @@ const submitDeleteWork = () => {
 
 
 const endSession = () => {
-  axios.put('https://0310-109-245-203-91.ngrok-free.app/endSession', {
+  axios.put('https://09a9-109-245-203-91.ngrok-free.app/endSession', {
     id: user._id,
     sessionId: findCurrentSession().sessionId
   })
@@ -598,6 +598,16 @@ const handleSessionClose = () => {
 
   setIsSessionPageVisible(false);
 };
+
+useEffect(() => {
+  if (!isSessionPageVisible) {
+    buttonAnim.setValue(0); // Reset button animation
+    slideAnim.setValue(-300); // Reset slide animation
+    opacityAnim.setValue(0); // Reset opacity animation
+    timerSlideAnim.setValue(400); // Reset timer slide animation
+    timerOpacityAnim.setValue(0); // Reset timer opacity animation
+  }
+}, [isSessionPageVisible]);
 
 useEffect(() => {
   if (isSessionPageVisible) {
@@ -1778,19 +1788,25 @@ const formatTime = (seconds) => {
                            sessionDate <= today;
                   }
                 }).map((session, index) => (
-                  <View key={index} className="bg-zinc-800/30 rounded-xl p-4 border border-zinc-800/50 shadow-lg">
-                    <View className="flex-row justify-between items-center">
-                      <View className="flex-row items-center">
-                        <View className="w-2 h-2 rounded-full bg-sky-400 mr-3" />
-                        <Text className="text-white text-base font-medium">{session.name}</Text>
-                      </View>
-                      <View className="bg-zinc-800/50 px-3 py-1 rounded-full">
-                        <Text className="text-sky-400 text-sm font-medium">
-                          {session.startTime} - {session.endTime}
-                        </Text>
+                  <ScrollView key={index}
+                  className="flex-1"
+                  showsVerticalScrollIndicator={true}
+                  scrollEnabled={true}
+                  contentContainerStyle={{flexGrow: 1}}>
+                    <View className="bg-zinc-800/30 rounded-xl p-4 border border-zinc-800/50 shadow-lg">
+                      <View className="flex-row justify-between items-center">
+                        <View className="flex-row items-center">
+                          <View className="w-2 h-2 rounded-full bg-sky-400 mr-3" />
+                          <Text className="text-white text-base font-medium">{session.name}</Text>
+                        </View>
+                        <View className="bg-zinc-800/50 px-3 py-1 rounded-full">
+                          <Text className="text-sky-400 text-sm font-medium">
+                            {session.startTime} - {session.endTime}
+                          </Text>
+                        </View>
                       </View>
                     </View>
-                  </View>
+                  </ScrollView>
                 ))}
                 {user.workSessions.filter(session => 
                   session.workId === user.work[editIndex]._id && 
@@ -2067,30 +2083,39 @@ const formatTime = (seconds) => {
             <Text className="text-white text-2xl font-bold">Sessions</Text>
             <Text className="text-zinc-500 text-lg font-medium">{selectedDate}</Text>
           </View>
-          <ScrollView className="flex-1">
+          <ScrollView 
+            className="flex-1"
+            showsVerticalScrollIndicator={true}
+            scrollEnabled={true}
+            contentContainerStyle={{flexGrow: 1}}
+          >
             {user.workSessions
               .filter(session => session.date === selectedDate)
               .map((session, index) => (
-                <View 
-                  key={session.sessionId} 
-                  className="bg-zinc-800/70 rounded-xl p-4 mb-3 border border-zinc-700/50"
+                <TouchableOpacity
+                  key={session.sessionId}
+                  activeOpacity={0.7}
                 >
-                  <View className="flex-row justify-between items-center mb-2">
-                    <View className="flex-row items-center">
-                      <View 
-                        className="w-1 h-10 rounded-full mr-3"
-                        style={{backgroundColor: findTaskById(session.workId).colors[0]}}
-                      />
-                      <Text className="text-white text-lg font-medium">{session.name}</Text>
+                  <View 
+                    className="bg-zinc-800/70 rounded-xl p-4 mb-3 border border-zinc-700/50"
+                  >
+                    <View className="flex-row justify-between items-center mb-2">
+                      <View className="flex-row items-center">
+                        <View 
+                          className="w-1 h-10 rounded-full mr-3"
+                          style={{backgroundColor: findTaskById(session.workId)?.colors?.[0] || 'white'}}
+                        />
+                        <Text className="text-white text-lg font-medium">{session.name}</Text>
+                      </View>
+                      <Text className="text-zinc-400">
+                        {session.startTime} - {session.endTime}
+                      </Text>
                     </View>
-                    <Text className="text-zinc-400">
-                      {session.startTime} - {session.endTime}
+                    <Text className="text-zinc-500 text-sm ml-4">
+                      {findTaskById(session.workId)?.name || '-'}
                     </Text>
                   </View>
-                  <Text className="text-zinc-500 text-sm ml-4">
-                    {findTaskById(session.workId).name}
-                  </Text>
-                </View>
+                </TouchableOpacity>
               ))}
           </ScrollView>
         </View>

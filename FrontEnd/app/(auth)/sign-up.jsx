@@ -51,7 +51,7 @@ const SignUp = () => {
   useEffect(() => {
     if (loginSuccess) {
       setIsLoading(false)
-      router.push('/onboardingSettingup')
+      router.push('/verify')
     }
   }, [loginSuccess])
 
@@ -63,7 +63,7 @@ const SignUp = () => {
     }
     
     setIsSubmiting(true)
-    axios.put('https://0310-109-245-203-91.ngrok-free.app/signup', {
+    axios.put('https://09a9-109-245-203-91.ngrok-free.app/signup', {
       name,
       email,
       password,
@@ -74,7 +74,7 @@ const SignUp = () => {
         setUser(res.data)
         setIsLogged(true)
         setLoginSuccess(true)
-        router.push('/onboardingSettingup')
+        router.push('/verify')
       } else {
         Alert.alert('User already exists')
       }

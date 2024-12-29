@@ -27,6 +27,7 @@ const endSession = require('./Session/endSession');
 const changeDaily = require('./Challenges/changeDaily');
 const collectDaily = require('./Challenges/collectDaily')
 const collectGeneral = require('./Challenges/collectGeneral')
+const Verify = require('./Auth/Verify');
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
@@ -54,6 +55,7 @@ app.put('/endSession', endSession);
 app.put('/changeDaily', changeDaily);
 app.put('/collectDaily', collectDaily);
 app.put('/collectGeneral', collectGeneral)
+app.put('/verify', Verify);
 
 
 app.listen(port, () => {

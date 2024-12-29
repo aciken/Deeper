@@ -20,6 +20,10 @@ const UserSchema = new mongoose.Schema({
       type: Number,
       default: 0
   },
+  onboardingData: {
+    type: Object,
+    default: {}
+  },
   array: {
     type: Array,
     default: () => new Array(31).fill([]) 

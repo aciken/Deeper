@@ -194,9 +194,12 @@ const Home = () => {
 			return session.date === currentDate && currentTimeInMinutes >= startTimeInMinutes && currentTimeInMinutes <= endTimeInMinutes;
 		});
 
-
 		return session;
 	}
+
+
+
+
 	
 	// TIMER
 	
@@ -419,7 +422,7 @@ const Home = () => {
 
 				
 
-				axios.put('https://0310-109-245-203-91.ngrok-free.app/changeDaily', {	
+				axios.put('https://09a9-109-245-203-91.ngrok-free.app/changeDaily', {	
 					id: user._id,
 					date
 				})
@@ -719,7 +722,7 @@ const Home = () => {
 
 
 	const collectPoints = (challange, index) => {
-		axios.put('https://0310-109-245-203-91.ngrok-free.app/collectDaily', {
+		axios.put('https://09a9-109-245-203-91.ngrok-free.app/collectDaily', {
 			id: user._id,
 			points: challange.points,
 			index
@@ -735,7 +738,7 @@ const Home = () => {
 
 
 	const collectGeneralPoints = (challange) => {
-		axios.put('https://0310-109-245-203-91.ngrok-free.app/collectGeneral', {
+		axios.put('https://09a9-109-245-203-91.ngrok-free.app/collectGeneral', {
 			id: user._id,
 			points: challange.points,
 			type: challange.type
@@ -826,7 +829,7 @@ const Home = () => {
 	useEffect(() => {
 		const id = user._id;
 		console.log('setting user')
-		axios.post('https://0310-109-245-203-91.ngrok-free.app/getUser', { id })
+		axios.post('https://09a9-109-245-203-91.ngrok-free.app/getUser', { id })
 			.then(async res => {
 				setIsLoading(false);
 				setUser(res.data);
@@ -889,7 +892,6 @@ const Home = () => {
 
 
 	const startSession = () => {
-
 		let isAdjusted = false;
 
 		if(sessionName === ''){
@@ -924,7 +926,7 @@ const Home = () => {
 
 			}
 
-			axios.put('https://0310-109-245-203-91.ngrok-free.app/startSession', {	
+			axios.put('https://09a9-109-245-203-91.ngrok-free.app/startSession', {	
 				sessionName,
 				selectedWork,
 				duration: adjustedDuration,
@@ -947,7 +949,11 @@ const Home = () => {
 					}
 					setUser(res.data);
 					await AsyncStorage.setItem('@user', JSON.stringify(res.data));
-					setIsStartSessionPopupVisible(false)
+					setIsStartSessionPopupVisible(false);
+					setSessionName('');
+					setSelectedWork(null);
+					setDuration({ hours: 0, minutes: 0 });
+					setCurrentSession(findCurrentSession()); // Update current session
 				}
 			})
 			.catch((e) => {
@@ -961,22 +967,23 @@ const Home = () => {
 	const buttonAnim = useRef(new Animated.Value(0)).current;
 
 	const handleSessionPress = () => {
-		// Animate button down with more aggressive parameters
+		console.log('Session button pressed'); // Debug log
 		Animated.spring(buttonAnim, {
-			toValue: 105,  // Increased from 5 to 15 for more movement
+			toValue: 105,
 			useNativeDriver: true,
-			tension: 100,  // Increased from 50 to 100 for faster movement
-			friction: 4,   // Reduced from 7 to 4 for more bounce
-			velocity: 3    // Added initial velocity for more aggressive start
+			tension: 100,
+			friction: 4,
+			velocity: 3
 		}).start();
 
 		setIsSessionPageVisible(true);
+		console.log('Session page visible:', isSessionPageVisible); // Debug log
 	};
 
 	const handleSessionClose = () => {
-		// Animate button back up with same aggressive parameters
+		console.log('Session button closed'); // Debug log
 		Animated.spring(buttonAnim, {
-			toValue: 0,
+			toValue: 0, // Reset to initial position
 			useNativeDriver: true,
 			tension: 100,
 			friction: 7,
@@ -984,14 +991,26 @@ const Home = () => {
 		}).start();
 
 		setIsSessionPageVisible(false);
+		console.log('Session page visible:', isSessionPageVisible); // Debug log
 	};
+
+	// Reset animations when session ends
+	useEffect(() => {
+		if (!isSessionPageVisible) {
+			buttonAnim.setValue(0); // Reset button animation
+			slideAnim.setValue(-300); // Reset slide animation
+			opacityAnim.setValue(0); // Reset opacity animation
+			timerSlideAnim.setValue(400); // Reset timer slide animation
+			timerOpacityAnim.setValue(0); // Reset timer opacity animation
+		}
+	}, [isSessionPageVisible]);
 
 	const slideAnim = useRef(new Animated.Value(-300)).current;  // Start from -400 (left)
 	const opacityAnim = useRef(new Animated.Value(0)).current;  // Start fully transparent
 
 	useEffect(() => {
+		console.log('Session page visibility changed:', isSessionPageVisible); // Debug log
 		if (isSessionPageVisible) {
-			// Animate when popup becomes visible
 			Animated.parallel([
 				Animated.spring(slideAnim, {
 					toValue: 0,
@@ -1007,8 +1026,7 @@ const Home = () => {
 				})
 			]).start();
 		} else {
-			// Reset animations when popup closes
-			slideAnim.setValue(-300);  // Reset to -400 to start from left again
+			slideAnim.setValue(-300);
 			opacityAnim.setValue(0);
 		}
 	}, [isSessionPageVisible]);
@@ -1056,16 +1074,18 @@ const Home = () => {
 
 
 	const endSession = () => {
-		axios.put('https://0310-109-245-203-91.ngrok-free.app/endSession', {
+		axios.put('https://09a9-109-245-203-91.ngrok-free.app/endSession', {
 			id: user._id,
 			sessionId: findCurrentSession().sessionId
 		})
-		.then(res => {
-			setUser(res.data)
-			setIsSessionPageVisible(false)
-			setAlertPopupVisible(true)
-			setAlertPopupMessage('Session ended')
-			setAlertPopupType('success')
+		.then(async res => {
+			setUser(res.data);
+			await AsyncStorage.setItem('@user', JSON.stringify(res.data));
+			setIsSessionPageVisible(false);
+			setAlertPopupVisible(true);
+			setAlertPopupMessage('Session ended');
+			setAlertPopupType('success');
+			setCurrentSession(null); // Reset current session
 		})
 		.catch((e) => {
 			console.error('Error ending session:', e);
@@ -1485,37 +1505,37 @@ const Home = () => {
 					</TouchableOpacity>
 
             ) : (
-              <Animated.View style={{ transform: [{ translateY: buttonAnim }] }}>
-                <TouchableOpacity 
-                  onPress={handleSessionPress}
-                  className="w-full rounded-full overflow-hidden shadow-lg pt-2"
-                >
-                  <LinearGradient
-                    colors={['#27272a', '#18181b']}
-                    start={{x: 0, y: 0}}
-                    end={{x: 1, y: 1}}
-                    className="w-full rounded-full h-14 flex-row justify-between items-center px-4"
-                  >
-                    <View className="flex-row items-center">
-                      <LinearGradient
-                        colors={findTaskById(findCurrentSession().workId).colors}
-                        start={{x: 0, y: 0}}
-                        end={{x: 0, y: 1}}
-                        className="w-6 h-6 rounded-full mr-1"
-                      >
-                      </LinearGradient>
-                      <View className="flex-col items-start">
-                        <Text className="text-white text-base font-semibold">{findCurrentSession().name}</Text>
-                        <Text className="text-zinc-400 text-sm font-regular">{findTaskById(findCurrentSession().workId).name}</Text>
-                      </View>
-                    </View>
-                    <View className="flex-row items-center">
-                      <Text className="text-white text-base font-semibold">{timeFromPoints(Math.round(pointsFromTime(findCurrentSession().endTime)-(currentTime-10)))}</Text>
-                      <Image source={icons.timerWhite} className="w-4 h-4 ml-1 tint-white" />
-                    </View>
-                  </LinearGradient>
-                </TouchableOpacity>
-              </Animated.View>
+			<Animated.View style={{ transform: [{ translateY: buttonAnim }] }}>
+				<TouchableOpacity 
+				onPress={handleSessionPress}
+				className="w-full rounded-full overflow-hidden shadow-lg pt-2"
+				>
+				<LinearGradient
+					colors={['#27272a', '#18181b']}
+					start={{x: 0, y: 0}}
+					end={{x: 1, y: 1}}
+					className="w-full rounded-full h-14 flex-row justify-between items-center px-4"
+				>
+					<View className="flex-row items-center">
+					<LinearGradient
+						colors={findTaskById(findCurrentSession().workId).colors}
+						start={{x: 0, y: 0}}
+						end={{x: 0, y: 1}}
+						className="w-6 h-6 rounded-full mr-1"
+					>
+					</LinearGradient>
+					<View className="flex-col items-start">
+						<Text className="text-white text-base font-semibold">{findCurrentSession().name}</Text>
+						<Text className="text-zinc-400 text-sm font-regular">{findTaskById(findCurrentSession().workId).name}</Text>
+					</View>
+					</View>
+					<View className="flex-row items-center">
+					<Text className="text-white text-base font-semibold">{timeFromPoints(Math.round(pointsFromTime(findCurrentSession().endTime)-(currentTime-10)))}</Text>
+					<Image source={icons.timerWhite} className="w-4 h-4 ml-1 tint-white" />
+					</View>
+				</LinearGradient>
+				</TouchableOpacity>
+			</Animated.View>
             )}
           </View>
 			</Animated.View>
@@ -1779,7 +1799,7 @@ const Home = () => {
     <BottomPopup
         visible={isStartSessionPopupVisible}
         onClose={() => setIsStartSessionPopupVisible(false)}
-        height={0.85}
+        height={Platform.OS === 'android' ? 0.7 : 0.85}
     >
         <View className="flex-1 bg-zinc-900">
             <Text className="text-white text-3xl font-bold p-6 text-center bg-gradient-to-r from-zinc-400 to-zinc-500 bg-clip-text">
@@ -1796,15 +1816,72 @@ const Home = () => {
                 />
 
                 <Text className="text-zinc-400 text-base mb-2">Set Duration</Text>
-                <View className="bg-zinc-800/50 rounded-xl overflow-hidden">
-                    <DateTimePicker
-                        value={new Date(0, 0, 0, duration.hours, duration.minutes)}
-                        mode="time"
-                        is24Hour={true}
-                        display="spinner"
-                        onChange={onTimeChange}
-                        textColor="white"
-                    />
+                <View className="bg-zinc-800/50 rounded-xl p-4">
+                    {Platform.OS === 'ios' ? (
+                        <DateTimePicker
+                            value={new Date(0, 0, 0, duration.hours, duration.minutes)}
+                            mode="time"
+                            display="spinner"
+                            onChange={(event, selectedDate) => {
+                                if (selectedDate) {
+                                    setDuration({
+                                        hours: selectedDate.getHours(),
+                                        minutes: Math.round(selectedDate.getMinutes() / 5) * 5
+                                    });
+                                }
+                            }}
+                            style={{height: 120}}
+                            textColor="white"
+                        />
+                    ) : (
+                        <View className="flex-row justify-between items-center">
+                            <View className="flex-row items-center">
+                                <TouchableOpacity
+                                    onPress={() => setDuration(prev => ({
+                                        ...prev,
+                                        hours: prev.hours > 0 ? prev.hours - 1 : 23
+                                    }))}
+                                    className="p-2"
+                                >
+                                    <Text className="text-zinc-400 text-2xl">-</Text>
+                                </TouchableOpacity>
+                                <Text className="text-white text-xl mx-4">{duration.hours.toString().padStart(2, '0')}</Text>
+                                <TouchableOpacity
+                                    onPress={() => setDuration(prev => ({
+                                        ...prev,
+                                        hours: prev.hours < 23 ? prev.hours + 1 : 0
+                                    }))}
+                                    className="p-2"
+                                >
+                                    <Text className="text-zinc-400 text-2xl">+</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            <Text className="text-white text-xl">:</Text>
+
+                            <View className="flex-row items-center">
+                                <TouchableOpacity
+                                    onPress={() => setDuration(prev => ({
+                                        ...prev,
+                                        minutes: prev.minutes > 0 ? prev.minutes - 5 : 55
+                                    }))}
+                                    className="p-2"
+                                >
+                                    <Text className="text-zinc-400 text-2xl">-</Text>
+                                </TouchableOpacity>
+                                <Text className="text-white text-xl mx-4">{duration.minutes.toString().padStart(2, '0')}</Text>
+                                <TouchableOpacity
+                                    onPress={() => setDuration(prev => ({
+                                        ...prev,
+                                        minutes: prev.minutes < 55 ? prev.minutes + 5 : 0
+                                    }))}
+                                    className="p-2"
+                                >
+                                    <Text className="text-zinc-400 text-2xl">+</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    )}
                 </View>
             </View>
 

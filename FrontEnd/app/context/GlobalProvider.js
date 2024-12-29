@@ -26,7 +26,7 @@ const GlobalProvider = ({ children }) => {
                 console.log(`storedUser type: ${typeof storedUser}, value: ${storedUser}`)
                 const parsedUser = JSON.parse(storedUser);
                 
-                axios.post('https://0310-109-245-203-91.ngrok-free.app/getUser', { id: parsedUser._id })
+                axios.post('https://09a9-109-245-203-91.ngrok-free.app/getUser', { id: parsedUser._id })
                     .then(res => {
                         console.log('User data:', res.data);
                         if(res.data == 'User not found'){
@@ -34,9 +34,13 @@ const GlobalProvider = ({ children }) => {
                             setIsLogged(false);
                             setUser(null);
                         } else {
-                            setUser(parsedUser);
-                            setIsLogged(true);
-                            router.push('/Home');
+                            if(parsedUser.verify != 1){
+                                router.push('/verify')
+                            } else {
+                                setUser(parsedUser);
+                                setIsLogged(true);
+                                router.push('/Home');
+                            }
                         }
                     })
                     .catch(e => {

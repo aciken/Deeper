@@ -8,8 +8,9 @@ const AuthLayout = () => {
     <View style={{ flex: 1 }}>
       <StatusBar backgroundColor='#030712' style='light' />
       <Stack>
-        <Stack.Screen name='sign-in' options={{ headerShown: false }} />
+        <Stack.Screen name='sign-in' options={{ headerShown: false}} />
         <Stack.Screen name='sign-up' options={{ headerShown: false }} />
+        <Stack.Screen name='verify' options={{ headerShown: false, gestureEnabled: false}} />
       </Stack>
     </View>
   )
