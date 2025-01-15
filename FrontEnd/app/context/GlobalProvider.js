@@ -21,12 +21,10 @@ const GlobalProvider = ({ children }) => {
             console.log('Checking login status...');
 
             const storedUser = await AsyncStorage.getItem('@user');
-            console.log('Stored user:', storedUser);
             if (storedUser) {
-                console.log(`storedUser type: ${typeof storedUser}, value: ${storedUser}`)
                 const parsedUser = JSON.parse(storedUser);
                 
-                axios.post('https://36c0-109-245-203-91.ngrok-free.app/getUser', { id: parsedUser._id })
+                axios.post('https://8814-109-245-203-91.ngrok-free.app/getUser', { id: parsedUser._id })
                     .then(res => {
                         console.log('User data:', res.data);
                         if(res.data == 'User not found'){

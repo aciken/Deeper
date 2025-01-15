@@ -17,9 +17,20 @@ const endSession = async (req, res) => {
         if (session.sessionId.toString() === sessionId) {
             console.log('before', session)
             console.log('currentTime', currentTime)
+
+            // Compare times
+            const [currentHours, currentMins] = currentTime.split(':').map(Number);
+            const [startHours, startMins] = session.startTime.split(':').map(Number);
+            
+            const currentTotalMins = currentHours * 60 + currentMins;
+            const startTotalMins = startHours * 60 + startMins;
+
+            // If current time is before start time, use start time
+            const endTime = currentTotalMins < startTotalMins ? session.startTime : currentTime;
+
             return {
                 ...session,
-                endTime: currentTime
+                endTime
             };
         }
         console.log('after', session)

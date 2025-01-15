@@ -11,6 +11,7 @@ import MaskedView from '@react-native-masked-view/masked-view';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AlertPopup from '../components/AlertPopup';
 import images from '../../constants/images';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Svg, { 
   Circle, 
@@ -64,6 +65,8 @@ const Tasks = () => {
   const [works, setWorks] = useState(user.work);
 
   const [currentTime, setCurrentTime] = useState(0);
+  const [sessionName, setSessionName] = useState('');
+  const [currentSession, setCurrentSession] = useState(null);
   
   const buttonAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(-300)).current;
@@ -130,32 +133,6 @@ const Tasks = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  // useEffect(() => {
-  //   const currentDate = new Date();
-  //   const dayOfMonth = currentDate.getDate();
-
-
-
-  //   works.forEach(work => {
-  //     let timeWorked = 0;
-  //   user.array[dayOfMonth-1].forEach(task => {
-  //     console.log(task[5], task[4])
-  //     if(task[3].name === work.name && task[5] <= currentTime-10){
-  //       timeWorked += task[5] - task[4]
-  //     }
-  //   })
-  //   // Round timeWorked to the nearest integer
-  //   timeWorked = Math.round(timeWorked);
-  //   axios.put('https://44ca-188-2-139-122.ngrok-free.app/updateWeeklyWork', {
-  //     work,
-  //     timeWorked,
-  //     id: user._id,
-  //   }).then(res => {
-  //     setWorks(res.data)
-  //     })
-  //   })
-  // }, [currentTime])
-
     // console.log(currentTime-10)
     // const hours = Math.floor(timeWorked / 20);
     // const minutes = Math.round((timeWorked / 20 - hours) * 60);
@@ -189,6 +166,8 @@ const Tasks = () => {
         
         return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
     }
+
+
 
     // return time
 
@@ -274,6 +253,8 @@ const Tasks = () => {
       const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
       weekDates[days[i]] = dateString;
     }
+
+    console.log(weekDates, todayDate())
 
     return weekDates;
   }
@@ -437,7 +418,7 @@ const getGoalWork = () => {
 
 
 const submitNewWork = () => {
-    axios.put('https://36c0-109-245-203-91.ngrok-free.app/addJob', {
+    axios.put('https://8814-109-245-203-91.ngrok-free.app/addJob', {
     newWork,
     id: user._id,
   }).then(res => {
@@ -453,7 +434,7 @@ const submitNewWork = () => {
 }
 
 const submitEditWork = () => {
-  axios.put('https://36c0-109-245-203-91.ngrok-free.app/editJob', {
+  axios.put('https://8814-109-245-203-91.ngrok-free.app/editJob', {
   editWork,
   index: editIndex,
   id: user._id,
@@ -474,7 +455,7 @@ const submitEditWork = () => {
 
 const submitDeleteWork = () => {
   if(user.work.length !== 1){
-    axios.put('https://36c0-109-245-203-91.ngrok-free.app/deleteJob', {
+    axios.put('https://8814-109-245-203-91.ngrok-free.app/deleteJob', {
     index: editIndex,
     id: user._id,
   }).then(res => {
@@ -497,7 +478,7 @@ const submitDeleteWork = () => {
 
 
 const endSession = () => {
-  axios.put('https://36c0-109-245-203-91.ngrok-free.app/endSession', {
+    axios.put('https://8814-109-245-203-91.ngrok-free.app/endSession', {
     id: user._id,
     sessionId: findCurrentSession().sessionId
   })
@@ -525,23 +506,24 @@ const pointsFromTime = (time) => {
   return (hours * 20) + Math.round(minutes / 3);
 }
 
-	const findCurrentSession = () => {
-		const currentDate = `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`;
-		const currentTime = new Date();
-		const currentTimeInMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+const findCurrentSession = () => {
+  const currentDate = `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`;
+  const currentTime = new Date();
+  const currentTimeInMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
 
-		const session = user.workSessions.find(session => {
-			const [startHours, startMinutes] = session.startTime.split(':').map(Number);
-			const startTimeInMinutes = startHours * 60 + startMinutes;
-			const [endHours, endMinutes] = session.endTime.split(':').map(Number);
-			const endTimeInMinutes = endHours * 60 + endMinutes;
+  const session = user.workSessions.find(session => {
+    const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+    const startTimeInMinutes = startHours * 60 + startMinutes;
+    const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+    const endTimeInMinutes = endHours * 60 + endMinutes;
 
-			return session.date === currentDate && currentTimeInMinutes >= startTimeInMinutes && currentTimeInMinutes <= endTimeInMinutes;
-		});
+    return session.date === currentDate && 
+         currentTimeInMinutes >= startTimeInMinutes && 
+         currentTimeInMinutes < endTimeInMinutes; // Changed <= to < to exclude endTime
+  });
 
-
-		return session;
-	}
+  return session;
+}
 
  let nextIndex = null;
 
@@ -695,6 +677,82 @@ const formatTime = (seconds) => {
   return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 };
 
+const startSession = () => {
+  let isAdjusted = false;
+
+  if(sessionName === ''){
+    setAlertPopupVisible(true);
+    setAlertPopupMessage('Please enter a session name');
+    setAlertPopupType('info');
+  } else if(!selectedWork) {
+    setAlertPopupVisible(true);
+    setAlertPopupMessage('Please select a work');
+    setAlertPopupType('info');
+  } else if(duration.hours === 0 && duration.minutes === 0) {
+    setAlertPopupVisible(true);
+    setAlertPopupMessage('Please select a duration');
+    setAlertPopupType('info');
+  } else {
+    // Check if session would exceed midnight
+    const now = new Date();
+    const endTime = new Date(now.getTime() + (duration.hours * 60 + duration.minutes) * 60000);
+    const midnight = new Date(now);
+    midnight.setHours(24, 0, 0, 0);
+
+    let adjustedDuration = {...duration};
+    
+    if (endTime > midnight) {
+      // Calculate remaining minutes until midnight
+      const minutesUntilMidnight = Math.floor((midnight - now) / 60000);
+      adjustedDuration = {
+        hours: Math.floor(minutesUntilMidnight / 60),
+        minutes: minutesUntilMidnight % 60
+      };
+      isAdjusted = true;
+
+    }
+
+    axios.put('https://8814-109-245-203-91.ngrok-free.app/startSession', {	
+      sessionName,
+      selectedWork,
+      duration: adjustedDuration,
+      id: user._id
+    })
+    .then(async res => {
+      if(res.data === 'Time overlap'){
+        setAlertPopupVisible(true);
+        setAlertPopupMessage('New Session overlaps with existing session');
+        setAlertPopupType('error');
+      } else {
+        if(isAdjusted){
+          setAlertPopupVisible(true);
+          setAlertPopupMessage('Session started, ends at 00:00');
+          setAlertPopupType('info');
+        } else {
+          setAlertPopupVisible(true);
+          setAlertPopupMessage('Session started');
+          setAlertPopupType('success');
+        }
+        setUser(res.data);
+        await AsyncStorage.setItem('@user', JSON.stringify(res.data));
+        setIsStartSessionPopupVisible(false);
+        setSessionName('');
+        setSelectedWork(null);
+        setDuration({ hours: 0, minutes: 0 });
+        setCurrentSession(findCurrentSession()); // Update current session
+      }
+    })
+    .catch((e) => {
+      console.error('Error starting session:', e);
+    });
+  }
+}
+
+const formatDate = (date) => {
+  const [day, month, year] = date.split(':');
+  return `${day.padStart(2, '0')}:${month.padStart(2, '0')}:${year}`;
+};
+
   return(
       <SafeAreaView className="flex-1 h-full bg-zinc-950" edges={['top']}>
         <View className="flex-1">
@@ -809,12 +867,12 @@ const formatTime = (seconds) => {
                   setSelectedDate(getWeekDates().monday)
                 }}
                 >
-                  <Text className="font-pmedium text-sm text-white mb-2">M</Text>
+                    <Text className={`font-pmedium text-sm ${formatDate(getWeekDates().monday) === formatDate(todayDate()) ? 'text-white' : 'text-zinc-700'} mb-2`}>M</Text>
                   <LinearGradient
             colors={workColors(getWeekDates().monday)}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 1}}
-            className={`w-8 h-8 rounded-md ${getWeekDates().monday === todayDate() ? 'border border-white' : ''} flex-row justify-center items-center`}
+            className={`w-8 h-8 rounded-md ${formatDate(getWeekDates().monday) === formatDate(todayDate()) ? 'border border-white' : ''} flex-row justify-center items-center`}
           >
                 <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().monday).length || ''}</Text>
                 </LinearGradient>
@@ -826,12 +884,12 @@ const formatTime = (seconds) => {
                   setSelectedDate(getWeekDates().tuesday)
                 }}
                 >
-                  <Text className="font-pmedium text-sm text-zinc-700 mb-2">T</Text>
+                  <Text className={`font-pmedium text-sm ${formatDate(getWeekDates().tuesday) === formatDate(todayDate()) ? 'text-white' : 'text-zinc-700'} mb-2`}>T</Text>
                   <LinearGradient
             colors={workColors(getWeekDates().tuesday)}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 1}}
-            className={`w-8 h-8 rounded-md ${getWeekDates().tuesday === todayDate() ? 'border border-white' : ''} flex-row justify-center items-center`}
+            className={`w-8 h-8 rounded-md ${formatDate(getWeekDates().tuesday) === formatDate(todayDate()) ? 'border border-white' : ''} flex-row justify-center items-center`}
           >
                 <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().tuesday).length || ''}</Text>
                 </LinearGradient>
@@ -842,12 +900,12 @@ const formatTime = (seconds) => {
                   setSelectedDate(getWeekDates().wednesday)
                 }}
                 >
-                  <Text className="font-pmedium text-sm text-zinc-700 mb-2">W</Text>
+                  <Text className={`font-pmedium text-sm ${formatDate(getWeekDates().wednesday) === formatDate(todayDate()) ? 'text-white' : 'text-zinc-700'} mb-2`}>W</Text>
                   <LinearGradient
             colors={workColors(getWeekDates().wednesday)}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 1}}
-            className={`w-8 h-8 rounded-md ${getWeekDates().wednesday === todayDate() ? 'border border-white' : ''} flex-row justify-center items-center`}
+            className={`w-8 h-8 rounded-md ${formatDate(getWeekDates().wednesday) === formatDate(todayDate()) ? 'border border-white' : ''} flex-row justify-center items-center`}
           >
                 <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().wednesday).length || ''}</Text>
                 </LinearGradient>
@@ -858,12 +916,12 @@ const formatTime = (seconds) => {
                   setSelectedDate(getWeekDates().thursday)
                 }}
                 >
-                  <Text className="font-pmedium text-sm text-zinc-700 mb-2">T</Text>
+                  <Text className={`font-pmedium text-sm ${formatDate(getWeekDates().thursday) === formatDate(todayDate()) ? 'text-white' : 'text-zinc-700'} mb-2`}>T</Text>
                   <LinearGradient
             colors={workColors(getWeekDates().thursday)}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 1}}
-            className={`w-8 h-8 rounded-md ${getWeekDates().thursday === todayDate() ? 'border border-white' : ''} flex-row justify-center items-center`}
+            className={`w-8 h-8 rounded-md ${formatDate(getWeekDates().thursday) === formatDate(todayDate()) ? 'border border-white' : ''} flex-row justify-center items-center`}
           >
                 <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().thursday).length || ''}</Text>
                 </LinearGradient>
@@ -874,12 +932,12 @@ const formatTime = (seconds) => {
                   setSelectedDate(getWeekDates().friday)
                 }}
                 >
-                  <Text className="font-pmedium text-sm text-zinc-700 mb-2">F</Text>
+                  <Text className={`font-pmedium text-sm ${formatDate(getWeekDates().friday) === formatDate(todayDate()) ? 'text-white' : 'text-zinc-700'} mb-2`}>F</Text>
                   <LinearGradient
             colors={workColors(getWeekDates().friday)}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 1}}
-            className={`w-8 h-8 rounded-md ${getWeekDates().friday === todayDate() ? 'border border-white' : ''} flex-row justify-center items-center`}
+            className={`w-8 h-8 rounded-md ${formatDate(getWeekDates().friday) === formatDate(todayDate()) ? 'border border-white' : ''} flex-row justify-center items-center`}
           >
                 <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().friday).length || ''}</Text>
                 </LinearGradient>
@@ -890,12 +948,12 @@ const formatTime = (seconds) => {
                   setSelectedDate(getWeekDates().saturday)
                 }}
                 >
-                  <Text className="font-pmedium text-sm text-zinc-700 mb-2">S</Text>
+                  <Text className={`font-pmedium text-sm ${formatDate(getWeekDates().saturday) === formatDate(todayDate()) ? 'text-white' : 'text-zinc-700'} mb-2`}>S</Text>
                   <LinearGradient
             colors={workColors(getWeekDates().saturday)}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 1}}
-            className={`w-8 h-8 rounded-md ${getWeekDates().saturday === todayDate() ? 'border border-white' : ''} flex-row justify-center items-center`}
+            className={`w-8 h-8 rounded-md ${formatDate(getWeekDates().saturday) === formatDate(todayDate()) ? 'border border-white' : ''} flex-row justify-center items-center`}
           >
                 <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().saturday).length || ''}</Text>
                 </LinearGradient>
@@ -906,12 +964,12 @@ const formatTime = (seconds) => {
                   setSelectedDate(getWeekDates().sunday)
                 }}
                 >
-                  <Text className="font-pmedium text-sm text-zinc-700 mb-2">S</Text>
+                    <Text className={`font-pmedium text-sm ${formatDate(getWeekDates().sunday) === formatDate(todayDate()) ? 'text-white' : 'text-zinc-700'} mb-2`}>S</Text>
                   <LinearGradient
             colors={workColors(getWeekDates().sunday)}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 1}}
-            className={`w-8 h-8 rounded-md ${getWeekDates().sunday === todayDate() ? 'border border-white' : ''} flex-row justify-center items-center`}
+            className={`w-8 h-8 rounded-md ${formatDate(getWeekDates().sunday) === formatDate(todayDate()) ? 'border border-white' : ''} flex-row justify-center items-center`}
           >
                 <Text className="font-psemibold text-blue-200 text-base">{user.workSessions.filter(session => session.date === getWeekDates().sunday).length || ''}</Text>
                 </LinearGradient>
@@ -1156,125 +1214,144 @@ const formatTime = (seconds) => {
 <BottomPopup
 				visible={isStartSessionPopupVisible}
 				onClose={() => setIsStartSessionPopupVisible(false)}
-				height={0.65}
+				height={Platform.OS === 'android' ? 0.7 : 0.85}
 			>
-				<ScrollView className="bg-zinc-900 rounded-t-3xl flex-1 p-2">
-				<MaskedView
-						maskElement={
-							<Text className="text-white text-3xl font-bold mb-6 text-center">Start Session</Text>
-								}
-							>
-							<LinearGradient
-								colors={['#D4D4D8', '#71717A']}
-								start={{x: 0, y: 0}}
-								end={{x: 1, y: 1}}
-							>
-							<Text className="text-white text-3xl font-bold mb-6 text-center opacity-0">Start Session</Text>
-							</LinearGradient>
-						</MaskedView>
+				<View className="flex-1 bg-zinc-900">
+					<Text className="text-white text-3xl font-bold p-6 text-center bg-gradient-to-r from-zinc-400 to-zinc-500 bg-clip-text">
+						Start Session
+					</Text>
 
-					
-					<View className="mb-4">
+					<View className="flex-1 px-4">
 						<TextInput
-							className="bg-zinc-800 text-white p-4 rounded-xl"
+							className="bg-zinc-800/50 text-white p-4 rounded-xl text-lg mb-4"
 							placeholder="Work Session Name"
 							placeholderTextColor="#71717A"
-							style={{ fontSize: 16 }}
+							value={sessionName}
+							onChangeText={setSessionName}
 						/>
-					</View>
-					
-					<View className="mb-4 z-10">
-						<TouchableOpacity 
-							className="flex-row justify-between items-center bg-zinc-800 p-4 rounded-xl"
-							onPress={() => setIsWorkDropdownVisible(!isWorkDropdownVisible)}
-						>
-							<View className="flex-row items-center">
-								{selectedWork ? (
-									<LinearGradient
-										colors={selectedWork.colors}
-										start={{x: 0, y: 0}}
-										end={{x: 1, y: 1}}
-										className="w-5 h-5 rounded-full mr-3"
-									>
-									</LinearGradient>
-								) : (
-									<Image source={icons.workGray} className="w-5 h-5 mr-3 tint-gray-400" />
-								)}
-								<Text className={`text-base ${selectedWork ? 'text-white' : 'text-gray-400'}`}>
-									{selectedWork ? selectedWork.name : "Select a work"}
-								</Text>
-							</View>
-							<Image 
-								source={icons.chevronRight} 
-								className={`w-4 h-4 tint-gray-400 ${isWorkDropdownVisible ? 'rotate-90' : ''}`} 
-							/>
-						</TouchableOpacity>
-      
-						{isWorkDropdownVisible && (
-							<View className="absolute top-full left-0 right-0 bg-zinc-800 rounded-xl mt-2 p-2 border border-zinc-700">
-								{works.map((work, index) => (
-									<TouchableOpacity 
-										key={index}
-										className="flex-row items-center p-3"
-										onPress={() => {
-											setSelectedWork(work);
-											setIsWorkDropdownVisible(false);
-										}}
-									>
-										<LinearGradient
-											colors={work.colors}
-											start={{x: 0, y: 0}}
-											end={{x: 1, y: 0}}
-											className="w-4 h-4 rounded-full mr-3"
+
+						<Text className="text-zinc-400 text-base mb-2">Set Duration</Text>
+						<View className="bg-zinc-800/50 rounded-xl p-4">
+							{Platform.OS === 'ios' ? (
+								<DateTimePicker
+									value={new Date(0, 0, 0, duration.hours, duration.minutes)}
+									mode="time"
+									display="spinner"
+									onChange={(event, selectedDate) => {
+										if (selectedDate) {
+											setDuration({
+												hours: selectedDate.getHours(),
+												minutes: Math.round(selectedDate.getMinutes() / 5) * 5
+											});
+										}
+									}}
+									style={{height: 120}}
+									textColor="white"
+								/>
+							) : (
+								<View className="flex-row justify-between items-center">
+									<View className="flex-row items-center">
+										<TouchableOpacity
+											onPress={() => setDuration(prev => ({
+												...prev,
+												hours: prev.hours > 0 ? prev.hours - 1 : 23
+											}))}
+											className="p-2"
 										>
-										</LinearGradient>
+											<Text className="text-zinc-400 text-2xl">-</Text>
+										</TouchableOpacity>
+										<Text className="text-white text-xl mx-4">{duration.hours.toString().padStart(2, '0')}</Text>
+										<TouchableOpacity
+											onPress={() => setDuration(prev => ({
+												...prev,
+												hours: prev.hours < 23 ? prev.hours + 1 : 0
+											}))}
+											className="p-2"
+										>
+											<Text className="text-zinc-400 text-2xl">+</Text>
+										</TouchableOpacity>
+									</View>
+
+									<Text className="text-white text-xl">:</Text>
+
+									<View className="flex-row items-center">
+										<TouchableOpacity
+											onPress={() => setDuration(prev => ({
+												...prev,
+												minutes: prev.minutes > 0 ? prev.minutes - 5 : 55
+											}))}
+											className="p-2"
+										>
+											<Text className="text-zinc-400 text-2xl">-</Text>
+										</TouchableOpacity>
+										<Text className="text-white text-xl mx-4">{duration.minutes.toString().padStart(2, '0')}</Text>
+										<TouchableOpacity
+											onPress={() => setDuration(prev => ({
+												...prev,
+												minutes: prev.minutes < 55 ? prev.minutes + 5 : 0
+											}))}
+											className="p-2"
+										>
+											<Text className="text-zinc-400 text-2xl">+</Text>
+										</TouchableOpacity>
+									</View>
+								</View>
+							)}
+						</View>
+					</View>
+
+					<View className="bg-zinc-900 p-4">
+						<Text className="text-zinc-400 text-base mb-2">Select Work</Text>
+						<ScrollView 
+							horizontal 
+							showsHorizontalScrollIndicator={false}
+							className="mb-4"
+						>
+							<View className="flex-row space-x-2">
+								{works.map((work, index) => (
+									<TouchableOpacity
+										key={index}
+										onPress={() => setSelectedWork(work)}
+										className={`p-4 rounded-xl border min-w-[140px] ${
+											selectedWork === work 
+											? 'bg-zinc-800/80 border-sky-500/50' 
+											: 'bg-zinc-800/50 border-transparent'
+										}`}
+									>
+										<View className="flex-row items-center mb-2">
+											<View className="w-6 h-6 rounded-full overflow-hidden">
+												<LinearGradient
+													colors={work.colors}
+													start={{x: 0, y: 0}}
+													end={{x: 1, y: 1}}
+													className="w-full h-full"
+												/>
+											</View>
+											{selectedWork === work && (
+												<View className="w-3 h-3 rounded-full bg-sky-500 ml-auto" />
+											)}
+										</View>
 										<Text className="text-white text-base">{work.name}</Text>
 									</TouchableOpacity>
 								))}
 							</View>
-						)}
-					</View>
-					
-					<TouchableOpacity 
-						className="flex-row justify-between items-center bg-zinc-800 p-4 rounded-xl mb-4"
-						onPress={() => setShowTimePicker(!showTimePicker)}	
-					>
-						<View className="flex-row items-center">
-							<Image source={icons.clockGray} className="w-5 h-5 mr-3 tint-zinc-400" />
-							<Text className="text-zinc-400 text-base">
-								{duration.hours > 0 || duration.minutes > 0 
-									? `${duration.hours}h ${duration.minutes}m`
-									: "Add duration"}
-							</Text>
-						</View>
-						<Image source={icons.chevronRight} className="w-4 h-4 tint-zinc-400" />
-					</TouchableOpacity>
-					
-					{showTimePicker && (
-						<View className="mb-4">
-							<DateTimePicker
-								value={new Date(0, 0, 0, duration.hours, duration.minutes)}
-								mode="time"
-								is24Hour={true}
-								display="spinner"
-								onChange={onTimeChange}
-							/>
-						</View>
-					)}
-				</ScrollView>
-    
-				<View className="bg-zinc-900 p-6">
-					<TouchableOpacity onPress={() => {/* Handle start session */}}>
-						<LinearGradient
-							colors={['#0ea5e9', '#60a5fa']}
-							start={{x: 0, y: 0}}
-							end={{x: 1, y: 1}}
-							className="w-full rounded-full h-14 flex-row justify-center items-center"
+						</ScrollView>
+
+						<TouchableOpacity 
+							onPress={startSession}
+							className="overflow-hidden rounded-xl"
 						>
-							<Image source={icons.play} className="w-6 h-6 mr-2 tint-white" />
-							<Text className="text-white text-lg font-semibold">Start Session</Text>
-						</LinearGradient>
-					</TouchableOpacity>
+							<LinearGradient
+								colors={['#0ea5e9', '#60a5fa']}
+								start={{x: 0, y: 0}}
+								end={{x: 1, y: 1}}
+								className="py-4 flex-row justify-center items-center"
+							>
+								<Image source={icons.play} className="w-6 h-6 tint-white" />
+								<Text className="text-white text-xl font-semibold ml-2">Start Session</Text>
+							</LinearGradient>
+						</TouchableOpacity>
+					</View>
 				</View>
 			</BottomPopup>
 

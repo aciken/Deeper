@@ -21,7 +21,7 @@ const ForgotPasswordVerification = () => {
 
     console.log(code,email)
     // Add logic to handle verification code submission
-    axios.post('https://36c0-109-245-203-91.ngrok-free.app/forgotPasswordVerification', {
+    axios.post('https://8814-109-245-203-91.ngrok-free.app/forgotPasswordVerification', {
       code,email
     })
     .then((res) => {

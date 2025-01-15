@@ -26,7 +26,7 @@ const ForgotPasswordReset = () => {
     }
 
     // Add logic to handle password reset
-    axios.post('https://36c0-109-245-203-91.ngrok-free.app/forgotPasswordReset', {
+    axios.post('https://8814-109-245-203-91.ngrok-free.app/forgotPasswordReset', {
       password,email
     })
     .then((res) => {

@@ -75,6 +75,13 @@ const UserSchema = new mongoose.Schema({
   resetCode: {
     type: Number,
     default: 0
+  },
+  subscription: {
+    type: Object,
+    default: {
+      status: false,
+      date: null
+    }
   }
 });
 

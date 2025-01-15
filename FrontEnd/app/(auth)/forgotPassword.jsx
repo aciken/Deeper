@@ -16,7 +16,7 @@ const ForgotPassword = () => {
       return;
     }
 
-    axios.post('https://36c0-109-245-203-91.ngrok-free.app/forgotPassword', {
+    axios.post('https://8814-109-245-203-91.ngrok-free.app/forgotPassword', {
       email: email
     })
     .then((res) => {

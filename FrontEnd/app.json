@@ -1,10 +1,10 @@
 {
   "expo": {
     "name": "deeper",
-    "slug": "FrontEnd",
+    "slug": "deeper",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icons/DeeperLogo2.png",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#09090b",
     "splash": {
@@ -17,7 +17,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.aciken.FrontEnd",
+      "bundleIdentifier": "com.aciken.deeper",
       "backgroundColor": "#09090b",
       "userInterfaceStyle": "dark"
     },
@@ -26,16 +26,11 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#09090b"
       },
-      "package": "com.aciken.FrontEnd",
+      "package": "com.aciken.deeper",
       "userInterfaceStyle": "dark"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "982934180885"
-      }
     },
     "scheme": "deeper",
     "plugins": [
@@ -47,6 +42,15 @@
     "androidStatusBar": {
       "backgroundColor": "#09090b",
       "barStyle": "light-content"
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "faa9ca94-f6aa-498d-9c89-515a98662f4a"
+      }
+    },
+    "owner": "aciken"
   }
 }

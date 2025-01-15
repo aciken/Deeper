@@ -191,7 +191,9 @@ const Home = () => {
 			const [endHours, endMinutes] = session.endTime.split(':').map(Number);
 			const endTimeInMinutes = endHours * 60 + endMinutes;
 
-			return session.date === currentDate && currentTimeInMinutes >= startTimeInMinutes && currentTimeInMinutes <= endTimeInMinutes;
+			return session.date === currentDate && 
+				   currentTimeInMinutes >= startTimeInMinutes && 
+				   currentTimeInMinutes < endTimeInMinutes; // Changed <= to < to exclude endTime
 		});
 
 		return session;
@@ -422,7 +424,7 @@ const Home = () => {
 
 				
 
-				axios.put('https://36c0-109-245-203-91.ngrok-free.app/changeDaily', {	
+				axios.put('https://8814-109-245-203-91.ngrok-free.app/changeDaily', {	
 					id: user._id,
 					date
 				})
@@ -722,7 +724,7 @@ const Home = () => {
 
 
 	const collectPoints = (challange, index) => {
-		axios.put('https://36c0-109-245-203-91.ngrok-free.app/collectDaily', {
+		axios.put('https://8814-109-245-203-91.ngrok-free.app/collectDaily', {
 			id: user._id,
 			points: challange.points,
 			index
@@ -738,7 +740,7 @@ const Home = () => {
 
 
 	const collectGeneralPoints = (challange) => {
-		axios.put('https://36c0-109-245-203-91.ngrok-free.app/collectGeneral', {
+		axios.put('https://8814-109-245-203-91.ngrok-free.app/collectGeneral', {
 			id: user._id,
 			points: challange.points,
 			type: challange.type
@@ -829,7 +831,7 @@ const Home = () => {
 	useEffect(() => {
 		const id = user._id;
 		console.log('setting user')
-		axios.post('https://36c0-109-245-203-91.ngrok-free.app/getUser', { id })
+		axios.post('https://8814-109-245-203-91.ngrok-free.app/getUser', { id })	
 			.then(async res => {
 				setIsLoading(false);
 				setUser(res.data);
@@ -926,7 +928,7 @@ const Home = () => {
 
 			}
 
-			axios.put('https://36c0-109-245-203-91.ngrok-free.app/startSession', {	
+			axios.put('https://8814-109-245-203-91.ngrok-free.app/startSession', {	
 				sessionName,
 				selectedWork,
 				duration: adjustedDuration,
@@ -1074,7 +1076,7 @@ const Home = () => {
 
 
 	const endSession = () => {
-		axios.put('https://36c0-109-245-203-91.ngrok-free.app/endSession', {
+		axios.put('https://8814-109-245-203-91.ngrok-free.app/endSession', {
 			id: user._id,
 			sessionId: findCurrentSession().sessionId
 		})
@@ -1471,7 +1473,7 @@ const Home = () => {
 								const endTimeInMinutes = endHours * 60 + endMinutes;
 								const currentTime = new Date();
 								const currentTimeInMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
-								return sessionDate && endTimeInMinutes < currentTimeInMinutes;
+								return sessionDate && endTimeInMinutes <= currentTimeInMinutes;
 							})
 							.map((task, index) => (
 								<TouchableOpacity key={index} className="flex-row justify-between items-center p-4">
