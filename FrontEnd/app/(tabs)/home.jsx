@@ -896,6 +896,8 @@ const Home = () => {
 	const startSession = () => {
 		let isAdjusted = false;
 
+		console.log('Device timezone:', Intl.DateTimeFormat().resolvedOptions().timeZone)
+
 		if(sessionName === ''){
 			setAlertPopupVisible(true);
 			setAlertPopupMessage('Please enter a session name');
@@ -909,39 +911,29 @@ const Home = () => {
 			setAlertPopupMessage('Please select a duration');
 			setAlertPopupType('info');
 		} else {
-			// Calculate times in client's timezone
-			const now = new Date();
-			const startTime = now.toLocaleTimeString('en-GB', { 
-				hour: '2-digit', 
-				minute: '2-digit',
-				hour12: false 
-			});
-
-			// Calculate end time
-			const [startHours, startMinutes] = startTime.split(':').map(Number);
-			const durationInMinutes = (duration.hours * 60) + duration.minutes;
-			let totalMinutes = startHours * 60 + startMinutes + durationInMinutes;
-
 			// Check if session would exceed midnight
-			if (totalMinutes >= 1440) { // 24 hours * 60 minutes
-				totalMinutes = 1439; // Set to 23:59
+			const now = new Date();
+			const endTime = new Date(now.getTime() + (duration.hours * 60 + duration.minutes) * 60000);
+			const midnight = new Date(now);
+			midnight.setHours(24, 0, 0, 0);
+
+			let adjustedDuration = {...duration};
+			
+			if (endTime > midnight) {
+				// Calculate remaining minutes until midnight
+				const minutesUntilMidnight = Math.floor((midnight - now) / 60000);
+				adjustedDuration = {
+					hours: Math.floor(minutesUntilMidnight / 60),
+					minutes: minutesUntilMidnight % 60
+				};
 				isAdjusted = true;
+
 			}
-
-			const endHours = Math.floor(totalMinutes / 60);
-			const endMinutes = totalMinutes % 60;
-			const endTime = `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
-
-			// Get current date in the client's timezone
-			const currentDate = new Date();
-			const date = `${currentDate.getDate()}:${currentDate.getMonth() + 1}:${currentDate.getFullYear()}`;
 
 			axios.put('https://8814-109-245-203-91.ngrok-free.app/startSession', {	
 				sessionName,
 				selectedWork,
-				startTime,
-				endTime,
-				date,
+				duration: adjustedDuration,
 				id: user._id
 			})
 			.then(async res => {
@@ -952,7 +944,7 @@ const Home = () => {
 				} else {
 					if(isAdjusted){
 						setAlertPopupVisible(true);
-						setAlertPopupMessage('Session adjusted to end at 23:59');
+						setAlertPopupMessage('Session started, ends at 00:00');
 						setAlertPopupType('info');
 					} else {
 						setAlertPopupVisible(true);
@@ -1086,19 +1078,9 @@ const Home = () => {
 
 
 	const endSession = () => {
-		const currentDate = new Date();
-		const endTime = currentDate.toLocaleTimeString('en-US', {
-			hour12: false,
-			hour: '2-digit',
-			minute: '2-digit'
-		});
-		const date = currentDate.toISOString().split('T')[0];
-
 		axios.put('https://8814-109-245-203-91.ngrok-free.app/endSession', {
 			id: user._id,
-			sessionId: findCurrentSession().sessionId,
-			endTime,
-			date
+			sessionId: findCurrentSession().sessionId
 		})
 		.then(async res => {
 			setUser(res.data);
