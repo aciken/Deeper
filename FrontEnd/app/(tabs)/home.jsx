@@ -424,7 +424,7 @@ const Home = () => {
 
 				
 
-				axios.put('https://8814-109-245-203-91.ngrok-free.app/changeDaily', {	
+				axios.put('https://deeper.onrender.com/changeDaily', {	
 					id: user._id,
 					date
 				})
@@ -724,7 +724,7 @@ const Home = () => {
 
 
 	const collectPoints = (challange, index) => {
-		axios.put('https://8814-109-245-203-91.ngrok-free.app/collectDaily', {
+		axios.put('https://deeper.onrender.com/collectDaily', {
 			id: user._id,
 			points: challange.points,
 			index
@@ -740,7 +740,7 @@ const Home = () => {
 
 
 	const collectGeneralPoints = (challange) => {
-		axios.put('https://8814-109-245-203-91.ngrok-free.app/collectGeneral', {
+		axios.put('https://deeper.onrender.com/collectGeneral', {
 			id: user._id,
 			points: challange.points,
 			type: challange.type
@@ -831,7 +831,7 @@ const Home = () => {
 	useEffect(() => {
 		const id = user._id;
 		console.log('setting user')
-		axios.post('https://8814-109-245-203-91.ngrok-free.app/getUser', { id })	
+		axios.post('https://deeper.onrender.com/getUser', { id })	
 			.then(async res => {
 				setIsLoading(false);
 				setUser(res.data);
@@ -896,7 +896,8 @@ const Home = () => {
 	const startSession = () => {
 		let isAdjusted = false;
 
-		console.log('Device timezone:', Intl.DateTimeFormat().resolvedOptions().timeZone)
+		const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+		console.log('Device timezone:', timezone)
 
 		if(sessionName === ''){
 			setAlertPopupVisible(true);
@@ -930,11 +931,12 @@ const Home = () => {
 
 			}
 
-			axios.put('https://8814-109-245-203-91.ngrok-free.app/startSession', {	
+			axios.put('https://deeper.onrender.com/startSession', {	
 				sessionName,
 				selectedWork,
 				duration: adjustedDuration,
-				id: user._id
+				id: user._id,
+				timezone
 			})
 			.then(async res => {
 				if(res.data === 'Time overlap'){
@@ -1078,9 +1080,11 @@ const Home = () => {
 
 
 	const endSession = () => {
-		axios.put('https://8814-109-245-203-91.ngrok-free.app/endSession', {
+		const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+		axios.put('https://deeper.onrender.com/endSession', {
 			id: user._id,
-			sessionId: findCurrentSession().sessionId
+			sessionId: findCurrentSession().sessionId,
+			timezone
 		})
 		.then(async res => {
 			setUser(res.data);
@@ -1220,7 +1224,7 @@ const Home = () => {
 					<View className="flex-row items-center justify-between mt-2 mb-4 mx-4">
 							<Text className="text-zinc-300 text-4xl font-bold">deeper</Text>
 							<TouchableOpacity onPress={() => setIsProfilePopupVisible(true)}>
-								<Image source={icons.settings} className="w-6 h-6 tint-zinc-300" />
+								<Image source={icons.profile} className="w-8 h-8 tint-zinc-300" />
 							</TouchableOpacity>
 					</View>
 
@@ -1814,7 +1818,7 @@ const Home = () => {
     <BottomPopup
         visible={isStartSessionPopupVisible}
         onClose={() => setIsStartSessionPopupVisible(false)}
-        height={Platform.OS === 'android' ? 0.7 : 0.85}
+        height={Platform.OS === 'android' ? 0.7 : 0.75}
     >
         <View className="flex-1 bg-zinc-900">
             <Text className="text-white text-3xl font-bold p-6 text-center bg-gradient-to-r from-zinc-400 to-zinc-500 bg-clip-text">
@@ -2135,24 +2139,31 @@ const Home = () => {
 					</View>
 
 					<View className="mb-6">
-						<Text className="text-zinc-400 text-base mb-2">Preferences</Text>
-						<TouchableOpacity className="bg-zinc-900 rounded-xl p-4 mb-2">
-							<Text className="text-white">Notifications</Text>
-						</TouchableOpacity>
-						<TouchableOpacity className="bg-zinc-900 rounded-xl p-4">
-							<Text className="text-white">Theme</Text>
-						</TouchableOpacity>
+						<Text className="text-zinc-400 text-base mb-2">Activity</Text>
+						<View className="bg-zinc-900 rounded-xl p-4">
+							<View className="flex-row flex-wrap gap-2">
+								{[...Array(365)].map((_, index) => {
+									// Create date for this dot starting from Jan 1, 2025
+									const dotDate = new Date(2025, 0, index + 1);
+									const dateString = `${dotDate.getDate()}:${dotDate.getMonth() + 1}:${dotDate.getFullYear()}`;
+									
+									// Check if there are any sessions on this date
+									const hasSession = user.workSessions.some(session => session.date === dateString);
+
+									return (
+										<View 
+											key={index}
+											className={`w-2 h-2 rounded-full ${hasSession ? 'bg-zinc-600' : 'bg-zinc-800'}`}
+										/>
+									);
+								})}
+							</View>
+						</View>
 					</View>
 
-					<View className="mb-6">
-						<Text className="text-zinc-400 text-base mb-2">Support</Text>
-						<TouchableOpacity className="bg-zinc-900 rounded-xl p-4 mb-2">
-							<Text className="text-white">Help Center</Text>
-						</TouchableOpacity>
-						<TouchableOpacity className="bg-zinc-900 rounded-xl p-4">
-							<Text className="text-white">Contact Us</Text>
-						</TouchableOpacity>
-					</View>
+
+
+
 
 					<TouchableOpacity 
 						onPress={async () => {

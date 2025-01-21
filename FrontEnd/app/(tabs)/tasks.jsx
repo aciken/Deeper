@@ -254,7 +254,6 @@ const Tasks = () => {
       weekDates[days[i]] = dateString;
     }
 
-    console.log(weekDates, todayDate())
 
     return weekDates;
   }
@@ -418,7 +417,7 @@ const getGoalWork = () => {
 
 
 const submitNewWork = () => {
-    axios.put('https://8814-109-245-203-91.ngrok-free.app/addJob', {
+    axios.put('https://deeper.onrender.com/addJob', {
     newWork,
     id: user._id,
   }).then(res => {
@@ -434,7 +433,7 @@ const submitNewWork = () => {
 }
 
 const submitEditWork = () => {
-  axios.put('https://8814-109-245-203-91.ngrok-free.app/editJob', {
+  axios.put('https://deeper.onrender.com/editJob', {
   editWork,
   index: editIndex,
   id: user._id,
@@ -455,7 +454,7 @@ const submitEditWork = () => {
 
 const submitDeleteWork = () => {
   if(user.work.length !== 1){
-    axios.put('https://8814-109-245-203-91.ngrok-free.app/deleteJob', {
+    axios.put('https://deeper.onrender.com/deleteJob', {
     index: editIndex,
     id: user._id,
   }).then(res => {
@@ -478,9 +477,11 @@ const submitDeleteWork = () => {
 
 
 const endSession = () => {
-    axios.put('https://8814-109-245-203-91.ngrok-free.app/endSession', {
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    axios.put('https://deeper.onrender.com/endSession', {
     id: user._id,
-    sessionId: findCurrentSession().sessionId
+    sessionId: findCurrentSession().sessionId,
+    timezone
   })
   .then(res => {
     setUser(res.data)
@@ -680,6 +681,8 @@ const formatTime = (seconds) => {
 const startSession = () => {
   let isAdjusted = false;
 
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
   if(sessionName === ''){
     setAlertPopupVisible(true);
     setAlertPopupMessage('Please enter a session name');
@@ -712,11 +715,12 @@ const startSession = () => {
 
     }
 
-    axios.put('https://8814-109-245-203-91.ngrok-free.app/startSession', {	
+    axios.put('https://deeper.onrender.com/startSession', {	
       sessionName,
       selectedWork,
       duration: adjustedDuration,
-      id: user._id
+      id: user._id,
+      timezone
     })
     .then(async res => {
       if(res.data === 'Time overlap'){
@@ -1167,10 +1171,18 @@ const formatDate = (date) => {
       <View className="flex-row items-center justify-between bg-zinc-800 rounded-xl p-2">
         <TouchableOpacity 
         onPress={() => {
-          if (newWork.currentTime.includes('m')) { 
-            setNewWork({...newWork, currentTime: parseInt(newWork.currentTime.replace('h', '')) + 'h'})
+          const currentHours = parseInt(newWork.currentTime.replace('h', ''));
+          if (newWork.currentTime.includes('m')) {
+            // If currently showing 0h 30m, don't go lower
+            if (currentHours === 0) return;
+            setNewWork({...newWork, currentTime: currentHours + 'h'})
           } else {
-            setNewWork({...newWork, currentTime: parseInt(newWork.currentTime.replace('h', '')) - 1 + 'h 30m'})
+            // Don't go below 30m
+            if (currentHours <= 1) {
+              setNewWork({...newWork, currentTime: '0h 30m'})
+            } else {
+              setNewWork({...newWork, currentTime: (currentHours - 1) + 'h 30m'})
+            }
           }
         }}
         className="bg-zinc-700 w-10 h-10 rounded-full items-center justify-center">
@@ -1179,10 +1191,14 @@ const formatDate = (date) => {
         <Text className="text-white text-2xl font-bold">{newWork.currentTime}</Text>
         <TouchableOpacity 
         onPress={() => {
+          const currentHours = parseInt(newWork.currentTime.replace('h', ''));
+          // Don't exceed 24h
+          if (currentHours >= 24) return;
+          
           if (newWork.currentTime.includes('m')) {
-            setNewWork({...newWork, currentTime: parseInt(newWork.currentTime.replace('h', '')) + 1 + 'h'})
+            setNewWork({...newWork, currentTime: (currentHours + 1) + 'h'})
           } else {
-            setNewWork({...newWork, currentTime: parseInt(newWork.currentTime.replace('h', '')) + 'h 30m'})
+            setNewWork({...newWork, currentTime: currentHours + 'h 30m'})
           }
         }}
         className="bg-zinc-700 w-10 h-10 rounded-full items-center justify-center">
@@ -1214,7 +1230,7 @@ const formatDate = (date) => {
 <BottomPopup
 				visible={isStartSessionPopupVisible}
 				onClose={() => setIsStartSessionPopupVisible(false)}
-				height={Platform.OS === 'android' ? 0.7 : 0.85}
+				height={Platform.OS === 'android' ? 0.7 : 0.75}
 			>
 				<View className="flex-1 bg-zinc-900">
 					<Text className="text-white text-3xl font-bold p-6 text-center bg-gradient-to-r from-zinc-400 to-zinc-500 bg-clip-text">
@@ -1829,7 +1845,7 @@ const formatDate = (date) => {
             )}
 
             {selectedTab === 'sessions' && (
-              <View className="space-y-4">
+              <ScrollView className="space-y-4">
                 <View className="flex-row justify-center items-center bg-zinc-800/30 rounded-full p-1 mb-4">
                   <TouchableOpacity 
                     onPress={() => setSessionTimeframe('today')}
@@ -1865,25 +1881,19 @@ const formatDate = (date) => {
                            sessionDate <= today;
                   }
                 }).map((session, index) => (
-                  <ScrollView key={index}
-                  className="flex-1"
-                  showsVerticalScrollIndicator={true}
-                  scrollEnabled={true}
-                  contentContainerStyle={{flexGrow: 1}}>
-                    <View className="bg-zinc-800/30 rounded-xl p-4 border border-zinc-800/50 shadow-lg">
-                      <View className="flex-row justify-between items-center">
-                        <View className="flex-row items-center">
-                          <View className="w-2 h-2 rounded-full bg-sky-400 mr-3" />
-                          <Text className="text-white text-base font-medium">{session.name}</Text>
-                        </View>
-                        <View className="bg-zinc-800/50 px-3 py-1 rounded-full">
-                          <Text className="text-sky-400 text-sm font-medium">
-                            {session.startTime} - {session.endTime}
-                          </Text>
-                        </View>
+                  <View key={index} className="bg-zinc-800/30 rounded-xl p-4 border border-zinc-800/50 shadow-lg">
+                    <View className="flex-row justify-between items-center">
+                      <View className="flex-row items-center">
+                        <View className="w-2 h-2 rounded-full bg-sky-400 mr-3" />
+                        <Text className="text-white text-base font-medium">{session.name}</Text>
+                      </View>
+                      <View className="bg-zinc-800/50 px-3 py-1 rounded-full">
+                        <Text className="text-sky-400 text-sm font-medium">
+                          {session.startTime} - {session.endTime}
+                        </Text>
                       </View>
                     </View>
-                  </ScrollView>
+                  </View>
                 ))}
                 {user.workSessions.filter(session => 
                   session.workId === user.work[editIndex]._id && 
@@ -1893,7 +1903,7 @@ const formatDate = (date) => {
                     <Text className="text-zinc-600 text-base">No sessions today</Text>
                   </View>
                 )}
-              </View>
+              </ScrollView>
             )}
 
             {selectedTab === 'edit' && (

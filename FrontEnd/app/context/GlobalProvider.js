@@ -24,7 +24,7 @@ const GlobalProvider = ({ children }) => {
             if (storedUser) {
                 const parsedUser = JSON.parse(storedUser);
                 
-                axios.post('https://8814-109-245-203-91.ngrok-free.app/getUser', { id: parsedUser._id })
+                axios.post('https://deeper.onrender.com/getUser', { id: parsedUser._id })
                     .then(res => {
                         console.log('User data:', res.data);
                         if(res.data == 'User not found'){

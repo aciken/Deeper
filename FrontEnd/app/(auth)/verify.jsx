@@ -27,7 +27,7 @@ const VerifyDigits = () => {
   const handleSubmit = () => {
     const verificationCode = digits.join('');
 
-    axios.put('https://8814-109-245-203-91.ngrok-free.app/verify', {
+    axios.put('https://deeper.onrender.com/verify', {
       id: user._id,
       code: verificationCode
     })

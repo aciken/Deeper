@@ -47,6 +47,7 @@ const SignUp = () => {
   })
   const [loginSuccess, setLoginSuccess] = useState(false)
   const [isSubmiting, setIsSubmiting] = useState(false)
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (loginSuccess) {
@@ -55,34 +56,59 @@ const SignUp = () => {
     }
   }, [loginSuccess])
 
-  const submit = () => {
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePassword = (password) => {
+    return password.length >= 8 && /\d/.test(password);
+  };
+
+  const handleSignUp = async () => {
     const { name, email, password } = form
     if (!name || !email || !password) {
-      Alert.alert('Please fill in all fields')
-      return
+      setError('Please fill in all fields');
+      return;
     }
-    
-    setIsSubmiting(true)
-    axios.put('https://8814-109-245-203-91.ngrok-free.app/signup', {  
-      name,
-      email,
-      password,
-      onboardingData,
-    }).then(res => {
-      if (res.data !== 'exist') {
-        setForm({ email: '', password: '', name: '' })
-        setUser(res.data)
-        setIsLogged(true)
-        setLoginSuccess(true)
-        router.push('/verify')
-      } else {
-        Alert.alert('User already exists')
-      }
-      setIsSubmiting(false)
-    }).catch(() => {
+
+    if (!validateEmail(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      setError('Password must be at least 8 characters long and contain at least one number');
+      return;
+    }
+
+    setIsSubmiting(true);
+    try {
+      axios.put('https://deeper.onrender.com/signup', {  
+        name,
+        email,
+        password,
+        onboardingData,
+      }).then(res => {
+        if (res.data !== 'exist') {
+          setForm({ email: '', password: '', name: '' })
+          setUser(res.data)
+          setIsLogged(true)
+          setLoginSuccess(true)
+          router.push('/verify')
+        } else {
+          Alert.alert('User already exists')
+        }
+        setIsSubmiting(false)
+      }).catch(() => {
+        Alert.alert('An error occurred')
+        setIsSubmiting(false)
+      })
+    } catch (error) {
+      console.error('Error during signup:', error)
       Alert.alert('An error occurred')
       setIsSubmiting(false)
-    })
+    }
   }
 
   return (
@@ -114,6 +140,13 @@ const SignUp = () => {
             </MaskedView>
             <Text className="text-zinc-500 text-lg">Sign up to get started</Text>
           </View>
+
+          {/* Error Message */}
+          {error && (
+            <View className="mb-6 p-4 bg-red-500/10 rounded-xl">
+              <Text className="text-red-500 text-center">{error}</Text>
+            </View>
+          )}
 
           {/* Form Fields */}
           <View className="space-y-6">
@@ -163,7 +196,7 @@ const SignUp = () => {
 
           {/* Sign Up Button */}
           <TouchableOpacity 
-            onPress={submit}
+            onPress={handleSignUp}
             className="mt-8 w-full h-14 rounded-2xl overflow-hidden"
             disabled={isSubmiting}
           >

@@ -2,7 +2,7 @@
   "expo": {
     "name": "deeper",
     "slug": "deeper",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icons/DeeperLogo2.png",
     "userInterfaceStyle": "dark",
@@ -19,7 +19,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.aciken.deeper",
       "backgroundColor": "#09090b",
-      "userInterfaceStyle": "dark"
+      "userInterfaceStyle": "dark",
+      "buildNumber": "2"
     },
     "android": {
       "adaptiveIcon": {

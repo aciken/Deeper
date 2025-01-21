@@ -81,14 +81,14 @@ const WorktimeSelect = () => {
     <TouchableOpacity
       onPress={() => handleTimeSelect(option.title.split(' ')[0]+'h')}
       className={`w-full h-20 rounded-xl mb-4 flex justify-center px-4
-        ${selectedTime === option.title ? 'bg-sky-400' : 'bg-zinc-900/70'}`}
+        ${selectedTime === option.title.split(' ')[0]+'h' ? 'bg-sky-400' : 'bg-zinc-900/70'}`}
     >
       <Text className={`text-lg font-medium
-        ${selectedTime === option.title ? 'text-zinc-900' : 'text-white'}`}>
+        ${selectedTime === option.title.split(' ')[0]+'h' ? 'text-zinc-900' : 'text-white'}`}>
         {option.title}
       </Text>
       <Text className={`text-sm mt-1
-        ${selectedTime === option.title ? 'text-zinc-800' : 'text-zinc-400'}`}>
+        ${selectedTime === option.title.split(' ')[0]+'h' ? 'text-zinc-800' : 'text-zinc-400'}`}>
         {option.description}
       </Text>
     </TouchableOpacity>

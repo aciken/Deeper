@@ -49,7 +49,7 @@ const SignIn = () => {
       Alert.alert('Please fill in all fields')
     } else {
       setIsSubmiting(true)
-      axios.post('https://8814-109-245-203-91.ngrok-free.app/login', {
+      axios.post('https://deeper.onrender.com/login', {
         email,
         password
       }).then(async (res) => {

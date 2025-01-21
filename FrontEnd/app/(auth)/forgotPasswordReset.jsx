@@ -7,26 +7,25 @@ import MaskedView from '@react-native-masked-view/masked-view';
 import { icons } from '../../constants';
 import axios from 'axios';
 
+const validatePassword = (password) => {
+  return password.length >= 8 && /\d/.test(password);
+};
 
 const ForgotPasswordReset = () => {
   const { email } = useLocalSearchParams();
   const [password, setPassword] = useState('');
   const [repeatPassword, setRepeatPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isSubmiting, setIsSubmiting] = useState(false);
 
-
-
-  const submit = () => {
-    if (!password || !repeatPassword) {
-      Alert.alert('Please fill in both password fields');
-      return;
-    }
-    if (password !== repeatPassword) {
-      Alert.alert('Passwords do not match');
+  const handleSubmit = () => {
+    if (!validatePassword(password)) {
+      setError('Password must be at least 8 characters long and contain at least one number');
       return;
     }
 
     // Add logic to handle password reset
-    axios.post('https://8814-109-245-203-91.ngrok-free.app/forgotPasswordReset', {
+    axios.post('https://deeper.onrender.com/forgotPasswordReset', {
       password,email
     })
     .then((res) => {
@@ -38,9 +37,9 @@ const ForgotPasswordReset = () => {
         Alert.alert('Failed to reset password');
       }
     })
-    .catch((err) => {
-      console.log(err);
-      Alert.alert('An error occurred, please try again later');
+    .catch(() => {
+      setError('An error occurred');
+      setIsSubmiting(false);
     });
   };
 
@@ -74,6 +73,13 @@ const ForgotPasswordReset = () => {
             <Text className="text-zinc-500 text-lg">Enter your new password</Text>
           </View>
 
+          {/* Error Display */}
+          {error && (
+            <View className="mb-6 p-4 bg-red-500/10 rounded-xl">
+              <Text className="text-red-500 text-center">{error}</Text>
+            </View>
+          )}
+
           {/* Password Inputs */}
           <View className="space-y-6">
             <View>
@@ -106,7 +112,7 @@ const ForgotPasswordReset = () => {
 
           {/* Submit Button */}
           <TouchableOpacity 
-            onPress={submit}
+            onPress={handleSubmit}
             className="mt-8 w-full h-14 rounded-2xl overflow-hidden"
           >
             <LinearGradient
