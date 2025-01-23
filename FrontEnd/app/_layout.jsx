@@ -68,6 +68,7 @@ const RootLayout = () => {
         <Stack.Screen name='log/SchedulePage' options={{ headerShown: false }} /> 
         <Stack.Screen name='log/addPreset' options={{ headerShown: false }} />
         <Stack.Screen name='log/createPreset' options={{ headerShown: false }} />
+        <Stack.Screen name='utils/Paywall' options={{ headerShown: false }} />
       </Stack>
     </GlobalProvider>
   );

@@ -16,6 +16,7 @@ import { Vibration } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 
+
 const Home = () => {
 	const { setUser, user, setIsLogged, setIsLoading } = useGlobalContext();
 	const isFocused = useIsFocused();
