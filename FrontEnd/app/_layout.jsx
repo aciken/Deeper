@@ -70,6 +70,7 @@ const RootLayout = () => {
         <Stack.Screen name='log/createPreset' options={{ headerShown: false }} />
         <Stack.Screen name='log/addTask' options={{ headerShown: false }} />
         <Stack.Screen name='utils/Paywall' options={{ headerShown: false, gestureEnabled: false }} />
+        <Stack.Screen name='pages' options={{ headerShown: false, presentation: 'modal', animation: 'slide_from_bottom' }} />
         <Stack.Screen 
           name="utils/settings" 
           options={{ 

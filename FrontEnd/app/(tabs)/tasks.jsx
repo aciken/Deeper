@@ -358,7 +358,10 @@ const openEditWork = (work, index) => {
   setEditWork(work)
   setInitialEditWork(work)
   setEditIndex(index)
-  setIsWorkEditPopupVisible(true)
+  router.push({
+    pathname: 'pages/WorkPage',
+    params: { workId: work._id }
+  })
 }
 
 const onTimeChange = (event, selectedTime) => {
@@ -1377,7 +1380,7 @@ const formatDate = (date) => {
         height={0.90}
       >
         <ScrollView className="flex-1 bg-zinc-900">
-          <View className="p-4 rounded-t-3xl">
+          <ScrollView className="p-4 rounded-t-3xl">
             <View className="flex-row justify-center items-center mb-4">
               <LinearGradient
                 colors={editWork.colors}
@@ -1845,65 +1848,79 @@ const formatDate = (date) => {
             )}
 
             {selectedTab === 'sessions' && (
-              <ScrollView className="space-y-4">
-                <View className="flex-row justify-center items-center bg-zinc-800/30 rounded-full p-1 mb-4">
-                  <TouchableOpacity 
-                    onPress={() => setSessionTimeframe('today')}
-                    className={`flex-1 py-2 px-4 rounded-full ${sessionTimeframe === 'today' ? 'bg-zinc-800' : ''}`}
-                  >
-                    <Text className={`text-base font-medium text-center ${sessionTimeframe === 'today' ? 'text-white' : 'text-zinc-500'}`}>Today</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    onPress={() => setSessionTimeframe('week')}
-                    className={`flex-1 py-2 px-4 rounded-full ${sessionTimeframe === 'week' ? 'bg-zinc-800' : ''}`}
-                  >
-                    <Text className={`text-base font-medium text-center ${sessionTimeframe === 'week' ? 'text-white' : 'text-zinc-500'}`}>Last 7 Days</Text>
-                  </TouchableOpacity>
+              <View style={{ height: '80%' }}>
+                {/* Fixed Header */}
+                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 1, backgroundColor: '#18181b', paddingHorizontal: 16 }}>
+                  <View className="flex-row justify-center items-center bg-zinc-800/30 rounded-full p-1 mb-4">
+                    <TouchableOpacity 
+                      onPress={() => setSessionTimeframe('today')}
+                      className={`flex-1 py-2 px-4 rounded-full ${sessionTimeframe === 'today' ? 'bg-zinc-800' : ''}`}
+                    >
+                      <Text className={`text-base font-medium text-center ${sessionTimeframe === 'today' ? 'text-white' : 'text-zinc-500'}`}>Today</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      onPress={() => setSessionTimeframe('week')}
+                      className={`flex-1 py-2 px-4 rounded-full ${sessionTimeframe === 'week' ? 'bg-zinc-800' : ''}`}
+                    >
+                      <Text className={`text-base font-medium text-center ${sessionTimeframe === 'week' ? 'text-white' : 'text-zinc-500'}`}>Last 7 Days</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  <Text className="text-zinc-400 text-sm font-medium mb-4">
+                    {sessionTimeframe === 'today' ? "Today's Sessions" : "Last 7 Days Sessions"}
+                  </Text>
                 </View>
 
-                <Text className="text-zinc-400 text-sm font-medium mb-2">
-                  {sessionTimeframe === 'today' ? "Today's Sessions" : "Last 7 Days Sessions"}
-                </Text>
-                
-                {user.workSessions.filter(session => {
-                  const [day, month, year] = session.date.split(':').map(Number);
-                  const sessionDate = new Date(year, month - 1, day);
-                  const today = new Date();
-                  const sevenDaysAgo = new Date(today);
-                  sevenDaysAgo.setDate(today.getDate() - 7);
+                {/* Scrollable Content */}
+                <ScrollView 
+                  style={{ marginTop: 100 }}
+                  contentContainerStyle={{ padding: 16 }}
+                  showsVerticalScrollIndicator={true}
+                >
+                  {user.workSessions.filter(session => {
+                    const [day, month, year] = session.date.split(':').map(Number);
+                    const sessionDate = new Date(year, month - 1, day);
+                    const today = new Date();
+                    const sevenDaysAgo = new Date(today);
+                    sevenDaysAgo.setDate(today.getDate() - 7);
 
-                  if (sessionTimeframe === 'today') {
-                    return session.workId === user.work[editIndex]._id && 
-                           session.date === `${today.getDate()}:${today.getMonth() + 1}:${today.getFullYear()}`;
-                  } else {
-                    return session.workId === user.work[editIndex]._id && 
-                           sessionDate >= sevenDaysAgo && 
-                           sessionDate <= today;
-                  }
-                }).map((session, index) => (
-                  <View key={index} className="bg-zinc-800/30 rounded-xl p-4 border border-zinc-800/50 shadow-lg">
-                    <View className="flex-row justify-between items-center">
-                      <View className="flex-row items-center">
-                        <View className="w-2 h-2 rounded-full bg-sky-400 mr-3" />
-                        <Text className="text-white text-base font-medium">{session.name}</Text>
-                      </View>
-                      <View className="bg-zinc-800/50 px-3 py-1 rounded-full">
-                        <Text className="text-sky-400 text-sm font-medium">
-                          {session.startTime} - {session.endTime}
-                        </Text>
+                    if (sessionTimeframe === 'today') {
+                      return session.workId === user.work[editIndex]._id && 
+                             session.date === `${today.getDate()}:${today.getMonth() + 1}:${today.getFullYear()}`;
+                    } else {
+                      return session.workId === user.work[editIndex]._id && 
+                             sessionDate >= sevenDaysAgo && 
+                             sessionDate <= today;
+                    }
+                  }).map((session, index) => (
+                    <View key={index} className="bg-zinc-800/30 rounded-xl p-4 border border-zinc-800/50 shadow-lg mb-4">
+                      <View className="flex-row justify-between items-center">
+                        <View className="flex-row items-center">
+                          <View className="w-2 h-2 rounded-full bg-sky-400 mr-3" />
+                          <Text className="text-white text-base font-medium">{session.name}</Text>
+                        </View>
+                        <View className="bg-zinc-800/50 px-3 py-1 rounded-full">
+                          <Text className="text-sky-400 text-sm font-medium">
+                            {session.startTime} - {session.endTime}
+                          </Text>
+                        </View>
                       </View>
                     </View>
-                  </View>
-                ))}
-                {user.workSessions.filter(session => 
-                  session.workId === user.work[editIndex]._id && 
-                  session.date === `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`
-                ).length === 0 && (
-                  <View className="items-center py-6">
-                    <Text className="text-zinc-600 text-base">No sessions today</Text>
-                  </View>
-                )}
-              </ScrollView>
+                  ))}
+
+                  {user.workSessions.filter(session => 
+                    session.workId === user.work[editIndex]._id && 
+                    session.date === `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`
+                  ).length === 0 && (
+                    <View className="items-center py-6">
+                      <Text className="text-zinc-600 text-base">No sessions today</Text>
+                    </View>
+                  )}
+
+                  {/* Bottom Padding */}
+                  <View className="h-32" />
+                </ScrollView>
+              </View>
             )}
 
             {selectedTab === 'edit' && (
@@ -2026,7 +2043,7 @@ const formatDate = (date) => {
             )}
 
 
-          </View>
+          </ScrollView>
         </ScrollView>
       </BottomPopup>
 
