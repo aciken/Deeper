@@ -1,36 +1,56 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet,Platform } from 'react-native';
 import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { icons } from '../../constants';
 import {useEffect} from 'react';
 import Purchases from 'react-native-purchases';
+import RevenueCatUI from 'react-native-purchases-ui';
 import { useRouter } from 'expo-router';
+import { useGlobalContext } from '../context/GlobalProvider';
 
 const TabsLayout = () => {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-
+  const { user } = useGlobalContext();
 
   useEffect(() => {
     const setupPurchases = async () => {
       try {
         if(Platform.OS === 'ios') {
-          await Purchases.configure({ apiKey: 'appl_QREOkhpBbXGDRXyYeCqXXvirAAA'});
+          await Purchases.configure({ apiKey: 'appl_TjfDUbftKJDEbZZrxvTNHKhUQzc'});
         } else {
-          await Purchases.configure({ apiKey: 'appl_QREOkhpBbXGDRXyYeCqXXvirAAA' });
+          await Purchases.configure({ apiKey: 'appl_TjfDUbftKJDEbZZrxvTNHKhUQzc' });
+        }
+
+        // Log in the user to RevenueCat
+        if (user?._id) {
+          await Purchases.logIn(user._id);
+          console.log('Logged in to RevenueCat with ID:', user._id);
         }
 
         const offerings = await Purchases.getOfferings();
-        console.log('RevenueCat Offerings:', offerings);
         
         // Check if user is premium
         const customerInfo = await Purchases.getCustomerInfo();
-        const isPro = customerInfo.entitlements.active.pro !== undefined;
+        const currentRevenueCatId = await Purchases.getAppUserID();
+        const isPro = customerInfo.entitlements.all.Pro?.isActive;
+        
         console.log('User is premium:', isPro);
+        console.log('Current RevenueCat ID:', currentRevenueCatId);
+        console.log('User ID:', user?._id);
 
-        if(!isPro) {
-          router.push('utils/two');
+        // Only consider the user as premium if both conditions are met:
+        // 1. They have an active Pro entitlement
+        // 2. Their RevenueCat ID matches their user ID
+        if(!isPro || currentRevenueCatId !== user?._id) {
+          // Force logout from RevenueCat before showing paywall
+          await Purchases.logOut();
+          // Log back in with correct ID
+          if (user?._id) {
+            await Purchases.logIn(user._id);
+          }
+          router.push('utils/Paywall');
         } 
 
         if (offerings.current) {

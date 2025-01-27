@@ -2,17 +2,35 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import axios from 'axios';
+import Purchases from 'react-native-purchases';
+import { Platform } from 'react-native';
 
 const GlobalContext = createContext();
 export const useGlobalContext = () => useContext(GlobalContext);
 
-const GlobalProvider = ({ children }) => {
+export const GlobalProvider = ({ children }) => {
     const [isLogged, setIsLogged] = useState(false);
     const [user, setUser] = useState(null); 
     const [isLoading, setIsLoading] = useState(true);
     const [selected, setSelected] = useState(0);
+    const [isPro, setIsPro] = useState(false);
 
     useEffect(() => {
+        const setupPurchases = async () => {
+            try {
+                if(Platform.OS === 'ios') {
+                    await Purchases.configure({ apiKey: 'appl_TjfDUbftKJDEbZZrxvTNHKhUQzc'});
+                } else {
+                    await Purchases.configure({ apiKey: 'appl_TjfDUbftKJDEbZZrxvTNHKhUQzc' });
+                }
+                const customerInfo = await Purchases.getCustomerInfo();
+                setIsPro(customerInfo.entitlements.all.Pro?.isActive ?? false);
+            } catch (error) {
+                console.error('Error setting up purchases:', error);
+            }
+        };
+
+        setupPurchases();
         checkLoginStatus();
     }, []);
 
@@ -66,6 +84,8 @@ const GlobalProvider = ({ children }) => {
                 setIsLoading,
                 selected,
                 setSelected,
+                isPro,
+                setIsPro,
             }}>
             {children}
         </GlobalContext.Provider>

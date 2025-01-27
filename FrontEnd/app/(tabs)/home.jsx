@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, ScrollView, BackHandler, Dimensions, TouchableOpacity, Image, Platform, TextInput, Animated, Easing } from 'react-native';
+import { View, Text, ScrollView, BackHandler, Dimensions, TouchableOpacity, Image, Platform, TextInput, Animated, Easing, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useIsFocused } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -15,10 +15,10 @@ import AlertPopup from '../components/AlertPopup';
 import { Vibration } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-
+import Purchases from 'react-native-purchases';
 
 const Home = () => {
-	const { setUser, user, setIsLogged, setIsLoading } = useGlobalContext();
+	const { setUser, user, setIsLogged, setIsLoading, isPro, setIsPro } = useGlobalContext();
 	const isFocused = useIsFocused();
 	const screenWidth = Dimensions.get('window').width;
 	const barWidth = (screenWidth - 80) / 7; // 80 is total padding
@@ -1204,6 +1204,27 @@ const Home = () => {
 		]).start();
 	}, []);
 
+	useEffect(() => {
+		const checkSubscription = async () => {
+			try {
+				// Configure RevenueCat first
+				if(Platform.OS === 'ios') {
+					await Purchases.configure({ apiKey: 'appl_TjfDUbftKJDEbZZrxvTNHKhUQzc'});
+				} else {
+					await Purchases.configure({ apiKey: 'appl_TjfDUbftKJDEbZZrxvTNHKhUQzc' });
+				}
+
+				// Then check subscription status
+				const customerInfo = await Purchases.getCustomerInfo();
+				setIsPro(customerInfo.entitlements.all.Pro?.isActive ?? false);
+			} catch (error) {
+				console.error('Error checking subscription:', error);
+			}
+		};
+
+		checkSubscription();
+	}, []);
+
 	return (
 		<SafeAreaView className="flex-1 bg-zinc-950" edges={['top']}>
 			<Animated.View 
@@ -1224,7 +1245,7 @@ const Home = () => {
 					{/* Logo and Welcome Section */}
 					<View className="flex-row items-center justify-between mt-2 mb-4 mx-4">
 							<Text className="text-zinc-300 text-4xl font-bold">deeper</Text>
-							<TouchableOpacity onPress={() => setIsProfilePopupVisible(true)}>
+							<TouchableOpacity onPress={() => router.push('utils/settings')}>
 								<Image source={icons.profile} className="w-8 h-8 tint-zinc-300" />
 							</TouchableOpacity>
 					</View>
@@ -2128,63 +2149,115 @@ const Home = () => {
 				onClose={() => setIsProfilePopupVisible(false)}
 				height={0.9}
 			>
-				<View className="p-4">
-					<Text className="text-white text-xl font-bold mb-4">Profile Settings</Text>
-					
-					<View className="mb-6">
-						<Text className="text-zinc-400 text-base mb-2">Account</Text>
-						<View className="bg-zinc-900 rounded-xl p-4">
-							<Text className="text-white text-lg">{user.name}</Text>
-							<Text className="text-zinc-500">{user.email}</Text>
+				<SafeAreaView className="flex-1 bg-zinc-900">
+					<View className="flex-1">
+						<View className="px-4 py-3 border-b border-zinc-800">
+							<Text className="text-white text-xl font-bold">Profile Settings</Text>
 						</View>
-					</View>
 
-					<View className="mb-6">
-						<Text className="text-zinc-400 text-base mb-2">Activity</Text>
-						<View className="bg-zinc-900 rounded-xl p-4">
-							<View className="flex-row flex-wrap gap-2">
-								{[...Array(365)].map((_, index) => {
-									// Create date for this dot starting from Jan 1, 2025
-									const dotDate = new Date(2025, 0, index + 1);
-									const dateString = `${dotDate.getDate()}:${dotDate.getMonth() + 1}:${dotDate.getFullYear()}`;
-									
-									// Check if there are any sessions on this date
-									const hasSession = user.workSessions.some(session => session.date === dateString);
+						<ScrollView 
+							className="flex-1"
+							showsVerticalScrollIndicator={false}
+						>
+							<View className="p-4 space-y-6">
+								{/* Account Section */}
+								<View>
+									<Text className="text-zinc-400 text-base mb-2">Account</Text>
+									<View className="bg-zinc-800/50 rounded-xl p-4">
+										<Text className="text-white text-lg">{user.name}</Text>
+										<Text className="text-zinc-500">{user.email}</Text>
+									</View>
+								</View>
 
-									return (
-										<View 
-											key={index}
-											className={`w-2 h-2 rounded-full ${hasSession ? 'bg-zinc-600' : 'bg-zinc-800'}`}
-										/>
-									);
-								})}
+								{/* Subscription Section */}
+								<View>
+									<Text className="text-zinc-400 text-base mb-2">Subscription</Text>
+									<View className="bg-zinc-800/50 rounded-xl p-4">
+										<View className="flex-row items-center justify-between mb-2">
+											<Text className="text-white text-lg">Pro Plan</Text>
+											<View className={`px-3 py-1 rounded-full ${isPro ? 'bg-sky-500/20' : 'bg-zinc-700/20'}`}>
+												<Text className={`font-medium ${isPro ? 'text-sky-400' : 'text-zinc-400'}`}>
+													{isPro ? 'Active' : 'Inactive'}
+												</Text>
+											</View>
+										</View>
+										{isPro ? (
+											<View>
+												<Text className="text-zinc-500 mb-3">Renews automatically</Text>
+												<TouchableOpacity 
+													onPress={() => {
+														if (Platform.OS === 'ios') {
+															Linking.openURL('itms-apps://apps.apple.com/account/subscriptions');
+														} else {
+															Linking.openURL('https://play.google.com/store/account/subscriptions');
+														}
+													}}
+													className="flex-row items-center"
+												>
+													<Text className="text-sky-500">Manage Subscription</Text>
+													<Image 
+														source={icons.chevronRight} 
+														className="w-4 h-4 ml-1 tint-sky-500" 
+													/>
+												</TouchableOpacity>
+											</View>
+										) : (
+											<TouchableOpacity 
+												onPress={() => router.push('utils/Paywall')}
+												className="mt-2"
+											>
+												<Text className="text-sky-500">Upgrade to Pro</Text>
+											</TouchableOpacity>
+										)}
+									</View>
+								</View>
+
+								{/* Activity Section */}
+								<View>
+									<Text className="text-zinc-400 text-base mb-2">Activity</Text>
+									<View className="bg-zinc-800/50 rounded-xl p-4">
+										<View className="flex-row flex-wrap gap-2">
+											{[...Array(365)].map((_, index) => {
+												const dotDate = new Date(2025, 0, index + 1);
+												const dateString = `${dotDate.getDate()}:${dotDate.getMonth() + 1}:${dotDate.getFullYear()}`;
+												const hasSession = user.workSessions.some(session => session.date === dateString);
+
+												return (
+													<View 
+														key={index}
+														className={`w-2 h-2 rounded-full ${hasSession ? 'bg-zinc-600' : 'bg-zinc-800'}`}
+													/>
+												);
+											})}
+										</View>
+									</View>
+								</View>
+
+								{/* Logout Button */}
+								<TouchableOpacity 
+									onPress={async () => {
+										try {
+											router.replace('/sign-in');
+											await AsyncStorage.removeItem('@user');
+											setIsLogged(false);
+											setUser(null);
+											await Purchases.logOut();
+										} catch (error) {
+											console.error('Error logging out:', error);
+											Alert.alert('Error', 'Failed to log out. Please try again.');
+										}
+									}}
+									className="bg-red-500/10 rounded-xl p-4"
+								>
+									<Text className="text-red-500 text-center font-semibold">Log Out</Text>
+								</TouchableOpacity>
+
+								{/* Add bottom padding for scroll */}
+								<View className="h-6" />
 							</View>
-						</View>
+						</ScrollView>
 					</View>
-
-
-
-
-
-					<TouchableOpacity 
-						onPress={async () => {
-							try {
-								router.replace('/sign-in');
-								await AsyncStorage.removeItem('@user');
-								setIsLogged(false);
-								setUser(null);
-
-	
-							} catch (error) {
-								console.error('Error logging out:', error);
-								Alert.alert('Error', 'Failed to log out. Please try again.');
-							}
-						}}
-						className="bg-red-500/10 rounded-xl p-4 mt-4"
-					>
-						<Text className="text-red-500 text-center font-semibold">Log Out</Text>
-					</TouchableOpacity>
-				</View>
+				</SafeAreaView>
 			</BottomPopup>
 		</SafeAreaView>
 	);

@@ -8,7 +8,7 @@
     "userInterfaceStyle": "dark",
     "backgroundColor": "#09090b",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/DeeperLoading.png",
       "resizeMode": "contain",
       "backgroundColor": "#09090b"
     },
@@ -24,7 +24,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/icons/DeeperLogo2.png",
         "backgroundColor": "#09090b"
       },
       "package": "com.aciken.deeper",
