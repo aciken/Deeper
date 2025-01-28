@@ -62,11 +62,15 @@ const Tasks = () => {
   const [isStartSessionPopupVisible, setIsStartSessionPopupVisible] = useState(false);
   const [isWorkEditPopupVisible, setIsWorkEditPopupVisible] = useState(false);
 
-  const [works, setWorks] = useState(user.work);
-
+  // Initialize works with empty array if user.work is undefined
+  const [works, setWorks] = useState([]);
+  
+  // Update works when user changes
   useEffect(() => {
-    setWorks(user.work)
-  }, [user.work])
+    if (user && Array.isArray(user.work)) {
+      setWorks(user.work);
+    }
+  }, [user]);
 
   const [currentTime, setCurrentTime] = useState(0);
   const [sessionName, setSessionName] = useState('');
@@ -82,7 +86,10 @@ const Tasks = () => {
 
   const [isSessionPageVisible, setIsSessionPageVisible] = useState(false);
   const [isDayPopupVisible, setIsDayPopupVisible] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const today = new Date();
+    return `${today.getDate()}:${today.getMonth() + 1}:${today.getFullYear()}`;
+  });
 
   const [selectedTab, setSelectedTab] = useState('stats');
 
@@ -359,13 +366,8 @@ const [initialEditWork, setInitialEditWork] = useState({
 
 
 const openEditWork = (work, index) => {
-  setEditWork(work)
-  setInitialEditWork(work)
-  setEditIndex(index)
-  router.push({
-    pathname: 'pages/WorkPage',
-    params: { workId: work._id }
-  })
+  if (!work?._id) return;
+  router.push(`/pages/WorkPage?workId=${work._id}`);
 }
 
 const onTimeChange = (event, selectedTime) => {
@@ -378,10 +380,11 @@ const onTimeChange = (event, selectedTime) => {
   }
 };
 
-const workToday = (job) => {
+const workToday = (work) => {
+  if (!work?._id) return '0h';
   const todaysSessions = user.workSessions.filter(session => 
     session.date === `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}` &&
-    session.workId === job._id
+    session.workId === work?._id
   );
 
   const now = new Date();
@@ -515,11 +518,13 @@ const pointsFromTime = (time) => {
 }
 
 const findCurrentSession = () => {
-  const currentDate = `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`;
-  const currentTime = new Date();
-  const currentTimeInMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
-
+  if (!user?.workSessions) return null;
   const session = user.workSessions.find(session => {
+    if (!session?.workId) return false;
+    const currentDate = `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`;
+    const currentTime = new Date();
+    const currentTimeInMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+
     const [startHours, startMinutes] = session.startTime.split(':').map(Number);
     const startTimeInMinutes = startHours * 60 + startMinutes;
     const [endHours, endMinutes] = session.endTime.split(':').map(Number);
@@ -529,7 +534,6 @@ const findCurrentSession = () => {
          currentTimeInMinutes >= startTimeInMinutes && 
          currentTimeInMinutes < endTimeInMinutes; // Changed <= to < to exclude endTime
   });
-
   return session;
 }
 
@@ -561,9 +565,11 @@ const findCurrentSession = () => {
   })
  }, [works])
 
- const findTaskById = (id) => {
-  return user.work.find(work => work._id === id)
-}
+ // Add this safety check for findTaskById
+ const findTaskById = (workId) => {
+  if (!user?.work || !workId) return null;
+  return user.work.find(w => w?._id === workId) || null;
+};
 
 const handleSessionPress = () => {
   Animated.spring(buttonAnim, {
@@ -770,7 +776,10 @@ const formatDate = (date) => {
           <ScrollView className="flex-1 h-full px-4" contentContainerStyle={{ flexGrow: 1 }}>
             <View className="flex flex-col justify-between bg-zinc-900/50 rounded-xl p-4 border border-zinc-700/50 mb-6">
               <View className="flex flex-row justify-between pb-4">
-                <Text className="text-lg text-white font-psemibold">Work Activity</Text>
+              <View>
+                  <Text className="text-lg text-white font-psemibold">Work Activity</Text>
+                  <Text className="text-zinc-500 text-sm font-pmedium">This Week</Text>
+                </View>
                 <View className="flex-row items-center">
                   <Text className="text-zinc-500 font-psemibold text-xs mr-2">less</Text>
                   <View className="flex-row items-center space-x-1">
@@ -1025,23 +1034,29 @@ const formatDate = (date) => {
             </View>
 
             <View>
-              {works.map((work, index) => (
-                <TouchableOpacity onPress={() => openEditWork(work, index)} key={index} className="flex-row justify-between items-center bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 w-full mb-4">
-                  <View className="flex-row justify-center items-center">
-                    <LinearGradient
-                      colors={work.colors}
-                      start={{x: 0, y: 0}}
-                      end={{x: 1, y: 1}}
-                      className="w-8 h-8 rounded-lg"
-                    >
-                    </LinearGradient>
+              {Array.isArray(works) && works.map((work, index) => (
+                work?._id && (  // Add null check
+                  <TouchableOpacity 
+                    onPress={() => work?._id && openEditWork(work, index)} 
+                    key={work?._id || `work-${index}`} 
+                    className="flex-row justify-between items-center bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 w-full mb-4"
+                  >
+                    <View className="flex-row justify-center items-center">
+                      <LinearGradient
+                        colors={work.colors}
+                        start={{x: 0, y: 0}}
+                        end={{x: 1, y: 1}}
+                        className="w-8 h-8 rounded-lg"
+                      >
+                      </LinearGradient>
 
-                  <Text className="text-white text-base font-psemibold pl-2">{work.name}</Text>
-                  </View>
-                  <View className="flex-row justify-center items-center">
-                    <Text className={` text-base font-psemibold ${isItDone(work.currentTime, workToday(work)) ? 'text-sky-400' : 'text-white'}`}>{workToday(work)} <Text className={`${isItDone(work.currentTime, workToday(work)) ? 'text-sky-400' : 'text-gray-400'}`}>/ {work.currentTime}</Text></Text>
-                  </View>
-                </TouchableOpacity>
+                    <Text className="text-white text-base font-psemibold pl-2">{work.name}</Text>
+                    </View>
+                    <View className="flex-row justify-center items-center">
+                      <Text className={` text-base font-psemibold ${isItDone(work.currentTime, workToday(work)) ? 'text-sky-400' : 'text-white'}`}>{workToday(work)} <Text className={`${isItDone(work.currentTime, workToday(work)) ? 'text-sky-400' : 'text-gray-400'}`}>/ {work.currentTime}</Text></Text>
+                    </View>
+                  </TouchableOpacity>
+                )
               ))}
             </View>
 
@@ -1078,19 +1093,19 @@ const formatDate = (date) => {
                   >
                     <View className="flex-row items-center">
                       <LinearGradient
-                        colors={findTaskById(findCurrentSession().workId).colors}
+                        colors={findTaskById(findCurrentSession()?.workId)?.colors || ['#71717A', '#404040']}
                         start={{x: 0, y: 0}}
                         end={{x: 0, y: 1}}
                         className="w-6 h-6 rounded-full mr-1"
                       >
                       </LinearGradient>
                       <View className="flex-col items-start">
-                        <Text className="text-white text-base font-semibold">{findCurrentSession().name}</Text>
-                        <Text className="text-zinc-400 text-sm font-regular">{findTaskById(findCurrentSession().workId).name}</Text>
+                        <Text className="text-white text-base font-semibold">{findCurrentSession()?.name}</Text>
+                        <Text className="text-zinc-400 text-sm font-regular">{findTaskById(findCurrentSession()?.workId)?.name}</Text>
                       </View>
                     </View>
                     <View className="flex-row items-center">
-                      <Text className="text-white text-base font-semibold">{timeFromPoints(Math.round(pointsFromTime(findCurrentSession().endTime)-(currentTime-10)))}</Text>
+                      <Text className="text-white text-base font-semibold">{timeFromPoints(Math.round(pointsFromTime(findCurrentSession()?.endTime)-(currentTime-10)))}</Text>
                       <Image source={icons.timerWhite} className="w-4 h-4 ml-1 tint-white" />
                     </View>
                   </LinearGradient>
@@ -1471,7 +1486,7 @@ const formatDate = (date) => {
                           .filter(session => {
                             const [day, month, year] = session.date.split(':').map(Number);
                             const sessionDate = new Date(year, month - 1, day);
-                            return session.workId === user.work[editIndex]._id && 
+                            return session.workId === user.work[editIndex]?._id && 
                                    sessionDate >= sevenDaysAgo && 
                                    sessionDate <= today;
                           })
@@ -1506,7 +1521,7 @@ const formatDate = (date) => {
 
                       // Calculate this week and last week totals
                       user.workSessions
-                        .filter(session => session.workId === user.work[editIndex]._id)
+                        .filter(session => session.workId === user.work[editIndex]?._id)
                         .forEach(session => {
                           const [day, month, year] = session.date.split(':').map(Number);
                           const sessionDate = new Date(year, month - 1, day);
@@ -1563,7 +1578,7 @@ const formatDate = (date) => {
                             .filter(session => {
                               const [day, month, year] = session.date.split(':').map(Number);
                               const sessionDate = new Date(year, month - 1, day);
-                              return session.workId === user.work[editIndex]._id && 
+                              return session.workId === user.work[editIndex]?._id && 
                                      sessionDate >= sevenDaysAgo && 
                                      sessionDate <= today;
                             })
@@ -1606,7 +1621,7 @@ const formatDate = (date) => {
                             .filter(session => {
                               const [day, month, year] = session.date.split(':').map(Number);
                               const sessionDate = new Date(year, month - 1, day);
-                              return session.workId === user.work[editIndex]._id && 
+                              return session.workId === user.work[editIndex]?._id && 
                                      sessionDate >= sevenDaysAgo && 
                                      sessionDate <= today;
                             })
@@ -1645,7 +1660,7 @@ const formatDate = (date) => {
                           .filter(session => {
                             const [day, month, year] = session.date.split(':').map(Number);
                             const sessionDate = new Date(year, month - 1, day);
-                            return session.workId === user.work[editIndex]._id && 
+                            return session.workId === user.work[editIndex]?._id && 
                                    sessionDate >= sevenDaysAgo && 
                                    sessionDate <= today;
                           })
@@ -1674,7 +1689,7 @@ const formatDate = (date) => {
                           .filter(session => {
                             const [day, month, year] = session.date.split(':').map(Number);
                             const sessionDate = new Date(year, month - 1, day);
-                            return session.workId === user.work[editIndex]._id && 
+                            return session.workId === user.work[editIndex]?._id && 
                                    sessionDate >= sevenDaysAgo && 
                                    sessionDate <= today;
                           })
@@ -1715,7 +1730,7 @@ const formatDate = (date) => {
                           .filter(session => {
                             const [day, month, year] = session.date.split(':').map(Number);
                             const sessionDate = new Date(year, month - 1, day);
-                            return session.workId === user.work[editIndex]._id && 
+                            return session.workId === user.work[editIndex]?._id && 
                                    sessionDate >= sevenDaysAgo && 
                                    sessionDate <= today;
                           })
@@ -1745,7 +1760,7 @@ const formatDate = (date) => {
                           .filter(session => {
                             const [day, month, year] = session.date.split(':').map(Number);
                             const sessionDate = new Date(year, month - 1, day);
-                            return session.workId === user.work[editIndex]._id && 
+                            return session.workId === user.work[editIndex]?._id && 
                                    sessionDate >= sevenDaysAgo && 
                                    sessionDate <= today;
                           })
@@ -1782,7 +1797,7 @@ const formatDate = (date) => {
                         const thisWeekSessions = user.workSessions.filter(session => {
                           const [day, month, year] = session.date.split(':').map(Number);
                           const sessionDate = new Date(year, month - 1, day);
-                          return session.workId === user.work[editIndex]._id && 
+                          return session.workId === user.work[editIndex]?._id && 
                                  sessionDate >= sevenDaysAgo && 
                                  sessionDate <= today;
                         }).length;
@@ -1801,7 +1816,7 @@ const formatDate = (date) => {
                         const thisWeekSessions = user.workSessions.filter(session => {
                           const [day, month, year] = session.date.split(':').map(Number);
                           const sessionDate = new Date(year, month - 1, day);
-                          return session.workId === user.work[editIndex]._id && 
+                          return session.workId === user.work[editIndex]?._id && 
                                  sessionDate >= sevenDaysAgo && 
                                  sessionDate <= today;
                         }).length;
@@ -1809,7 +1824,7 @@ const formatDate = (date) => {
                         const lastWeekSessions = user.workSessions.filter(session => {
                           const [day, month, year] = session.date.split(':').map(Number);
                           const sessionDate = new Date(year, month - 1, day);
-                          return session.workId === user.work[editIndex]._id && 
+                          return session.workId === user.work[editIndex]?._id && 
                                  sessionDate >= fourteenDaysAgo && 
                                  sessionDate < sevenDaysAgo;
                         }).length;
@@ -1828,7 +1843,7 @@ const formatDate = (date) => {
                         const thisWeekSessions = user.workSessions.filter(session => {
                           const [day, month, year] = session.date.split(':').map(Number);
                           const sessionDate = new Date(year, month - 1, day);
-                          return session.workId === user.work[editIndex]._id && 
+                          return session.workId === user.work[editIndex]?._id && 
                                  sessionDate >= sevenDaysAgo && 
                                  sessionDate <= today;
                         }).length;
@@ -1836,7 +1851,7 @@ const formatDate = (date) => {
                         const lastWeekSessions = user.workSessions.filter(session => {
                           const [day, month, year] = session.date.split(':').map(Number);
                           const sessionDate = new Date(year, month - 1, day);
-                          return session.workId === user.work[editIndex]._id && 
+                          return session.workId === user.work[editIndex]?._id && 
                                  sessionDate >= fourteenDaysAgo && 
                                  sessionDate < sevenDaysAgo;
                         }).length;
@@ -1889,10 +1904,10 @@ const formatDate = (date) => {
                     sevenDaysAgo.setDate(today.getDate() - 7);
 
                     if (sessionTimeframe === 'today') {
-                      return session.workId === user.work[editIndex]._id && 
+                      return session.workId === user.work[editIndex]?._id && 
                              session.date === `${today.getDate()}:${today.getMonth() + 1}:${today.getFullYear()}`;
                     } else {
-                      return session.workId === user.work[editIndex]._id && 
+                      return session.workId === user.work[editIndex]?._id && 
                              sessionDate >= sevenDaysAgo && 
                              sessionDate <= today;
                     }
@@ -1913,7 +1928,7 @@ const formatDate = (date) => {
                   ))}
 
                   {user.workSessions.filter(session => 
-                    session.workId === user.work[editIndex]._id && 
+                    session.workId === user.work[editIndex]?._id && 
                     session.date === `${new Date().getDate()}:${new Date().getMonth() + 1}:${new Date().getFullYear()}`
                   ).length === 0 && (
                     <View className="items-center py-6">
@@ -2069,7 +2084,7 @@ const formatDate = (date) => {
                 >                
                   <View className="flex-row items-center mb-4">
                     <LinearGradient
-                      colors={findTaskById(findCurrentSession().workId).colors}
+                      colors={findTaskById(findCurrentSession()?.workId)?.colors || ['#71717A', '#404040']}
                       start={{x: 0, y: 0}}
                       end={{x: 1, y: 1}}
                       className="w-12 h-12 rounded-2xl mr-4 items-center justify-center"
@@ -2079,7 +2094,7 @@ const formatDate = (date) => {
                     <View>
                       <Text className="text-zinc-400 text-base font-medium mb-1">Current Session</Text>
                       <Text className="text-white text-2xl font-bold">
-                        {findCurrentSession().name}
+                        {findCurrentSession()?.name}
                       </Text>
                     </View>
                   </View>
@@ -2087,7 +2102,7 @@ const formatDate = (date) => {
                   <View className="flex-row items-center">
                     <View className="w-1.5 h-1.5 rounded-full bg-zinc-700 mr-2" />
                     <Text className="text-zinc-500 font-medium">
-                      {findTaskById(findCurrentSession().workId).name}
+                      {findTaskById(findCurrentSession()?.workId)?.name}
                     </Text>
                   </View>
                 </Animated.View>
@@ -2112,7 +2127,7 @@ const formatDate = (date) => {
                         }
                       >
                         <LinearGradient
-                          colors={findTaskById(findCurrentSession().workId).colors}
+                          colors={findTaskById(findCurrentSession()?.workId)?.colors || ['#71717A', '#404040']}
                           start={{x: 0, y: 0}}
                           end={{x: 1, y: 0}}
                         >
@@ -2141,7 +2156,7 @@ const formatDate = (date) => {
                         </View>
                         <View className="flex-1">
                           <Text className="text-zinc-400 text-sm mb-1">Start Time</Text>
-                          <Text className="text-white text-lg font-semibold">{findCurrentSession().startTime}</Text>
+                          <Text className="text-white text-lg font-semibold">{findCurrentSession()?.startTime}</Text>
                         </View>
                       </View>
                     </View>
@@ -2153,7 +2168,7 @@ const formatDate = (date) => {
                         </View>
                         <View className="flex-1">
                           <Text className="text-zinc-400 text-sm mb-1">End Time</Text>
-                          <Text className="text-white text-lg font-semibold">{findCurrentSession().endTime}</Text>
+                          <Text className="text-white text-lg font-semibold">{findCurrentSession()?.endTime}</Text>
                         </View>
                       </View>
                     </View>
@@ -2168,7 +2183,7 @@ const formatDate = (date) => {
                   className="w-full"
                 >
                   <LinearGradient
-                    colors={findTaskById(findCurrentSession().workId).colors}
+                    colors={findTaskById(findCurrentSession()?.workId)?.colors || ['#71717A', '#404040']}
                     start={{x: 0, y: 0}}
                     end={{x: 1, y: 1}}
                     className="w-full h-14 rounded-2xl flex-row items-center justify-center shadow-lg shadow-black/50"
@@ -2191,41 +2206,100 @@ const formatDate = (date) => {
             <Text className="text-white text-2xl font-bold">Sessions</Text>
             <Text className="text-zinc-500 text-lg font-medium">{selectedDate}</Text>
           </View>
-          <ScrollView 
-            className="flex-1"
-            showsVerticalScrollIndicator={true}
-            scrollEnabled={true}
-            contentContainerStyle={{flexGrow: 1}}
-          >
-            {user.workSessions
-              .filter(session => session.date === selectedDate)
-              .map((session, index) => (
-                <TouchableOpacity
-                  key={session.sessionId}
-                  activeOpacity={0.7}
-                >
-                  <View 
-                    className="bg-zinc-800/70 rounded-xl p-4 mb-3 border border-zinc-700/50"
-                  >
-                    <View className="flex-row justify-between items-center mb-2">
-                      <View className="flex-row items-center">
-                        <View 
-                          className="w-1 h-10 rounded-full mr-3"
-                          style={{backgroundColor: findTaskById(session.workId)?.colors?.[0] || 'white'}}
-                        />
-                        <Text className="text-white text-lg font-medium">{session.name}</Text>
-                      </View>
-                      <Text className="text-zinc-400">
-                        {session.startTime} - {session.endTime}
-                      </Text>
-                    </View>
-                    <Text className="text-zinc-500 text-sm ml-4">
-                      {findTaskById(session.workId)?.name || '-'}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
-          </ScrollView>
+
+          {/* Check if the date is in the future */}
+          {(() => {
+            // Add safety check for selectedDate
+            if (!selectedDate) return null;
+
+            const [day, month, year] = selectedDate.split(':').map(Number);
+            const selectedDateTime = new Date(year, month - 1, day);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            if (selectedDateTime > today) {
+              return (
+                <View className="flex-1 items-center justify-center">
+                  <Image 
+                    source={icons.calendar} 
+                    className="w-16 h-16 tint-zinc-700 mb-4" 
+                  />
+                  <Text className="text-zinc-500 text-lg text-center">
+                    This day hasn't arrived yet
+                  </Text>
+                </View>
+              );
+            }
+
+            const sessions = user.workSessions.filter(session => session.date === selectedDate);
+            
+            if (sessions.length === 0) {
+              return (
+                <View className="flex-1 items-center justify-center">
+                  <Image 
+                    source={icons.timer} 
+                    className="w-16 h-16 tint-zinc-700 mb-4" 
+                  />
+                  <Text className="text-zinc-500 text-lg text-center">
+                    No sessions on this day
+                  </Text>
+                </View>
+              );
+            }
+
+            return (
+              <ScrollView 
+                className="flex-1"
+                showsVerticalScrollIndicator={false}
+              >
+                {sessions.map((session, index) => {
+                  const work = findTaskById(session.workId);
+                  return (
+                    <TouchableOpacity
+                      key={session.sessionId || index}
+                      activeOpacity={0.7}
+                      className="mb-3"
+                    >
+                      <LinearGradient
+                        colors={['rgba(39, 39, 42, 0.4)', 'rgba(39, 39, 42, 0.2)']}
+                        start={{x: 0, y: 0}}
+                        end={{x: 0, y: 1}}
+                        className="rounded-xl p-4 border border-zinc-800/50"
+                      >
+                        <View className="flex-row justify-between items-center mb-3">
+                          <View className="flex-row items-center flex-1">
+                            <LinearGradient
+                              colors={work?.colors || ['#71717A', '#404040']}
+                              start={{x: 0, y: 0}}
+                              end={{x: 1, y: 1}}
+                              className="w-1 h-12 rounded-full mr-4"
+                            />
+                            <View>
+                              <Text className="text-white text-lg font-semibold mb-1">
+                                {session.name || 'Unnamed Session'}
+                              </Text>
+                              <Text className="text-zinc-400 text-sm">
+                                {work?.name || 'Deleted Work'}
+                              </Text>
+                            </View>
+                          </View>
+                          <View className="items-end">
+                            <Text className="text-zinc-300 text-base font-medium mb-1">
+                              {session.startTime || '--:--'}
+                            </Text>
+                            <Text className="text-zinc-500 text-sm">
+                              {session.endTime || '--:--'}
+                            </Text>
+                          </View>
+                        </View>
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  );
+                })}
+                <View className="h-6" />
+              </ScrollView>
+            );
+          })()}
         </View>
       </BottomPopup>
 
@@ -2233,168 +2307,6 @@ const formatDate = (date) => {
 
       </SafeAreaView>
   )
-
-
-
-
-
-
-
-
-
-  // useEffect(() => {
-  //   fetchGoals();
-  //   fetchPresets();
-  //   fetchFutureWork();
-  // }, []);
-
-  // const fetchGoals = async () => {
-  //   try {
-  //     const response = await axios.post('https://44a8-188-2-139-122.ngrok-free.app/getGoals', { id: user._id });
-  //     setGoals(response.data);
-  //   } catch (error) {
-  //     console.error('Error fetching goals:', error);
-  //   }
-  // };
-
-  // const fetchPresets = async () => {
-  //   try {
-  //     const response = await axios.post('https://44a8-188-2-139-122.ngrok-free.app/getPresets', { id: user._id });
-  //     setPresets(response.data);
-  //   } catch (error) {
-  //     console.error('Error fetching presets:', error);
-  //   }
-  // };
-
-  // const fetchFutureWork = async () => {
-  //   // This is a placeholder. In a real app, you'd fetch future work from your backend
-  //   setFutureWork([
-  //     { id: 1, name: "Project A", dueDate: "Next Week" },
-  //     { id: 2, name: "Task B", dueDate: "In 2 days" },
-  //     { id: 3, name: "Meeting C", dueDate: "Tomorrow" },
-  //   ]);
-  // };
-
-  // return (
-  //   <SafeAreaView className="flex-1 h-full bg-gray-950">
-  //     <ScrollView className="flex-1 h-full px-4">
-  //       <View className="my-6">
-  //         <TouchableOpacity 
-  //           onPress={() => router.push({pathname: 'log/SchedulePage'})}  
-  //           className="w-full rounded-xl overflow-hidden shadow-lg"
-  //         >
-  //           <LinearGradient
-  //             colors={['#38bdf8', '#1d4ed8']}
-  //             start={{x: 0, y: 0}}
-  //             end={{x: 1, y: 1}}
-  //             className="w-full h-16 flex-row justify-center items-center"
-  //           >
-  //             <Image source={icons.calendar} className="w-6 h-6 mr-2 tint-white" />
-  //             <Text className="text-white text-lg font-semibold">Schedule</Text>
-  //           </LinearGradient>
-  //         </TouchableOpacity>
-  //       </View>
-
-  //       <View className="flex-row justify-between mb-6">
-  //         <TouchableOpacity 
-  //           onPress={() => setIsWorkVisible(true)} 
-  //           className="w-[48%] bg-gray-800 border border-gray-700 p-4 rounded-xl flex-row justify-center items-center"
-  //         >
-  //           <Image source={icons.work} className="w-6 h-6 mr-2 tint-white" />
-  //           <Text className="text-white text-lg font-bold">Work</Text>
-  //         </TouchableOpacity>
-  //         <TouchableOpacity 
-  //           onPress={() => setIsPresetVisible(true)} 
-  //           className="w-[48%] bg-gray-800 border border-gray-700 p-4 rounded-xl flex-row justify-center items-center"
-  //         >
-  //           <Image source={icons.presets} className="w-6 h-6 mr-2 tint-white" />
-  //           <Text className="text-white text-lg font-bold">Presets</Text>
-  //         </TouchableOpacity>
-  //       </View>
-
-  //       <View className="mb-6">
-  //         <Text className="text-white text-2xl font-bold mb-4">Upcoming Work</Text>
-  //         {futureWork.map(work => (
-  //           <View key={work.id} className="bg-gray-800 p-4 rounded-xl mb-3 border border-gray-700">
-  //             <Text className="text-white text-lg font-semibold">{work.name}</Text>
-  //             <Text className="text-gray-400 mt-1">Due: {work.dueDate}</Text>
-  //           </View>
-  //         ))}
-  //       </View>
-  //     </ScrollView>
-
-  //     <BottomPopup
-  //       visible={isWorkVisible}
-  //       onClose={() => setIsWorkVisible(false)}
-  //     >
-  //       <View className="p-6 bg-gray-900 rounded-t-3xl">
-  //         <Text className="text-white text-2xl font-bold mb-6 text-center">Work</Text>
-  //         {goals.map(goal => (
-  //           <TouchableOpacity 
-  //             key={goal.id} 
-  //             className="bg-gray-800 p-4 rounded-xl mb-3 border border-gray-700 flex-row items-center"
-  //           >
-  //             <View style={{ width: 16, height: 16, borderRadius: 8, backgroundColor: goal.color, marginRight: 12 }} />
-  //             <Text className="text-white text-lg flex-1">{goal.name}</Text>
-  //             <Text className="text-gray-400">{goal.count}h / {goal.time}h</Text>
-  //           </TouchableOpacity>
-  //         ))}
-  //         <TouchableOpacity 
-  //           className="bg-blue-500 p-4 rounded-xl mt-4 flex-row justify-center items-center"
-  //           onPress={() => {/* Handle add work */}}
-  //         >
-  //           <Image source={icons.plus} className="w-5 h-5 mr-2 tint-white" />
-  //           <Text className="text-white text-center font-bold text-lg">Add New Work</Text>
-  //         </TouchableOpacity>
-  //       </View>
-  //     </BottomPopup>
-
-  //     <BottomPopup
-  //       visible={isPresetVisible}
-  //       onClose={() => setIsPresetVisible(false)}
-  //     >
-  //       <View className="p-6 bg-gray-900 rounded-t-3xl">
-  //         <Text className="text-white text-2xl font-bold mb-6 text-center">Presets</Text>
-  //         {presets.map((preset, index) => (
-  //           <TouchableOpacity 
-  //             key={index}
-  //             className="bg-gray-800 p-4 rounded-xl mb-3 border border-gray-700 flex-row items-center"
-  //           >
-  //             <Image source={icons.preset} className="w-6 h-6 mr-3 tint-white" />
-  //             <View className="flex-1">
-  //               <Text className="text-white text-lg">{preset.name}</Text>
-  //               <Text className="text-gray-400 mt-1">{preset.jobs.length} jobs</Text>
-  //             </View>
-  //           </TouchableOpacity>
-  //         ))}
-  //         <TouchableOpacity 
-  //           className="bg-blue-500 p-4 rounded-xl mt-4 flex-row justify-center items-center"
-  //           onPress={() => {/* Handle create preset */}}
-  //         >
-  //           <Image source={icons.plus} className="w-5 h-5 mr-2 tint-white" />
-  //           <Text className="text-white text-center font-bold text-lg">Create New Preset</Text>
-  //         </TouchableOpacity>
-  //       </View>
-  //     </BottomPopup>
-
-  //     <View className="px-4 pb-2">
-  //       <TouchableOpacity 
-  //         onPress={() => {}}
-  //         className="w-full rounded-xl overflow-hidden shadow-lg"
-  //       >
-  //         <LinearGradient
-  //           colors={['#0ea5e9', '#60a5fa']}
-  //           start={{x: 0, y: 0}}
-  //           end={{x: 1, y: 1}}
-  //           className="w-full h-14 flex-row justify-center items-center"
-  //         >
-  //           <Image source={icons.play} className="w-6 h-6 mr-2 tint-white" />
-  //           <Text className="text-white text-lg font-semibold">Start Session</Text>
-  //         </LinearGradient>
-  //       </TouchableOpacity>
-  //     </View>
-  //   </SafeAreaView>
-  // );
 };
 
 export default Tasks;

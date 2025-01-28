@@ -47,7 +47,7 @@ const Signup = async (req, res) => {
 
             const msg = {
                 to: email,
-                from: { name: 'Deeper', email: 'adrianmarton2006@gmail.com' },
+                from: { name: 'Deeper', email: 'adrian@deepersoftware.com' },
                 subject: 'Verification Code',
                 text: `Your verification code is: ${code}`,
                 html: `

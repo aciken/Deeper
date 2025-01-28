@@ -22,7 +22,7 @@ const ForgotPasswordEmail = async (req, res) => {
 
             const msg = {
                 to: email,
-                from: { name: 'Deeper', email: 'adrianmarton2006@gmail.com' },
+                from: { name: 'Deeper', email: 'adrian@deepersoftware.com' },
                 subject: 'Reset Code',
                 text: `Your reset code is: ${resetCode}`,
                 html: `

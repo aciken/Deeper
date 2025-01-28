@@ -75,18 +75,21 @@ const WorkPage = () => {
     ['#EC4899', '#862957'],
   ];
 
-  if (!work) {
-    router.back();
-    return null;
-  }
+  useEffect(() => {
+    if (!editWork && work) {
+      setEditWork({
+        ...work,
+        currentTime: work.currentTime || '1h'
+      });
+    }
+  }, [work]);
 
-  // Initialize editWork if not set
-  if (!editWork && work) {
-    setEditWork({
-      ...work,
-      currentTime: work.currentTime || '1h'
-    });
-  }
+  useEffect(() => {
+    if (work) {
+      const index = user.work.findIndex(w => w._id === workId);
+      setEditIndex(index);
+    }
+  }, [work]);
 
   useEffect(() => {
     if (!work) return;
@@ -126,7 +129,6 @@ const WorkPage = () => {
         dailyMinutes[dayName] = (dailyMinutes[dayName] || 0) + sessionMinutes;
       });
 
-    // Convert minutes to graph points
     const maxMinutes = Math.max(...Object.values(dailyMinutes), 60);
     const newPoints = Object.entries(dailyMinutes).map(([day, minutes]) => ({
       day,
@@ -135,13 +137,6 @@ const WorkPage = () => {
 
     setPoints(newPoints);
   }, [work, user.workSessions]);
-
-  useEffect(() => {
-    if (work) {
-      const index = user.work.findIndex(w => w._id === workId);
-      setEditIndex(index);
-    }
-  }, [work]);
 
   const submitEditWork = () => {
     axios.put('https://deeper.onrender.com/editJob', {
@@ -165,10 +160,11 @@ const WorkPage = () => {
         index: editIndex,
         id: user._id,
       }).then(res => {
-        console.log(res.data)
+        // First update user state
         setUser(res.data);
-        // Navigate to Tasks tab instead of Home
-        router.replace('/(tabs)/Tasks');
+        router.back();
+
+
       }).catch(error => {
         setAlertPopupMessage('Error deleting work');
         setAlertPopupType('error');
@@ -179,6 +175,10 @@ const WorkPage = () => {
       setAlertPopupType('error');
       setAlertPopupVisible(true);
     }
+  }
+
+  if (!work) {
+    return null;
   }
 
   return (
@@ -740,10 +740,29 @@ const WorkPage = () => {
                   <View className="flex-row items-center justify-between">
                     <TouchableOpacity 
                       onPress={() => {
-                        if (editWork?.currentTime.includes('m')) { 
-                          setEditWork({...editWork, currentTime: parseInt(editWork.currentTime) + 'h'})
+                        let currentMinutes;
+                        if (editWork?.currentTime.includes('h') && editWork?.currentTime.includes('m')) {
+                          const [h, m] = editWork.currentTime.split('h ');
+                          currentMinutes = parseInt(h) * 60 + parseInt(m);
+                        } else if (editWork?.currentTime.includes('h')) {
+                          currentMinutes = parseInt(editWork.currentTime) * 60;
                         } else {
-                          setEditWork({...editWork, currentTime: parseInt(editWork.currentTime) - 1 + 'h 30m'})
+                          currentMinutes = parseInt(editWork.currentTime);
+                        }
+                        
+                        // Don't go below 30m
+                        if (currentMinutes <= 30) return;
+                        
+                        const newMinutes = currentMinutes - 30;
+                        if (newMinutes < 60) {
+                          setEditWork({...editWork, currentTime: `${newMinutes}m`});
+                        } else {
+                          const hours = Math.floor(newMinutes / 60);
+                          const minutes = newMinutes % 60;
+                          setEditWork({
+                            ...editWork, 
+                            currentTime: minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`
+                          });
                         }
                       }}
                       className="bg-zinc-700/80 w-12 h-12 rounded-full items-center justify-center shadow-lg"
@@ -755,10 +774,29 @@ const WorkPage = () => {
                       
                     <TouchableOpacity 
                       onPress={() => {
-                        if (editWork?.currentTime.includes('m')) {
-                          setEditWork({...editWork, currentTime: parseInt(editWork.currentTime) + 1 + 'h'})
+                        let currentMinutes;
+                        if (editWork?.currentTime.includes('h') && editWork?.currentTime.includes('m')) {
+                          const [h, m] = editWork.currentTime.split('h ');
+                          currentMinutes = parseInt(h) * 60 + parseInt(m);
+                        } else if (editWork?.currentTime.includes('h')) {
+                          currentMinutes = parseInt(editWork.currentTime) * 60;
                         } else {
-                          setEditWork({...editWork, currentTime: parseInt(editWork.currentTime) + 'h 30m'})
+                          currentMinutes = parseInt(editWork.currentTime);
+                        }
+                        
+                        // Don't go above 24h (1440 minutes)
+                        if (currentMinutes >= 1440) return;
+                        
+                        const newMinutes = currentMinutes + 30;
+                        if (newMinutes < 60) {
+                          setEditWork({...editWork, currentTime: `${newMinutes}m`});
+                        } else {
+                          const hours = Math.floor(newMinutes / 60);
+                          const minutes = newMinutes % 60;
+                          setEditWork({
+                            ...editWork, 
+                            currentTime: minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`
+                          });
                         }
                       }}
                       className="bg-zinc-700/80 w-12 h-12 rounded-full items-center justify-center shadow-lg"
