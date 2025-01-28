@@ -186,7 +186,14 @@ const Home = () => {
 		const currentTime = new Date();
 		const currentTimeInMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
 
+		// Add null check for workSessions
+		if (!user?.workSessions) return null;
+
 		const session = user.workSessions.find(session => {
+			// First check if the work still exists
+			const workExists = user.work.some(w => w._id === session.workId);
+			if (!workExists) return false;
+
 			const [startHours, startMinutes] = session.startTime.split(':').map(Number);
 			const startTimeInMinutes = startHours * 60 + startMinutes;
 			const [endHours, endMinutes] = session.endTime.split(':').map(Number);
@@ -194,7 +201,7 @@ const Home = () => {
 
 			return session.date === currentDate && 
 				   currentTimeInMinutes >= startTimeInMinutes && 
-				   currentTimeInMinutes < endTimeInMinutes; // Changed <= to < to exclude endTime
+				   currentTimeInMinutes < endTimeInMinutes;
 		});
 
 		return session;

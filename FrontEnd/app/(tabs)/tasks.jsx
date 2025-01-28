@@ -64,6 +64,10 @@ const Tasks = () => {
 
   const [works, setWorks] = useState(user.work);
 
+  useEffect(() => {
+    setWorks(user.work)
+  }, [user.work])
+
   const [currentTime, setCurrentTime] = useState(0);
   const [sessionName, setSessionName] = useState('');
   const [currentSession, setCurrentSession] = useState(null);

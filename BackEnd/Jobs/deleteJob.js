@@ -9,7 +9,7 @@ const DeleteJob = async (req, res) => {
             user.work.splice(index, 1);
         }
         await user.save();
-        res.json(user.work);
+        res.json(user);
     } catch (error) {
         console.error('Error occurred:', error); 
         res.status(400).json({ message: error.message });

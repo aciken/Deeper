@@ -15,6 +15,7 @@ import Svg, {
   G 
 } from 'react-native-svg';
 import { Dimensions } from 'react-native';
+import AlertPopup from '../components/AlertPopup';
 
 const createSmoothPath = (points, screenWidth, graphHeight) => {
   if (points.length < 2) return '';
@@ -53,6 +54,11 @@ const WorkPage = () => {
     { day: 'Sat', value: 0 },
     { day: 'Sun', value: 0 },
   ]);
+  const [works, setWorks] = useState(user.work);
+  const [editIndex, setEditIndex] = useState(null);
+  const [alertPopupVisible, setAlertPopupVisible] = useState(false);
+  const [alertPopupMessage, setAlertPopupMessage] = useState('');
+  const [alertPopupType, setAlertPopupType] = useState('info');
 
   const screenWidth = Dimensions.get('window').width;
   const graphHeight = 200;
@@ -130,36 +136,50 @@ const WorkPage = () => {
     setPoints(newPoints);
   }, [work, user.workSessions]);
 
-  const submitEditWork = async () => {
-    try {
-      const response = await axios.put('https://deeper-backend.onrender.com/editWork', {
-        id: user._id,
-        workId: work._id,
-        name: editWork.name,
-        colors: editWork.colors,
-        currentTime: editWork.currentTime
-      });
-      setUser(response.data);
-      router.back();
-    } catch (error) {
-      console.error('Error updating work:', error);
+  useEffect(() => {
+    if (work) {
+      const index = user.work.findIndex(w => w._id === workId);
+      setEditIndex(index);
     }
-  };
+  }, [work]);
 
-  const submitDeleteWork = async () => {
-    try {
-      const response = await axios.delete('https://deeper-backend.onrender.com/deleteWork', {
-        data: {
-          id: user._id,
-          workId: work._id
-        }
+  const submitEditWork = () => {
+    axios.put('https://deeper.onrender.com/editJob', {
+      editWork,
+      index: editIndex,
+      id: user._id,
+    }).then(res => {
+      setUser(res.data)
+      // Navigate back before setting any other state
+      router.back()
+    }).catch(error => {
+      setAlertPopupMessage('Error updating work');
+      setAlertPopupType('error');
+      setAlertPopupVisible(true);
+    })
+  }
+  
+  const submitDeleteWork = () => {
+    if(user.work.length !== 1){
+      axios.put('https://deeper.onrender.com/deleteJob', {
+        index: editIndex,
+        id: user._id,
+      }).then(res => {
+        console.log(res.data)
+        setUser(res.data);
+        // Navigate to Tasks tab instead of Home
+        router.replace('/(tabs)/Tasks');
+      }).catch(error => {
+        setAlertPopupMessage('Error deleting work');
+        setAlertPopupType('error');
+        setAlertPopupVisible(true);
       });
-      setUser(response.data);
-      router.back();
-    } catch (error) {
-      console.error('Error deleting work:', error);
+    } else {
+      setAlertPopupMessage('You need to have at least one work');
+      setAlertPopupType('error');
+      setAlertPopupVisible(true);
     }
-  };
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-zinc-950">
@@ -665,120 +685,134 @@ const WorkPage = () => {
         )}
 
         {selectedTab === 'edit' && (
-          <ScrollView className="flex-1 px-4">
-            {/* Work Name Input */}
-            <View className="mb-6">
-              <Text className="text-zinc-400 text-sm font-medium mb-2">Work Name</Text>
-              <TextInput
-                className="bg-zinc-800/50 text-white p-4 rounded-xl border border-zinc-800"
-                placeholder="Work Name" 
-                placeholderTextColor="#71717A"
-                value={editWork?.name}
-                onChangeText={(text) => setEditWork({...editWork, name: text})}
-                style={{fontSize: 16}}
-              />
-            </View>
+          <View className="flex-1">
+            <ScrollView className="flex-1 px-4">
+              {/* Work Name Input */}
+              <View className="mb-6">
+                <Text className="text-zinc-400 text-sm font-medium mb-2">Work Name</Text>
+                <TextInput
+                  className="bg-zinc-800/50 text-white p-4 rounded-xl border border-zinc-800"
+                  placeholder="Work Name" 
+                  placeholderTextColor="#71717A"
+                  value={editWork?.name}
+                  onChangeText={(text) => setEditWork({...editWork, name: text})}
+                  style={{fontSize: 16}}
+                />
+              </View>
 
-            {/* Color Selection */}
-            <View className="mb-6">
-              <Text className="text-zinc-400 text-sm font-medium mb-3">Color Theme</Text>
-              <View className="flex-row justify-between px-2">
-                {ballColors.map((color, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    onPress={() => {
-                      if (!user.work.some(w => w.colors[0] === color[0] && w.colors[1] === color[1] && w._id !== work._id)) {
-                        setEditWork({...editWork, colors: color});
-                      }
-                    }}
-                    className="p-1"
+              {/* Color Selection */}
+              <View className="mb-6">
+                <Text className="text-zinc-400 text-sm font-medium mb-3">Color Theme</Text>
+                <View className="flex-row justify-between px-2">
+                  {ballColors.map((color, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      onPress={() => {
+                        if (!user.work.some(w => w.colors[0] === color[0] && w.colors[1] === color[1] && w._id !== work._id)) {
+                          setEditWork({...editWork, colors: color});
+                        }
+                      }}
+                      className="p-1"
+                    >
+                      <LinearGradient
+                        colors={color}
+                        start={{x: 0, y: 0}}
+                        end={{x: 1, y: 1}}
+                        className={`w-10 h-10 rounded-full shadow-lg ${
+                          user.work.some(w => w.colors[0] === color[0] && w.colors[1] === color[1] && w._id !== work._id)
+                            ? 'opacity-20' 
+                            : ''
+                        } ${
+                          editWork?.colors[0] === color[0] && editWork?.colors[1] === color[1]
+                            ? 'border-2 border-white'
+                            : ''
+                        }`}
+                      />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              {/* Daily Target Time */}
+              <View className="mb-6">
+                <Text className="text-zinc-400 text-sm font-medium mb-3">Daily Target Time</Text>
+                <View className="bg-zinc-800/50 rounded-xl p-4 border border-zinc-800">
+                  <View className="flex-row items-center justify-between">
+                    <TouchableOpacity 
+                      onPress={() => {
+                        if (editWork?.currentTime.includes('m')) { 
+                          setEditWork({...editWork, currentTime: parseInt(editWork.currentTime) + 'h'})
+                        } else {
+                          setEditWork({...editWork, currentTime: parseInt(editWork.currentTime) - 1 + 'h 30m'})
+                        }
+                      }}
+                      className="bg-zinc-700/80 w-12 h-12 rounded-full items-center justify-center shadow-lg"
+                    >
+                      <Text className="text-white text-xl font-medium">-</Text>
+                    </TouchableOpacity>
+                      
+                    <Text className="text-white text-2xl font-bold">{editWork?.currentTime}</Text>
+                      
+                    <TouchableOpacity 
+                      onPress={() => {
+                        if (editWork?.currentTime.includes('m')) {
+                          setEditWork({...editWork, currentTime: parseInt(editWork.currentTime) + 1 + 'h'})
+                        } else {
+                          setEditWork({...editWork, currentTime: parseInt(editWork.currentTime) + 'h 30m'})
+                        }
+                      }}
+                      className="bg-zinc-700/80 w-12 h-12 rounded-full items-center justify-center shadow-lg"
+                    >
+                      <Text className="text-white text-xl font-medium">+</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            </ScrollView>
+
+            {/* Action Buttons - Fixed at bottom */}
+            <View className="px-4 py-6 bg-zinc-950/80 border-t border-zinc-800/50">
+              <View className="flex-row justify-between space-x-3">
+                <TouchableOpacity 
+                  onPress={submitEditWork}
+                  className="flex-1"
+                >
+                  <LinearGradient
+                    colors={['#0ea5e9', '#60a5fa']}
+                    start={{x: 0, y: 0}}
+                    end={{x: 1, y: 1}}
+                    className="rounded-full py-4 items-center shadow-lg"
                   >
-                    <LinearGradient
-                      colors={color}
-                      start={{x: 0, y: 0}}
-                      end={{x: 1, y: 1}}
-                      className={`w-10 h-10 rounded-full shadow-lg ${
-                        user.work.some(w => w.colors[0] === color[0] && w.colors[1] === color[1] && w._id !== work._id)
-                          ? 'opacity-20' 
-                          : ''
-                      } ${
-                        editWork?.colors[0] === color[0] && editWork?.colors[1] === color[1]
-                          ? 'border-2 border-white'
-                          : ''
-                      }`}
-                    />
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-
-            {/* Daily Target Time */}
-            <View className="mb-6">
-              <Text className="text-zinc-400 text-sm font-medium mb-3">Daily Target Time</Text>
-              <View className="flex-row items-center justify-between bg-zinc-800/50 rounded-xl p-3 border border-zinc-800">
-                <TouchableOpacity 
-                  onPress={() => {
-                    if (editWork?.currentTime.includes('m')) { 
-                      setEditWork({...editWork, currentTime: parseInt(editWork.currentTime) + 'h'})
-                    } else {
-                      setEditWork({...editWork, currentTime: parseInt(editWork.currentTime) - 1 + 'h 30m'})
-                    }
-                  }}
-                  className="bg-zinc-700/80 w-12 h-12 rounded-full items-center justify-center shadow-lg"
-                >
-                  <Text className="text-white text-xl font-medium">-</Text>
+                    <Text className="text-white text-lg font-semibold">Save Changes</Text>
+                  </LinearGradient>
                 </TouchableOpacity>
-                
-                <Text className="text-white text-2xl font-bold">{editWork?.currentTime}</Text>
-                
+
                 <TouchableOpacity 
-                  onPress={() => {
-                    if (editWork?.currentTime.includes('m')) {
-                      setEditWork({...editWork, currentTime: parseInt(editWork.currentTime) + 1 + 'h'})
-                    } else {
-                      setEditWork({...editWork, currentTime: parseInt(editWork.currentTime) + 'h 30m'})
-                    }
-                  }}
-                  className="bg-zinc-700/80 w-12 h-12 rounded-full items-center justify-center shadow-lg"
+                  onPress={submitDeleteWork}
+                  className="w-14 h-14"
                 >
-                  <Text className="text-white text-xl font-medium">+</Text>
+                  <LinearGradient
+                    colors={['#DC2626', '#991B1B']}
+                    start={{x: 0, y: 0}}
+                    end={{x: 1, y: 1}}
+                    className="w-14 h-14 rounded-full items-center justify-center shadow-lg"
+                  >
+                    <Image source={icons.trash} className="w-6 h-6 tint-white" />
+                  </LinearGradient>
                 </TouchableOpacity>
               </View>
             </View>
-
-            {/* Action Buttons */}
-            <View className="flex-row justify-between space-x-3 mt-4 mb-8">
-              <TouchableOpacity 
-                onPress={submitEditWork}
-                className="flex-1"
-              >
-                <LinearGradient
-                  colors={['#0ea5e9', '#60a5fa']}
-                  start={{x: 0, y: 0}}
-                  end={{x: 1, y: 1}}
-                  className="rounded-full py-4 items-center shadow-lg"
-                >
-                  <Text className="text-white text-lg font-semibold">Save Changes</Text>
-                </LinearGradient>
-              </TouchableOpacity>
-
-              <TouchableOpacity 
-                onPress={submitDeleteWork}
-                className="w-14 h-14"
-              >
-                <LinearGradient
-                  colors={['#DC2626', '#991B1B']}
-                  start={{x: 0, y: 0}}
-                  end={{x: 1, y: 1}}
-                  className="w-14 h-14 rounded-full items-center justify-center shadow-lg"
-                >
-                  <Image source={icons.trash} className="w-6 h-6 tint-white" />
-                </LinearGradient>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
+          </View>
         )}
       </View>
+
+      {/* Add AlertPopup */}
+      <AlertPopup
+        visible={alertPopupVisible}
+        message={alertPopupMessage}
+        type={alertPopupType}
+        onClose={() => setAlertPopupVisible(false)}
+      />
     </SafeAreaView>
   );
 };
