@@ -427,6 +427,19 @@ const getGoalWork = () => {
 
 
 const submitNewWork = () => {
+  if(newWork.name === ''){
+    setAlertPopupVisible(true);
+    setAlertPopupMessage('Please enter a work name');
+    setAlertPopupType('info');
+    return;
+  }
+  if(newWork.colors[0] === '' || newWork.colors[1] === ''){
+    setAlertPopupVisible(true);
+    setAlertPopupMessage('Please select a color');
+    setAlertPopupType('info');
+    return;
+  }
+
     axios.put('https://deeper.onrender.com/addJob', {
     newWork,
     id: user._id,

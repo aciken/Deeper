@@ -20,7 +20,7 @@
       "bundleIdentifier": "com.aciken.deeper",
       "backgroundColor": "#09090b",
       "userInterfaceStyle": "dark",
-      "buildNumber": "3"
+      "buildNumber": "4"
     },
     "android": {
       "adaptiveIcon": {
@@ -29,7 +29,7 @@
       },
       "package": "com.aciken.deeper",
       "userInterfaceStyle": "dark",
-      "buildNumber": "3"
+      "buildNumber": "4"
     },
     "web": {
       "favicon": "./assets/favicon.png"
