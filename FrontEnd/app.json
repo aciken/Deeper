@@ -8,7 +8,7 @@
     "userInterfaceStyle": "dark",
     "backgroundColor": "#09090b",
     "splash": {
-      "image": "./assets/DeeperLoading.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#09090b"
     },
