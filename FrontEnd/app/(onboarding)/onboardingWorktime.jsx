@@ -110,7 +110,7 @@ const WorktimeSelect = () => {
 
         {/* Title */}
         <Text className="text-white text-4xl font-bold mt-2">
-          How much time will you spend on {onboardingData?.workname}?
+          How much time you plan to spend on {onboardingData?.workname}?
         </Text>
 
         {/* Time Options */}

@@ -63,7 +63,7 @@ const WorknameSelect = () => {
 
         {/* Title */}
         <Text className="text-white text-4xl font-bold mt-2">
-          Name your project
+          What are you working on?
         </Text>
 
         {/* Work Name Input */}
@@ -71,7 +71,7 @@ const WorknameSelect = () => {
           <TextInput
             value={workname}
             onChangeText={setWorkname}
-            placeholder="Enter project name"
+            placeholder="Enter work name"
             placeholderTextColor="#52525b"
             className="w-full h-14 bg-zinc-900/70 rounded-xl px-4 text-white text-lg"
             autoCapitalize="none"
