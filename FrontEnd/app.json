@@ -2,7 +2,7 @@
   "expo": {
     "name": "Deeper",
     "slug": "deeper",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/icons/DeeperLogo2.png",
     "userInterfaceStyle": "dark",
@@ -20,7 +20,7 @@
       "bundleIdentifier": "com.aciken.deeper",
       "backgroundColor": "#09090b",
       "userInterfaceStyle": "dark",
-      "buildNumber": "5"
+      "buildNumber": "6"
     },
     "android": {
       "adaptiveIcon": {
@@ -29,7 +29,7 @@
       },
       "package": "com.aciken.deeper",
       "userInterfaceStyle": "dark",
-      "buildNumber": "5"
+      "buildNumber": "6"
     },
     "web": {
       "favicon": "./assets/favicon.png"

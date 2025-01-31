@@ -8,7 +8,7 @@ const PagesLayout = () => {
     <View style={{ flex: 1 }}>
       <StatusBar backgroundColor='#030712' style='light' />
       <Stack>
-        <Stack.Screen name='WorkPage' options={{ headerShown: false, presentation: 'modal', animation: 'slide_from_bottom' }} />
+        <Stack.Screen name='WorkPage' options={{ headerShown: false,backgroundColor: '#09090b', presentation: 'modal', animation: 'slide_from_bottom' }} />
       </Stack>
     </View>
   )

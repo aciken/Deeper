@@ -204,7 +204,7 @@ const Index = () => {
           {/* Action Buttons */}
           <View className="space-y-4">
             <TouchableOpacity 
-              onPress={() => router.push('/onboardingGender')}
+              onPress={() => router.push('/onboardingTime')}
               className="w-full h-14 rounded-2xl overflow-hidden"
             >
               <LinearGradient

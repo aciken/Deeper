@@ -11,7 +11,19 @@ export default function Settings() {
   const router = useRouter();
   const { user, setUser, setIsLogged, isPro } = useGlobalContext();
 
-
+  const handleLogout = async () => {
+    try {
+      AsyncStorage.clear();
+      // setUser(null);
+      // Purchases.logOut();
+      //   setIsLogged(false);
+      router.back();
+      router.replace('/');
+    } catch (error) {
+      console.error('Error logging out:', error);
+      Alert.alert('Error', 'Failed to log out. Please try again.');
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-zinc-950" edges={['bottom']}>
@@ -104,26 +116,53 @@ export default function Settings() {
 
             {/* Logout Button */}
             <TouchableOpacity 
-              onPress={async () => {
-                try {
-                  AsyncStorage.clear();
-                  // setUser(null);
-                  // Purchases.logOut();
-                  //   setIsLogged(false);
-                    router.back();
-                    router.replace('/');
-                } catch (error) {
-                    console.error('Error logging out:', error);
-                    Alert.alert('Error', 'Failed to log out. Please try again.');
-                }
-            }}
-              className="bg-red-500/10 rounded-xl p-4"
+              onPress={handleLogout}
+              className="w-full h-14 rounded-2xl bg-zinc-900 items-center justify-center mb-8"
             >
-              <Text className="text-red-500 text-center font-semibold">Log Out</Text>
+              <Text className="text-red-500 text-lg font-semibold">Log Out</Text>
             </TouchableOpacity>
 
-            {/* Add bottom padding for scroll */}
-            <View className="h-6" />
+            {/* Support Section */}
+            <View className="border-t border-zinc-800/50 pt-8 mb-12">
+              {/* Support Contact */}
+              <View className="flex-row justify-center items-center py-4">
+                <Text className="text-zinc-500 text-sm text-center">
+                  For support contact:{' '}
+                  <Text 
+                    className="text-sky-500"
+                    onPress={() => Linking.openURL('mailto:adrian@deepersoftware.com')}
+                  >
+                    adrian@deepersoftware.com
+                  </Text>
+                </Text>
+              </View>
+              
+              {/* Links */}
+              <View className="flex-row justify-center items-center space-x-6">
+                <TouchableOpacity 
+                  onPress={() => Linking.openURL('https://www.deepersoftware.com/terms-of-use')}
+                  className="py-2"
+                >
+                  <Text className="text-zinc-600 text-sm">Terms of Use</Text>
+                </TouchableOpacity>
+                
+                <View className="w-1 h-1 rounded-full bg-zinc-700" />
+                
+                <TouchableOpacity 
+                  onPress={() => Linking.openURL('https://www.deepersoftware.com/privacy-policy')}
+                  className="py-2"
+                >
+                  <Text className="text-zinc-600 text-sm">Privacy Policy</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* App Version */}
+              <View className="mt-6">
+                <Text className="text-zinc-700 text-xs text-center">
+                  Version 1.0.4
+                </Text>
+              </View>
+            </View>
           </View>
         </ScrollView>
       </View>

@@ -16,6 +16,7 @@ import Svg, {
 } from 'react-native-svg';
 import { Dimensions } from 'react-native';
 import AlertPopup from '../components/AlertPopup';
+import { Linking } from 'react-native';
 
 const createSmoothPath = (points, screenWidth, graphHeight) => {
   if (points.length < 2) return '';
@@ -843,6 +844,36 @@ const WorkPage = () => {
           </View>
         )}
       </View>
+
+      {/* Add this after the AlertPopup component, just before the closing SafeAreaView tag */}
+      {selectedTab === 'edit' && (
+        <View className="px-4 pb-4 mt-4 border-t border-zinc-800/50">
+          <View className="flex-row justify-center items-center py-4">
+            <Text className="text-zinc-500 text-sm text-center">
+              For support contact:{' '}
+              <Text className="text-sky-500">adrian@deepersoftware.com</Text>
+            </Text>
+          </View>
+          
+          <View className="flex-row justify-center items-center space-x-6">
+            <TouchableOpacity 
+              onPress={() => Linking.openURL('https://deepersoftware.com/terms')}
+              className="py-2"
+            >
+              <Text className="text-zinc-600 text-sm">Terms of Use</Text>
+            </TouchableOpacity>
+            
+            <View className="w-1 h-1 rounded-full bg-zinc-700" />
+            
+            <TouchableOpacity 
+              onPress={() => Linking.openURL('https://deepersoftware.com/privacy')}
+              className="py-2"
+            >
+              <Text className="text-zinc-600 text-sm">Privacy Policy</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
       {/* Add AlertPopup */}
       <AlertPopup

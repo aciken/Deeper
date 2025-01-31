@@ -20,8 +20,6 @@ const DeeptimeSelect = () => {
       } catch (error) {
         console.error('Error parsing onboarding data:', error);
         setOnboardingData({
-          gender: null,
-          born: null,
           time: null,
           deeptime: null,
           productive: null,

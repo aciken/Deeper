@@ -165,7 +165,7 @@ const SignIn = () => {
           {/* Sign Up Link */}
           <View className="flex-row justify-center mt-6">
             <Text className="text-zinc-500 text-base mr-1">Don't have an account?</Text>
-            <TouchableOpacity onPress={() => router.push('/onboardingGender')}>
+            <TouchableOpacity onPress={() => router.push('/onboardingTime')}>
               <Text className="text-sky-400 text-base font-medium">Create Account</Text>
             </TouchableOpacity>
           </View>
